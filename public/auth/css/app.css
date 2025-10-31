@@ -1,0 +1,267 @@
+body {
+    background: #e9f2f7;
+    color: #000;
+    font-family: "Poppins", sans-serif;
+    min-height: 100vh;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    background: #d3e6f5;
+    position: fixed;
+    top: -200px;
+    left: -250px;
+    height: 500px;
+    width: 500px;
+    border-radius: 50%;
+}
+
+body::after {
+    content: "";
+    background: #dbd9f1;
+    position: fixed;
+    bottom: -300px;
+    right: -300px;
+    height: 500px;
+    width: 500px;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+@media (max-width: 768px) {
+    body::before {
+        top: -100px;
+        left: -100px;
+        height: 300px;
+        width: 300px;
+    }
+
+    body::after {
+        bottom: -100px;
+        right: -100px;
+        height: 300px;
+        width: 300px;
+    }
+}
+
+.logo {
+    max-width: 150px;
+    border-radius: 15px;
+    transform: translateX(-50%);
+    margin-left: 50%;
+}
+
+.custom-control-label {
+    margin-bottom: 0;
+    margin-top: 1px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.card-signin {
+    border: 0;
+    border-radius: 5px;
+    background: #ffffff;
+    box-shadow: 1px 3px 100px #c1bde1;
+}
+
+.card-signin .card-header {
+    font-weight: 300;
+    font-size: 1.5rem;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background: #ffffff;
+}
+
+.login-form-head {
+    text-align: center;
+    background: #ffffff;
+    padding: 30px 15px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.login-form-head h4 {
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+}
+
+.card-signin .card-body {
+    padding: 1rem 2rem;
+}
+
+.form-signin {
+    font-family: "Poppins", sans-serif;
+    width: 100%;
+    text-align: center;
+}
+
+.form-signin .btn {
+    padding: 12px 20px;
+    transition: all 0.2s;
+}
+
+.form-signin .form-control {
+    padding: 12px 20px;
+    text-align: center;
+    border-left: 1px solid #4f39f6;
+    height: auto;
+}
+
+.form-signin .form-control:focus {
+    border: 1px 1px 1px 1px;
+    border-color: #4f39f6;
+    box-shadow: none;
+}
+
+.form-signup .form-control {
+    padding: 12px 20px;
+    border-left: 1px solid #4f39f6;
+    height: auto;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.form-signup .form-control:focus {
+    border: 1px 1px 1px 1px;
+    border-color: #4f39f6;
+    box-shadow: none;
+}
+
+.form-signup .btn {
+    padding: 12px 20px;
+    transition: all 0.2s;
+}
+
+select.form-control {
+    padding: 12px 20px;
+    height: 51px !important;
+}
+
+.custom-control-label:before {
+    background: #cccccc;
+    border-radius: 50% !important;
+}
+
+.custom-control {
+    display: inline-block;
+}
+
+.btn-register {
+    text-align: center;
+    display: block;
+    color: #222222;
+    font-size: 16px !important;
+}
+
+.btn-register:hover {
+    color: #222222;
+    text-decoration: underline;
+}
+
+.btn-register:active,
+.btn-register:focus {
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.alert-success {
+    color: #363636;
+    background-color: #d3ffdd;
+    border-color: #2cba4d;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #4f39f6;
+    border-color: #4f39f6;
+}
+
+.btn-primary:hover {
+    background-color: #432dd7;
+    border-color: #432dd7;
+}
+
+.btn-primary:active,
+.btn-primary:focus {
+    background-color: #432dd7;
+    border-color: #432dd7;
+}
+
+.tenant-link {
+    color: #000000;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+.tenant-link:hover {
+    text-decoration: none;
+    color: #130dbc;
+}
+
+select.form-control {
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Ctitle%3Edown-arrow%3C%2Ftitle%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10.293%2C3.293%2C6%2C7.586%2C1.707%2C3.293A1%2C1%2C0%2C0%2C0%2C.293%2C4.707l5%2C5a1%2C1%2C0%2C0%2C0%2C1.414%2C0l5-5a1%2C1%2C0%2C1%2C0-1.414-1.414Z%22%20fill%3D%22%23000000%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem top 50%;
+    background-size: 0.65rem auto;
+}
+
+.parent-box:focus-within {
+    color: #495057;
+    background-color: #fff;
+    border: 1px 1px 1px 1px;
+    border-color: #4f39f6;
+}
+
+.parent-box .form-control {
+    border: none;
+    padding-left: 1px;
+    font-weight: bold;
+}
+
+.parent-box .form-control:focus {
+    border: none;
+}
+
+.iti {width: 100%;}
+
+.fs-14 {
+    font-size: 14px;
+}
+
+.two-factor-alert {
+    background: #fff;
+    text-align: left;
+    position: relative;
+    font-size: 15px;
+    width: 100%;
+    margin: 0px auto 40px auto;
+    padding: 14px 16px;
+    text-align: left;
+    border-radius: 0;
+    border-width: 0 0 0 3px;
+    border-style: solid;
+    box-shadow: 0 8px 16px 0px rgba(10, 14, 29, 0.04),
+        0px 8px 64px 0px rgba(10, 14, 29, 0.08);
+    border-color: #4f39f6;
+}
+
+.gradient-text{
+    background: linear-gradient(to right, #4f39f6, #e839f6, #4f39f6);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
