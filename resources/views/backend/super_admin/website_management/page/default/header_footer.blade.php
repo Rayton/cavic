@@ -11,7 +11,7 @@
 				<div class="card-body">
 					@csrf
 					<div class="row">
-				
+
 						<div class="col-md-6">
 					        <div class="form-group">
 						        <label class="control-label">{{ _lang('Footer Color') }}</label>

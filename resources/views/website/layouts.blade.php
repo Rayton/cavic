@@ -47,8 +47,8 @@
                             <ul class="navbar-nav ms-auto d-flex">
                                 <li class="nav-item"><a class="nav-link {{ url()->current() == url('/') ? 'active' : '' }}" href="{{ url('/') }}">{{ _lang('Home') }}</a></li>
                                 <li class="nav-item"><a class="nav-link {{ url()->current() == url('/about') ? 'active' : '' }}" href="{{ url('/about') }}">{{ _lang('About') }}</a></li>
-                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/features') ? 'active' : '' }}" href="{{ url('/features') }}">{{ _lang('Features') }}</a></li> 
-                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/pricing') ? 'active' : '' }}" href="{{ url('/pricing') }}">{{ _lang('Pricing') }}</a></li> 
+                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/features') ? 'active' : '' }}" href="{{ url('/features') }}">{{ _lang('Features') }}</a></li>
+                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/pricing') ? 'active' : '' }}" href="{{ url('/pricing') }}">{{ _lang('Pricing') }}</a></li>
 
                                 @php $otherPages = \App\Models\Page::active()->get(); @endphp
                                 <li class="nav-item">
@@ -60,9 +60,9 @@
                                         <li class="nav-item"><a class="nav-link" href="{{ url('/'.$d_page->slug) }}">{{ $d_page->translation->title }}</a></li>
                                         @endforeach
                                     </ul>
-                                </li>  
-                                
-                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/contact') ? 'active' : '' }}" href="{{ url('/contact') }}">{{ _lang('Contact') }}</a></li> 
+                                </li>
+
+                                <li class="nav-item"><a class="nav-link {{ url()->current() == url('/contact') ? 'active' : '' }}" href="{{ url('/contact') }}">{{ _lang('Contact') }}</a></li>
                                 @if(count(get_language_list()) > 1)
                                 <li class="nav-item">
                                     <a class="nav-link has-submenu text-nowrap" href="#"><i class="bi bi-translate me-2 d-none d-lg-inline"></i> {{ explode('---', get_language())[0] }}</a>
@@ -70,13 +70,13 @@
                                         @foreach(get_language_list() as $language)
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center" href="{{ route('switch_language') }}?language={{ $language }}">
-                                                <img class="avatar avatar-xss avatar-circle me-2" src="{{ asset('public/backend/plugins/flag-icon-css/flags/1x1/'.explode('---', $language)[1].'.svg') }}"> 
+                                                <img class="avatar avatar-xss avatar-circle me-2" src="{{ asset('public/backend/plugins/flag-icon-css/flags/1x1/'.explode('---', $language)[1].'.svg') }}">
                                                 <span>{{ explode('---', $language)[0] }}</span>
                                             </a>
-                                        </li> 
+                                        </li>
                                         @endforeach
                                     </ul>
-                                </li> 
+                                </li>
                                 @endif
                             </ul>
 
@@ -88,7 +88,7 @@
 
                                 @guest
                                     <li class="nav-item"><a class="nav-link me-2 btn-login py-2 text-nowrap" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right me-2 d-none d-lg-inline"></i>{{ _lang('Sign In') }}</a></li>
-                                    <li class="nav-item"><a class="nav-link btn-register py-2 text-nowrap" href="{{ route('register') }}"><i class="bi bi-person-plus me-2 d-none d-lg-inline"></i>{{ _lang('Sign Up') }}</a></li>                        
+                                    <li class="nav-item"><a class="nav-link btn-register py-2 text-nowrap" href="{{ route('register') }}"><i class="bi bi-person-plus me-2 d-none d-lg-inline"></i>{{ _lang('Sign Up') }}</a></li>
                                 @endguest
                             </ul>
                         </div>
@@ -129,12 +129,12 @@
             @yield('content')
 
             @php $gdpr_cookie_consent = json_decode(get_trans_option('gdpr_cookie_consent_page')) @endphp
-            
+
             @if(isset($gdpr_cookie_consent->cookie_consent_status) && $gdpr_cookie_consent->cookie_consent_status == 1)
             @include('cookie-consent::index')
             @endif
         </main>
-        
+
         <!-- Footer-->
         <footer class="footer">
             <!-- Footer Top -->
@@ -149,7 +149,7 @@
                                 </div>
 
                                 <p class="text">{{ isset($header_footer_settings->widget_1_content) ? $header_footer_settings->widget_1_content : '' }}</p>
-                                
+
                             </div>
                             <!-- End Single Widget -->
                         </div>
@@ -204,7 +204,7 @@
                 </div>
             </div>
         </footer>
-        
+
         <script src="{{ asset('public/website/js/jquery-3.7.1.min.js') }}"></script>
         <script src="{{ asset('public/website/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ asset('public/website/vendors/slick/slick.min.js') }}"></script>

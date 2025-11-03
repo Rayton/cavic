@@ -30,8 +30,8 @@
                 </div>
             </div>
         </div>
-        
-        <div class="row gx-5 justify-content-center">     
+
+        <div class="row gx-5 justify-content-center">
             <div class="d-flex align-items-center justify-content-center">
                 @if($packages->where('package_type', 'monthly')->count() > 0)
                 <div class="form-check form-switch custom-switch mb-5 me-3">
@@ -53,7 +53,7 @@
                     <label class="form-check-label ms-1 text-primary" for="lifetime-plans"><b>{{ _lang('Lifetime') }}</b></label>
                 </div>
                 @endif
-            </div>       
+            </div>
 
             @foreach($packages as $package)
             <div class="col-lg-4 mb-5 {{ $package->package_type }}-plan">
@@ -94,7 +94,7 @@
                     </div>
                 </div>
             </div>
-            @endforeach  
+            @endforeach
         </div>
     </div>
 </section>

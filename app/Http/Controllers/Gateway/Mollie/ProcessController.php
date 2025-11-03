@@ -41,7 +41,7 @@ class ProcessController extends Controller {
                     'currency' => $deposit->gateway->currency,
                     'value'    => '' . sprintf('%0.2f', round($deposit->gateway_amount, 2)) . '',
                 ],
-                'description' => _lang('Deposit to') . ' ' . get_option('site_title', 'Credit Lite'),
+                'description' => _lang('Deposit to') . ' ' . get_option('site_title', 'Victech'),
                 'redirectUrl' => route('callback.' . $deposit->gateway->slug),
                 'metadata'    => [
                     "transaction_id" => $deposit->id,

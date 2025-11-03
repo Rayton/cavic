@@ -175,7 +175,7 @@
 						        <input type="file" class="dropify" name="home_page_media[newsletter_bg_image]" data-default-file="{{ isset($pageMedia->newsletter_bg_image) ? asset('public/uploads/media/'.$pageMedia->newsletter_bg_image) : '' }}">
 					        </div>
 					    </div>
-						
+
 						<div class="col-md-12 mt-2">
 							<div class="form-group">
 								<button type="submit" class="btn btn-primary  mt-2"><i class="ti-check-box mr-2"></i>{{ _lang('Save Changes') }}</button>

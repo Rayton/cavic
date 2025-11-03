@@ -1081,7 +1081,7 @@ if (! function_exists('decimalPlace')) {
 
 if (! function_exists('money_format_2')) {
     function money_format_2($floatcurr) {
-        $decimal_place = get_option('decimal_places', 2);
+        $decimal_place = get_option('decimal_places', 0);
         $decimal_sep   = get_option('decimal_sep', '.');
         $thousand_sep  = get_option('thousand_sep', ',');
 
@@ -1308,7 +1308,7 @@ if (! function_exists('get_page')) {
             $string = ucwords($slug);
             return _dlang($string);
         }
-        
+
         $pageData  = json_decode(get_trans_option($slug . '_page'));
         if($pageData != null){
             return $pageData->title;

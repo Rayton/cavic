@@ -50,7 +50,7 @@ class ProcessController extends Controller {
             )
         );
         $payload = array(
-            'purpose'                 => _lang('Deposit to') . ' ' . get_option('site_title', 'Credit Lite'),
+            'purpose'                 => _lang('Deposit to') . ' ' . get_option('site_title', 'Victech'),
             'amount'                  => round($deposit->gateway_amount, 2),
             'currency'                => $deposit->gateway->currency,
             'buyer_name'              => $deposit->member->name,
