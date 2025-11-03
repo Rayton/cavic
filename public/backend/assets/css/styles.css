@@ -4,10 +4,10 @@
     Version: 1.0
 
 ----------------------------------------------
-    
+
     CSS INDEX
     ===================
-  
+
     1. Core Css
     2. Dashboard One
         2.1 Sidebar Menu
@@ -384,6 +384,26 @@ h5,
 
 .metismenu li li a:after {
     top: 6px;
+}
+
+/* Keep parent menu expanded and highlighted when submenu is active */
+.metismenu > li.active > a {
+    color: #fff;
+    background: rgba(79, 57, 246, 0.7);
+}
+
+.metismenu > li.active > a i {
+    color: #fff;
+}
+
+.metismenu > li.active > a:after {
+    content: "\f107";
+    color: #fff;
+}
+
+/* Ensure submenu stays visible when parent has active class */
+.metismenu li.active > ul {
+    display: block !important;
 }
 
 /*-------------------- END Sidebar Menu -------------------*/
@@ -4922,14 +4942,14 @@ Payment Gateway
     width: 60px;
     height: 34px;
   }
-  
+
   /* Hide the default checkbox */
   .switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
-  
+
   /* Style the slider (the actual switch) */
   .slider {
     position: absolute;
@@ -4942,7 +4962,7 @@ Payment Gateway
     transition: 0.4s;
     border-radius: 34px;
   }
-  
+
   /* Add a circle inside the slider */
   .slider:before {
     position: absolute;
@@ -4955,16 +4975,16 @@ Payment Gateway
     background-color: white;
     transition: 0.4s;
   }
-  
+
   /* When the checkbox is checked, change the background color and move the circle */
   input:checked + .slider {
     background-color: #4f39f6;
   }
-  
+
   input:checked + .slider:before {
     transform: translateX(26px);
   }
-  
+
 
 /* Rounded sliders */
 .slider.round {
@@ -5373,7 +5393,7 @@ Payment Gateway
 
 .pos-print{
     margin: auto;
-    width: 2.8in; 
+    width: 2.8in;
     padding: 10px 10px;
     border: 1px solid #CCCCCC;
 }
@@ -5394,7 +5414,7 @@ Payment Gateway
 #receipt .table{max-width: 800px;}
 .print-only{display: none;}
 @media print {
-    .print-only{display: block;} 
+    .print-only{display: block;}
 }
 
 /** Local Notification Design **/

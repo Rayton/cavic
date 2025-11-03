@@ -19,10 +19,10 @@
         $('.page-container').addClass('sbar_collapsed');
     }
     $('.nav-btn').on('click', function() {
-    	$('.page-container').toggleClass('sbar_collapsed');  
+    	$('.page-container').toggleClass('sbar_collapsed');
     });
 
-	
+
 	/*================================
     Active Sidebar Menu
     ==================================*/
@@ -31,32 +31,39 @@
         if ($(this).attr("href") == path) {
             $("#menu li").removeClass("active-nav");
             $(this).parent().addClass("active-nav");
-            $(this).parent().parent().parent().addClass("active-nav active");
+
+            // Add 'active' class to all parent menu items to keep them expanded
+            $(this).parents('li').addClass("active");
+
+            // Also add 'in' class to parent ul elements to keep submenus visible
+            $(this).parent().parent().addClass("in");
         }
     });
 
     /*================================
-    Init Tooltip 
+    Init Tooltip
     ==================================*/
 
     $('[data-toggle="tooltip"]').tooltip();
-	
+
 	/*================================
-    Hide Empty Menu 
+    Hide Empty Menu
     ==================================*/
 	$("#menu li").each(function(){
 		var elem = $(this);
 		if($(elem).has("ul").length > 0){
 			if($(elem).find("ul").has("li").length === 0){
 				$(elem).remove();
-			}		
+			}
 		}
-	}); 
+	});
 
     /*================================
     sidebar menu
     ==================================*/
-    $("#menu").metisMenu();
+    $("#menu").metisMenu({
+        toggle: false  // Prevent automatic collapse of parent menus
+    });
 
     /*================================
     slimscroll activation
@@ -65,11 +72,11 @@
 		$('.nofity-list').slimScroll({
 			height: '435px'
 		});
-		
+
 		$('.timeline-area').slimScroll({
 			height: '500px'
 		});
-		
+
 		$('.recent-activity').slimScroll({
 			height: 'calc(100vh - 114px)'
 		});
@@ -204,7 +211,7 @@
 		});
 	}
 
-	//App Js	
+	//App Js
 	$(document).ajaxStart(function () {
 		Pace.restart();
 	});
@@ -371,7 +378,7 @@
 		.find("label.form-label, label.col-form-label, label.control-label")
 		.append("<span class='required'> *</span>");
 	}
-	
+
 
 	//Print Command
 	$(document).on('click', '.print', function (event) {
@@ -554,8 +561,8 @@
 							if(target_select != null && previous_select == null){
 								previous_select = target_select;
 							}
-							target_select = $(this); // 2nd level		
-							
+							target_select = $(this); // 2nd level
+
 							$(".select2-results:not(:has(a))").append('<p class="border-top m-0 p-2"><a class="ajax-modal-2" href="'+ $(this).data('href') +'" data-title="'+ $(this).data('title') +'" data-reload="false"><i class="fas fa-plus-circle mr-1"></i>'+ $lang_add_new +'</a></p>');
 						});;
 
@@ -564,8 +571,8 @@
 
 				//Auto Selected
 				if ($(".auto-select").length) {
-					$('.auto-select').each(function (i, obj) {	
-						$(this).val($(this).data('selected')).trigger('change');		
+					$('.auto-select').each(function (i, obj) {
+						$(this).val($(this).data('selected')).trigger('change');
 					})
 				}
 
@@ -576,7 +583,7 @@
 					.closest(".form-group")
 					.find("label.form-label, label.col-form-label, label.control-label")
 					.append("<span class='required'> *</span>");
-				
+
 				$("#main_modal .ajax-screen-submit input:required, #main_modal .ajax-screen-submit select:required, #main_modal .ajax-screen-submit textarea:required")
 					.closest(".form-group")
 					.find("label.form-label, label.col-form-label, label.control-label")
@@ -617,7 +624,7 @@
 				$("#secondary_modal .alert-primary").addClass('d-none');
 				$("#secondary_modal .alert-danger").addClass('d-none');
 				$('#secondary_modal').modal('show');
-				
+
 
 				if (fullscreen == true) {
 					$("#secondary_modal >.modal-dialog").addClass("fullscreen-modal");
@@ -701,7 +708,7 @@
 				}
 
 				$(".dropify").dropify();
-				
+
 				$("#secondary_modal input:required, #secondary_modal select:required, #secondary_modal textarea:required")
 					.closest(".form-group")
 					.find("label.form-label, label.col-form-label, label.control-label")
@@ -884,7 +891,7 @@
 
 						$(table).prepend(new_row);
 
-						if (reload == false) {				
+						if (reload == false) {
 							var select_value = json['data'][target_select.data('value')];
 							var select_display = json['data'][target_select.data('display')];
 
@@ -893,7 +900,7 @@
 
 							if(previous_select != null){
 								var newOption = new Option(select_display, select_value, true, true);
-								previous_select.append(newOption).trigger('change');					
+								previous_select.append(newOption).trigger('change');
 							}
 							$(current_modal).modal('hide');
 						}
@@ -1348,7 +1355,7 @@
 					dropdonwValues += `<a class="dropdown-item" href="javascript: void(0);"><label class="d-flex align-items-center"><input type="checkbox" class="mr-2" value="${option.value}" data-text="${option.text}" checked><span>${option.text}</span></label></a>`;
 				}else{
 					dropdonwValues += `<a class="dropdown-item" href="javascript: void(0);"><label class="d-flex align-items-center"><input type="checkbox" class="mr-2" value="${option.value}" data-text="${option.text}"><span>${option.text}</span></label></a>`;
-				}		
+				}
 			});
 
 			if(selectedText == ""){
@@ -1356,7 +1363,7 @@
 			}else{
 				selectedText = selectedText.split(' ').slice(1).join(' ');
 			}
-			
+
 			$(this).after(`<div class="dropdown multi-select-box">
 				<button class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
 					${selectedText}
@@ -1375,7 +1382,7 @@
 			if($(this).is(':checked')){
 				selectedText += ", " + $(this).data('text');
 				selectedValues.push( $(this).val());
-			}	
+			}
 		});
 
 		$(this).closest('.multi-select-box').prev().val(selectedValues).trigger('change');
