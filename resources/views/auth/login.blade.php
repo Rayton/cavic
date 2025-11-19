@@ -7,13 +7,13 @@
             <div class="card card-signin p-3 my-5">
                 <div class="card-body">
 					<img class="logo" src="{{ get_logo() }}">
-					
+
                     @if(!$adminLogin)
-					<h5 class="text-center py-4">{{ _lang('LOGIN TO YOUR ACCOUNT') }}</h4> 
+					<h5 class="text-center py-4">{{ _lang('LOGIN TO YOUR ACCOUNT') }}</h4>
                     @else
-                    <h5 class="text-center py-4">{{ _lang('ADMIN LOGIN') }}</h4> 
+                    <h5 class="text-center py-4">{{ _lang('ADMIN LOGIN') }}</h4>
                     @endif
-					
+
                     @if(Session::has('error'))
                         <div class="alert alert-danger text-center">
                             <strong>{{ session('error') }}</strong>
@@ -25,7 +25,7 @@
                             <strong>{{ session('success') }}</strong>
                         </div>
                     @endif
-					
+
 					@if(Session::has('registration_success'))
                         <div class="alert alert-success text-center">
                             <strong>{{ session('registration_success') }}</strong>
@@ -37,7 +37,7 @@
 
                         <div class="form-group row">
                             <div class="col-md-12">
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email', request()->email) }}" placeholder="{{ _lang('Email') }}" required autofocus autocomplete="username">
+                                <input id="email" type="email" class="text-left form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email', request()->email) }}" placeholder="{{ _lang('Email') }}" required autofocus autocomplete="username">
 
                                 @if ($errors->has('email'))
                                     <span class="invalid-feedback">
@@ -48,9 +48,9 @@
                         </div>
 
                         <div class="form-group row">
-						    <div class="col-md-12">	
+						    <div class="col-md-12">
 
-								<input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" placeholder="{{ _lang('Password') }}" required autocomplete="current-password">
+								<input id="password" type="password" class="text-left form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" placeholder="{{ _lang('Password') }}" required autocomplete="current-password">
 
                                 @if ($errors->has('password'))
                                     <span class="invalid-feedback">
@@ -70,7 +70,7 @@
                                 @endif
                             </div>
                         </div>
-						
+
 						<div class="text-center">
 							<div class="custom-control custom-checkbox mb-3">
 								<input type="checkbox" name="remember" class="custom-control-input" id="remember" {{ old('remember') ? 'checked' : '' }}>
@@ -89,11 +89,11 @@
                                 @else
                                     @if(get_option('member_signup') == 1)
                                         <a href="{{ route('register') }}" class="btn btn-link btn-register">{{ _lang('Create an Account') }}</a>
-                                    @endif	
-                                @endif						
+                                    @endif
+                                @endif
                             </div>
                         </div>
-									
+
 						<div class="form-group row mt-3">
                             <div class="col-md-12">
 								<a class="btn-link" href="{{ request()->is('admin/*') ? route('admin.password.request') : route('tenant.password.request') }}">

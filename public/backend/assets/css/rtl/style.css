@@ -98,7 +98,7 @@ select.form-control {
     top: 0;
     right: auto;
     left: 0;
-    z-index: 2;
+    z-index: 0;
     padding: 0.75rem 1.25rem;
     color: inherit;
 }
@@ -108,7 +108,7 @@ select.form-control {
 		right: initial !important;
 		left: 0;
 	}
-	
+
 	.sbar_collapsed .nav-btn {
 		margin: 10px 10px 0 0;
 	}
@@ -240,11 +240,11 @@ code, samp, var, [type="email"], [type="file"], [type="number"], [type="password
 		left: 0;
 		right: -100%;
 	}
-	
+
 	.page-container, .sbar_collapsed.page-container {
 		padding-right: 0;
 	}
-	
+
 	.sbar_collapsed_rtl.page-container > .sidebar-menu {
 		right: 0px;
 	}

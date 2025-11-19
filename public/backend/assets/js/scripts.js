@@ -46,6 +46,27 @@
 
     $('[data-toggle="tooltip"]').tooltip();
 
+    /*================================
+    User Profile Dropdown Toggle
+    ==================================*/
+    $('.user-name.dropdown-toggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).siblings('.dropdown-menu').toggleClass('show');
+    });
+
+    // Close dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.user-profile').length) {
+            $('.user-profile .dropdown-menu').removeClass('show');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside
+    $('.user-profile .dropdown-menu').on('click', function(e) {
+        e.stopPropagation();
+    });
+
 	/*================================
     Hide Empty Menu
     ==================================*/

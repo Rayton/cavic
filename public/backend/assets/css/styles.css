@@ -320,8 +320,14 @@ h5,
     color: #fff;
 }
 
-.metismenu li a:only-child:after {
+.metismenu li a:only-child:after,
+.metismenu > li:not(:has(ul)) > a:after {
     content: "";
+    display: none;
+}
+
+.metismenu > li:not(:has(ul)) .menu-arrow {
+    display: none;
 }
 
 .metismenu li a span {
@@ -893,7 +899,7 @@ ul.breadcrumbs {
     align-items: center;
     -ms-flex-wrap: wrap;
     flex-wrap: wrap;
-    background: var(--primary-color);
+    background: transparent;
     padding: 17px 26px;
     position: relative;
 }
@@ -908,7 +914,7 @@ ul.breadcrumbs {
 .user-name {
     font-size: 17px;
     font-weight: 500;
-    color: #fff;
+    color: #2c3e50;
     letter-spacing: 0;
     cursor: pointer;
     -webkit-user-select: none;
@@ -948,6 +954,8 @@ ul.breadcrumbs {
     display: block !important;
     visibility: hidden;
     opacity: 0;
+    z-index: 9999;
+    position: absolute;
 }
 
 .notification-area .dropdown-menu.show,
@@ -1930,6 +1938,8 @@ table.dbkit-table tr td {
     font-size: 13px;
     border: none;
     padding: 10px 16px;
+    position: relative;
+    z-index: 0;
 }
 .alert strong,
 .alert-link {
@@ -2020,6 +2030,8 @@ table.dbkit-table tr td {
     top: 4px;
     outline: none;
     font-size: 13px;
+    z-index: 0;
+    position: relative;
 }
 
 /*-------------------- END Alert------------------- */

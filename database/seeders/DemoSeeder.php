@@ -20,7 +20,7 @@ class DemoSeeder extends Seeder {
         // Create Super Admin
         DB::table('users')->insert([
             'name'              => 'Super Admin',
-            'email'             => 'admin@demo.com',
+            'email'             => 'superadmin@example.com',
             'email_verified_at' => now(),
             'password'          => Hash::make('123456'),
             'status'            => 1,
@@ -41,7 +41,7 @@ class DemoSeeder extends Seeder {
 
         DB::table('users')->insert([
             'name'            => 'Demo User',
-            'email'           => 'user@demo.com',
+            'email'           => 'demouser@example.com',
             'user_type'       => 'admin',
             'tenant_id'       => $teannt,
             'tenant_owner'    => 1,
