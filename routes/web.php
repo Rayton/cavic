@@ -518,79 +518,24 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
         
         $currentUser = auth()->user();
         
-        if (isset($_GET['tenant_slug'])) {
-            $targetTenant = \App\Models\Tenant::where('slug', $_GET['tenant_slug'])->first();
-            if (!$targetTenant) {
-                return back()->with('error', _lang('Tenant not found'));
-            }
-            
-            // Use the same logic as login - find all users with the same email
-            // This mimics the showTenants() method behavior for automatic switching
-            $availableUsers = \App\Models\User::with('tenant')
-                ->where('email', $currentUser->email)
-                ->where('user_type', '!=', 'superadmin')
-                ->where('status', 1)
-                ->get();
-            
-            // Find the user that belongs to the target tenant
-            $targetUser = $availableUsers->first(function($user) use ($targetTenant) {
-                return $user->tenant_id == $targetTenant->id;
-            });
-            
-            // If not found by email matching, try alternative methods for member tenants
-            if (!$targetUser) {
-                // Check if user is already in target tenant
-                if ($currentUser->tenant_id == $targetTenant->id) {
-                    $targetUser = $currentUser;
-                }
-                // If customer switching to member tenant, find member and get admin user
-                else if ($currentUser->user_type == 'customer') {
-                    $member = \App\Models\Member::where('user_id', $currentUser->id)
-                        ->where('tenant_id', $currentUser->tenant_id)
-                        ->first();
-                    
-                    if ($member && $member->member_tenant_id == $targetTenant->id) {
-                        // Find admin user in member tenant (direct lookup - should be only one)
-                        $targetUser = \App\Models\User::where('tenant_id', $targetTenant->id)
-                            ->where('tenant_owner', 1)
-                            ->first();
-                    }
-                }
-                // If admin in member tenant switching to main tenant
-                else if ($currentUser->user_type == 'admin' && $currentUser->tenant_owner == 1) {
-                    $member = \App\Models\Member::where('member_tenant_id', $currentUser->tenant_id)->first();
-                    if ($member && $member->tenant_id == $targetTenant->id && $member->user_id) {
-                        $targetUser = \App\Models\User::find($member->user_id);
-                    }
-                }
-            }
-            
-            if ($targetUser && $targetUser->status == 1) {
-                // Log in as target user if different (this changes user_type from customer to admin for member tenant)
-                if ($targetUser->id != $currentUser->id) {
-                    auth()->login($targetUser);
-                    request()->session()->regenerate();
-                }
-                
-                // Use server-side redirect to immediately update the URL
-                // This is the most reliable way to ensure browser URL bar updates
-                return redirect()->route('dashboard.index', ['tenant' => $targetTenant->slug]);
-            } else {
-                \Log::warning('Tenant switch failed', [
-                    'current_user_id' => $currentUser->id,
-                    'current_user_email' => $currentUser->email,
-                    'current_user_type' => $currentUser->user_type,
-                    'current_tenant_id' => $currentUser->tenant_id,
-                    'target_tenant_id' => $targetTenant->id,
-                    'target_tenant_slug' => $targetTenant->slug,
-                    'available_users_count' => $availableUsers->count(),
-                ]);
-                
-                return back()->with('error', _lang('You do not have access to this tenant'));
-            }
+        if (!isset($_GET['tenant_slug'])) {
+            return back();
         }
         
-        return back();
+        $targetTenant = \App\Models\Tenant::where('slug', $_GET['tenant_slug'])->first();
+        if (!$targetTenant) {
+            return back()->with('error', _lang('Tenant not found'));
+        }
+        
+        // Logout current user
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        
+        // Redirect to target tenant login page with email pre-filled
+        $loginUrl = url('/' . $targetTenant->slug . '/login?email=' . urlencode($currentUser->email));
+        
+        return redirect($loginUrl);
     })->name('switch_tenant');
 
     Route::get('tenants/check-tenant-slug/{ignoreId?}', [TenantController::class, 'checkSlug'])->name('check-slug');
