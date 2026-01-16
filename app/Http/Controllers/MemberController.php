@@ -5,8 +5,10 @@ use App\Imports\MembersImport;
 use App\Mail\GeneralMail;
 use App\Models\CustomField;
 use App\Models\Member;
+use App\Models\Package;
 use App\Models\SavingsAccount;
 use App\Models\SavingsProduct;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\MemberRequestAccepted;
@@ -197,16 +199,18 @@ class MemberController extends Controller
         // Store custom field data
         $customFieldsData = store_custom_field_data($customFields);
 
-        //Create Login details
+        //Create Login details for main tenant (customer portal)
+        $mainTenantUser = null;
         if ($request->client_login == 1 && $request->tenant->package->member_portal == 1) {
-            $user                  = new User();
-            $user->name            = $request->input('name');
-            $user->email           = $request->input('login_email');
-            $user->password        = Hash::make($request->password);
-            $user->user_type       = 'customer';
-            $user->status          = $request->input('status');
-            $user->profile_picture = $photo;
-            $user->save();
+            $mainTenantUser                  = new User();
+            $mainTenantUser->name            = $request->input('name');
+            $mainTenantUser->email           = $request->input('login_email');
+            $mainTenantUser->password        = Hash::make($request->password);
+            $mainTenantUser->user_type       = 'customer';
+            $mainTenantUser->tenant_id       = $request->tenant->id;
+            $mainTenantUser->status          = $request->input('status');
+            $mainTenantUser->profile_picture = $photo;
+            $mainTenantUser->save();
         }
 
         $member             = new Member();
@@ -217,8 +221,8 @@ class MemberController extends Controller
         } else {
             $member->branch_id = auth()->user()->branch_id;
         }
-        if ($request->client_login == 1) {
-            $member->user_id = $user->id;
+        if ($request->client_login == 1 && $mainTenantUser) {
+            $member->user_id = $mainTenantUser->id;
         }
         $member->email         = $request->input('email');
         $member->country_code  = $request->input('country_code');
@@ -235,6 +239,54 @@ class MemberController extends Controller
         $member->custom_fields = json_encode($customFieldsData);
 
         $member->save();
+
+        // Create tenant for member
+        $mainTenant = $request->tenant;
+        $memberPackage = get_or_create_members_package();
+        
+        // Generate unique slug for member tenant
+        $memberSlug = strtolower(str_replace(' ', '-', $mainTenant->slug . '-' . $member->first_name . '-' . $member->last_name));
+        $memberSlug = preg_replace('/[^a-z0-9\-]/', '', $memberSlug);
+        
+        // Ensure slug is unique
+        $originalSlug = $memberSlug;
+        $counter = 1;
+        while (Tenant::where('slug', $memberSlug)->exists()) {
+            $memberSlug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        // Create member tenant
+        $memberTenant = new Tenant();
+        $memberTenant->slug = $memberSlug;
+        $memberTenant->name = $mainTenant->name . ' - ' . $member->first_name . ' ' . $member->last_name;
+        $memberTenant->membership_type = 'member';
+        $memberTenant->package_id = $memberPackage->id;
+        $memberTenant->subscription_date = now();
+        $memberTenant->valid_to = update_membership_date($memberPackage, $memberTenant->subscription_date);
+        $memberTenant->status = 1;
+        $memberTenant->save();
+        
+        // Link member to their tenant
+        $member->member_tenant_id = $memberTenant->id;
+        $member->save();
+        
+        // Create admin user for member tenant (always create for member tenant)
+        $memberAdminUser = new User();
+        $memberAdminUser->name = $member->first_name . ' ' . $member->last_name;
+        $memberAdminUser->email = $request->input('email') ?: ($request->input('login_email') ?: 'member' . $member->id . '@example.com');
+        // Use same password if login is enabled, otherwise generate a random one
+        if ($request->client_login == 1 && isset($mainTenantUser)) {
+            $memberAdminUser->password = $mainTenantUser->password; // Same password
+        } else {
+            $memberAdminUser->password = Hash::make('password123'); // Default password
+        }
+        $memberAdminUser->user_type = 'admin';
+        $memberAdminUser->tenant_id = $memberTenant->id;
+        $memberAdminUser->tenant_owner = 1;
+        $memberAdminUser->status = $request->input('status', 1);
+        $memberAdminUser->profile_picture = $photo;
+        $memberAdminUser->save();
 
         //Increment Member No
         $memberNo = get_tenant_option('starting_member_no');

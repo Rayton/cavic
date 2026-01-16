@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomField;
 use App\Models\Guarantor;
 use App\Models\Loan;
+use App\Models\LoanApproval;
 use App\Models\LoanCollateral;
 use App\Models\LoanPayment;
 use App\Models\LoanProduct;
@@ -47,11 +48,41 @@ class LoanController extends Controller {
         return view('backend.admin.loan.list', compact('status', 'assets'));
     }
 
+    /**
+     * Get approval data for a loan (AJAX endpoint)
+     */
+    public function get_approval_data(Request $request, $tenant, $id) {
+        $loan = Loan::with(['approvals.approver', 'loan_product', 'currency'])
+            ->findOrFail($id);
+        
+        $approvalData = [
+            'loan_id' => $loan->loan_id,
+            'loan_product' => $loan->loan_product ? $loan->loan_product->name : null,
+            'currency' => $loan->currency ? $loan->currency->name : null,
+            'approvals' => $loan->approvals->map(function($approval) {
+                return [
+                    'approval_level' => $approval->approval_level,
+                    'approval_level_name' => $approval->approval_level_name,
+                    'status' => $approval->status,
+                    'remarks' => $approval->remarks,
+                    'approved_at' => $approval->formatted_approved_at,
+                    'approver' => $approval->approver ? [
+                        'name' => $approval->approver->name,
+                        'member_no' => $approval->approver->member_no
+                    ] : null
+                ];
+            })->values()
+        ];
+        
+        return response()->json(['success' => true, 'data' => $approvalData]);
+    }
+
     public function get_table_data(Request $request) {
         $loans = Loan::select('loans.*')
             ->with('borrower')
             ->with('currency')
             ->with('loan_product')
+            ->with(['approvals.approver'])
             ->orderBy("loans.id", "desc");
 
         return Datatables::eloquent($loans)
@@ -66,7 +97,39 @@ class LoanController extends Controller {
             ->editColumn('applied_amount', function ($loan) {
                 return decimalPlace($loan->applied_amount, currency($loan->currency->name));
             })
+            ->addColumn('approval_status', function ($loan) {
+                // Always make it clickable to show approval trails
+                $linkClass = 'approval-status-link';
+                $loanId = $loan->id;
+                
+                // Check if all approvals are complete
+                if ($loan->isFullyApproved()) {
+                    $statusHtml = show_status(_lang('Approved'), 'success');
+                    return '<a href="#" class="' . $linkClass . '" data-loan-id="' . $loanId . '" data-toggle="modal" data-target="#approvalStatusModal">' . $statusHtml . '</a>';
+                }
+                
+                // Find current pending approval
+                $currentApproval = $loan->approvals->where('status', LoanApproval::STATUS_PENDING)->sortBy('approval_level')->first();
+                
+                if ($currentApproval) {
+                    $levelName = _lang($currentApproval->approval_level_name);
+                    $statusHtml = show_status($levelName . ' ' . _lang('Pending'), 'warning');
+                    return '<a href="#" class="' . $linkClass . '" data-loan-id="' . $loanId . '" data-toggle="modal" data-target="#approvalStatusModal">' . $statusHtml . '</a>';
+                }
+                
+                // Check if any approval was rejected
+                $rejectedApproval = $loan->approvals->where('status', LoanApproval::STATUS_REJECTED)->first();
+                if ($rejectedApproval) {
+                    $statusHtml = show_status(_lang('Rejected'), 'danger');
+                    return '<a href="#" class="' . $linkClass . '" data-loan-id="' . $loanId . '" data-toggle="modal" data-target="#approvalStatusModal">' . $statusHtml . '</a>';
+                }
+                
+                // Default: show pending (no approvals started yet)
+                $statusHtml = show_status(_lang('Pending'), 'warning');
+                return '<a href="#" class="' . $linkClass . '" data-loan-id="' . $loanId . '" data-toggle="modal" data-target="#approvalStatusModal">' . $statusHtml . '</a>';
+            })
             ->editColumn('status', function ($loan) {
+                // Loan Status (actual loan status)
                 if ($loan->status == 0) {
                     return show_status(_lang('Pending'), 'warning');
                 } else if ($loan->status == 1) {
@@ -95,7 +158,7 @@ class LoanController extends Controller {
             ->setRowId(function ($loan) {
                 return "row_" . $loan->id;
             })
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['approval_status', 'status', 'action'])
             ->make(true);
     }
 
@@ -270,7 +333,7 @@ class LoanController extends Controller {
      */
     public function show(Request $request, $tenant, $id) {
         $assets = ['datatable'];
-        $loan            = Loan::find($id);
+        $loan = Loan::with(['approvals', 'approvals.approver'])->findOrFail($id);
         $loancollaterals = LoanCollateral::where('loan_id', $loan->id)
             ->orderBy("id", "desc")
             ->get();
@@ -297,7 +360,12 @@ class LoanController extends Controller {
     public function approve(Request $request, $tenant, $id) {
         if ($request->isMethod('get')) {
             $alert_col = 'col-lg-6 offset-lg-3';
-            $loan      = Loan::find($id);
+            $loan      = Loan::with(['approvals'])->find($id);
+
+            // Check if loan has approval process and if it's complete
+            if ($loan->approvals && $loan->approvals->count() > 0 && !$loan->isFullyApproved()) {
+                return back()->with('error', _lang('Cannot approve loan. All approval levels must be completed first.'));
+            }
 
             $accounts = SavingsAccount::with('savings_type.currency')
                 ->where('member_id', $loan->borrower_id)
@@ -316,7 +384,13 @@ class LoanController extends Controller {
 
         DB::beginTransaction();
 
-        $loan = Loan::find($id);
+        $loan = Loan::with(['approvals'])->find($id);
+        
+        // Check if loan has approval process and if it's complete
+        if ($loan->approvals && $loan->approvals->count() > 0 && !$loan->isFullyApproved()) {
+            DB::rollBack();
+            return back()->with('error', _lang('Cannot approve loan. All approval levels must be completed first.'));
+        }
 
         if ($loan->status == 1) {
             abort(403);

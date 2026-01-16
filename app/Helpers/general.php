@@ -1134,9 +1134,14 @@ if (! function_exists('base_currency_id')) {
             }
 
             if (! $base_currency_id) {
-                $currency         = \App\Models\Currency::first();
-                $base_currency_id = $currency->id;
-                Cache::put($cacheKey, $base_currency_id);
+                $currency = \App\Models\Currency::first();
+                if ($currency) {
+                    $base_currency_id = $currency->id;
+                    Cache::put($cacheKey, $base_currency_id);
+                } else {
+                    // If no currency exists, return null or a default
+                    return null;
+                }
             }
 
             return $base_currency_id;
@@ -1162,9 +1167,15 @@ if (! function_exists('get_base_currency')) {
         }
 
         if (! $base_currency) {
-            $currency      = \App\Models\Currency::first();
-            $base_currency = $currency->name;
-            Cache::put($cacheKey, $base_currency);
+            $currency = \App\Models\Currency::first();
+            if ($currency) {
+                $base_currency = $currency->name;
+                Cache::put($cacheKey, $base_currency);
+            } else {
+                // Fallback to USD if no currency exists
+                $base_currency = 'USD';
+                Cache::put($cacheKey, $base_currency);
+            }
         }
 
         return $base_currency;
@@ -1400,5 +1411,36 @@ if (! function_exists('process_loan_fee')) {
         $fee->description        = ucwords(str_replace('_', ' ', $fee_name));
         $fee->loan_id            = $loan_id;
         $fee->save();
+    }
+}
+
+if (! function_exists('get_or_create_members_package')) {
+    /**
+     * Get or create the "Members" package for member tenants
+     *
+     * @return \App\Models\Package
+     */
+    function get_or_create_members_package() {
+        $package = \App\Models\Package::where('name', 'Members')->first();
+        
+        if (!$package) {
+            $package = new \App\Models\Package();
+            $package->name = 'Members';
+            $package->package_type = 'lifetime';
+            $package->cost = 0;
+            $package->status = 1;
+            $package->is_popular = 0;
+            $package->discount = 0;
+            $package->trial_days = 0;
+            $package->user_limit = '1';
+            $package->member_limit = '1';
+            $package->branch_limit = '1';
+            $package->account_type_limit = '-1';
+            $package->account_limit = '-1';
+            $package->member_portal = 1;
+            $package->save();
+        }
+        
+        return $package;
     }
 }

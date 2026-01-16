@@ -95,6 +95,74 @@
 							</div>
 						</div>
 
+						<div class="col-lg-12">
+							<hr>
+							<h5>{{ _lang('Select Trustees') }}</h5>
+							<p class="text-muted">{{ _lang('Please select two trustees who will review your loan application') }}</p>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="form-group">
+								<label class="control-label">{{ _lang('Trustee 1') }} <span class="text-danger">*</span></label>
+								<select class="form-control auto-select select2" data-selected="{{ old('trustee1_member_id') }}" name="trustee1_member_id" required>
+									<option value="">{{ _lang('Select Trustee 1') }}</option>
+									@foreach(\App\Models\Member::orderBy('first_name', 'asc')->get() as $member)
+										@if($member->id != auth()->user()->member->id)
+										<option value="{{ $member->id }}">{{ $member->name }} ({{ $member->member_no }})</option>
+										@endif
+									@endforeach
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="form-group">
+								<label class="control-label">{{ _lang('Trustee 2') }} <span class="text-danger">*</span></label>
+								<select class="form-control auto-select select2" data-selected="{{ old('trustee2_member_id') }}" name="trustee2_member_id" required>
+									<option value="">{{ _lang('Select Trustee 2') }}</option>
+									@foreach(\App\Models\Member::orderBy('first_name', 'asc')->get() as $member)
+										@if($member->id != auth()->user()->member->id)
+										<option value="{{ $member->id }}">{{ $member->name }} ({{ $member->member_no }})</option>
+										@endif
+									@endforeach
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-12">
+							<hr>
+							<h5>{{ _lang('Select Leaders') }}</h5>
+							<p class="text-muted">{{ _lang('Please select Secretary and Chairman who will review your loan application') }}</p>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="form-group">
+								<label class="control-label">{{ _lang('Secretary') }} <span class="text-danger">*</span></label>
+								<select class="form-control auto-select select2" data-selected="{{ old('secretary_leader_id') }}" name="secretary_leader_id" required>
+									<option value="">{{ _lang('Select Secretary') }}</option>
+									@foreach($secretaries as $secretary)
+										@if($secretary->member)
+										<option value="{{ $secretary->id }}">{{ $secretary->member->name }} ({{ $secretary->member->member_no }})</option>
+										@endif
+									@endforeach
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="form-group">
+								<label class="control-label">{{ _lang('Chairman') }} <span class="text-danger">*</span></label>
+								<select class="form-control auto-select select2" data-selected="{{ old('chairman_leader_id') }}" name="chairman_leader_id" required>
+									<option value="">{{ _lang('Select Chairman') }}</option>
+									@foreach($chairmen as $chairman)
+										@if($chairman->member)
+										<option value="{{ $chairman->id }}">{{ $chairman->member->name }} ({{ $chairman->member->member_no }})</option>
+										@endif
+									@endforeach
+								</select>
+							</div>
+						</div>
+
 						<div class="col-md-12 mt-2">
 							<div class="form-group">
 								<button type="submit" class="btn btn-primary"><i class="ti-check-box"></i>&nbsp;{{ _lang('Submit Application') }}</button>

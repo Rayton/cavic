@@ -1,0 +1,38 @@
+/* ============================================
+   MICROFINANCE APP - MAIN STYLESHEET
+   Custom Design System Implementation
+   ============================================ */
+
+/* 1. Design System Foundation */
+@import url('design-system/_variables.css');
+
+/* 2. Theme Overrides */
+@import url('themes/dark-theme.css');
+
+/* 3. Components */
+@import url('components/_cards.css');
+@import url('components/_sidebar.css');
+
+/* 4. Base overrides for template integration */
+body {
+    font-family: var(--mf-font-family-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--mf-font-family-heading);
+}
+
+/* Smooth theme transitions */
+body,
+.main-content,
+.sidebar-menu,
+.header-area,
+.card,
+.form-control,
+.modal-content,
+.dropdown-menu {
+    transition: background-color var(--mf-transition-slow), 
+                color var(--mf-transition-slow),
+                border-color var(--mf-transition-slow);
+}
+

@@ -12,7 +12,7 @@
 		<div class="col-md-12">
 			<div class="form-group">
 				<label class="control-label">{{ _lang('Code') }}</label>						
-				<input type="text" class="form-control" name="name" value="{{ $currency->full_name }} ({{ $currency->name }})" placeholder="USD" required>
+				<input type="text" class="form-control" name="name" value="{{ $currency->name }}" placeholder="USD" required>
 			</div>
 		</div>
 

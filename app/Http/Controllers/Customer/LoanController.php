@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\CustomField;
 use App\Models\Loan;
+use App\Models\Leader;
+use App\Models\LoanApproval;
 use App\Models\LoanPayment;
 use App\Models\LoanProduct;
 use App\Models\LoanRepayment;
 use App\Models\SavingsAccount;
 use App\Models\Transaction;
+use App\Notifications\LoanApprovalLevelNotification;
 use App\Notifications\LoanPaymentReceived;
 use App\Utilities\LoanCalculator as Calculator;
 use DateTime;
@@ -37,6 +40,7 @@ class LoanController extends Controller {
     public function index() {
         $assets = ['datatable'];
         $loans  = Loan::where('borrower_id', auth()->user()->member->id)
+            ->with(['approvals.approver', 'approvals.approvedBy'])
             ->orderBy("loans.id", "desc")
             ->get();
         return view('backend.customer.loan.my_loans', compact('loans', 'assets'));
@@ -158,7 +162,23 @@ class LoanController extends Controller {
             $accounts = SavingsAccount::with('savings_type')
                 ->where('member_id', auth()->user()->member->id)
                 ->get();
-            return view('backend.customer.loan.apply_loan', compact('alert_col', 'customFields', 'accounts'));
+            
+            // Get active secretaries and chairmen for selection
+            $secretaries = Leader::where('position', Leader::POSITION_SECRETARY)
+                ->where('status', 1)
+                ->where('tenant_id', request()->tenant->id)
+                ->whereNotNull('member_id')
+                ->with('member')
+                ->get();
+            
+            $chairmen = Leader::where('position', Leader::POSITION_CHAIRMAN)
+                ->where('status', 1)
+                ->where('tenant_id', request()->tenant->id)
+                ->whereNotNull('member_id')
+                ->with('member')
+                ->get();
+            
+            return view('backend.customer.loan.apply_loan', compact('alert_col', 'customFields', 'accounts', 'secretaries', 'chairmen'));
         } else if ($request->isMethod('post')) {
             @ini_set('max_execution_time', 0);
             @set_time_limit(0);
@@ -182,6 +202,10 @@ class LoanController extends Controller {
                 'applied_amount'     => "required|numeric|min:$min_amount|max:$max_amount",
                 'attachment'         => 'nullable|mimes:jpeg,png,jpg,doc,pdf,docx,zip|max:8192', //8MB = 8192KB
                 'debit_account_id'   => 'required',
+                'trustee1_member_id' => 'required|exists:members,id',
+                'trustee2_member_id' => 'required|exists:members,id|different:trustee1_member_id',
+                'secretary_leader_id' => 'required|exists:leaders,id',
+                'chairman_leader_id' => 'required|exists:leaders,id|different:secretary_leader_id',
             ];
 
             $validationMessages = [];
@@ -245,6 +269,10 @@ class LoanController extends Controller {
             $loan->created_user_id        = auth()->id();
             $loan->custom_fields          = json_encode($customFieldsData);
             $loan->debit_account_id       = $request->debit_account_id;
+            $loan->trustee1_member_id     = $request->input('trustee1_member_id');
+            $loan->trustee2_member_id     = $request->input('trustee2_member_id');
+            $loan->secretary_leader_id     = $request->input('secretary_leader_id');
+            $loan->chairman_leader_id     = $request->input('chairman_leader_id');
 
             // Create Loan Repayments
             $calculator = new Calculator(
@@ -289,6 +317,9 @@ class LoanController extends Controller {
             if ($loanProduct->starting_loan_id != null) {
                 $loanProduct->increment('starting_loan_id');
             }
+
+            // Initialize multi-level approvals
+            $this->initializeLoanApprovals($loan);
 
             DB::commit();
 
@@ -514,6 +545,86 @@ class LoanController extends Controller {
         }
 
         return null;
+    }
+
+    /**
+     * Initialize multi-level approvals for a loan
+     */
+    private function initializeLoanApprovals(Loan $loan)
+    {
+        // Trustee 1 - Selected by member
+        if ($loan->trustee1_member_id) {
+            $approval = new LoanApproval();
+            $approval->loan_id = $loan->id;
+            $approval->approval_level = LoanApproval::LEVEL_TRUSTEE_1;
+            $approval->approval_level_name = _lang('Trustee 1');
+            $approval->approver_member_id = $loan->trustee1_member_id;
+            $approval->status = LoanApproval::STATUS_PENDING;
+            $approval->tenant_id = $loan->tenant_id;
+            $approval->save();
+
+            // Notify Trustee 1
+            try {
+                $trustee1 = $loan->trustee1;
+                if ($trustee1 && $trustee1->id) {
+                    // Check if member has email
+                    if (empty($trustee1->email)) {
+                        \Log::warning('Trustee 1 (Member ID: ' . $trustee1->id . ') does not have an email address');
+                    } else {
+                        // Send notification immediately (not queued) to Member
+                        $trustee1->notifyNow(new LoanApprovalLevelNotification($loan, $approval, 'pending'));
+                        \Log::info('Notification sent immediately to Trustee 1 (Member ID: ' . $trustee1->id . ', Email: ' . $trustee1->email . ')');
+                    }
+                } else {
+                    \Log::warning('Trustee 1 not found for loan ID: ' . $loan->id);
+                }
+            } catch (\Exception $e) {
+                // Log error but don't fail the loan creation
+                \Log::error('Failed to notify Trustee 1: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            }
+        }
+
+        // Trustee 2 - Selected by member
+        if ($loan->trustee2_member_id) {
+            $approval = new LoanApproval();
+            $approval->loan_id = $loan->id;
+            $approval->approval_level = LoanApproval::LEVEL_TRUSTEE_2;
+            $approval->approval_level_name = _lang('Trustee 2');
+            $approval->approver_member_id = $loan->trustee2_member_id;
+            $approval->status = LoanApproval::STATUS_PENDING;
+            $approval->tenant_id = $loan->tenant_id;
+            $approval->save();
+        }
+
+        // Secretary - Selected by member from leaders table
+        if ($loan->secretary_leader_id) {
+            $secretary = Leader::with('member')->find($loan->secretary_leader_id);
+            if ($secretary && $secretary->member_id) {
+                $approval = new LoanApproval();
+                $approval->loan_id = $loan->id;
+                $approval->approval_level = LoanApproval::LEVEL_SECRETARY;
+                $approval->approval_level_name = _lang('Secretary');
+                $approval->approver_member_id = $secretary->member_id;
+                $approval->status = LoanApproval::STATUS_PENDING;
+                $approval->tenant_id = $loan->tenant_id;
+                $approval->save();
+            }
+        }
+
+        // Chairman - Selected by member from leaders table
+        if ($loan->chairman_leader_id) {
+            $chairman = Leader::with('member')->find($loan->chairman_leader_id);
+            if ($chairman && $chairman->member_id) {
+                $approval = new LoanApproval();
+                $approval->loan_id = $loan->id;
+                $approval->approval_level = LoanApproval::LEVEL_CHAIRMAN;
+                $approval->approval_level_name = _lang('Chairman');
+                $approval->approver_member_id = $chairman->member_id;
+                $approval->status = LoanApproval::STATUS_PENDING;
+                $approval->tenant_id = $loan->tenant_id;
+                $approval->save();
+            }
+        }
     }
 
 }

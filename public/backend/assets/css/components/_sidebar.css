@@ -1,0 +1,223 @@
+/* ============================================
+   CUSTOM SIDEBAR DESIGN - Enhanced Collapse
+   ============================================ */
+
+.sidebar-menu {
+    background: var(--mf-bg-sidebar);
+    border-right: 1px solid var(--mf-border-light);
+    box-shadow: var(--mf-shadow-md);
+    transition: width var(--mf-transition-sidebar), padding var(--mf-transition-sidebar);
+    width: var(--mf-sidebar-width-expanded);
+    position: fixed;
+    overflow: hidden;
+    min-height: 100vh;
+    z-index: 999;
+}
+
+/* ============================================
+   EXPANDED STATE - Normal Sidebar
+   ============================================ */
+
+.metismenu li > a {
+    display: flex;
+    align-items: center;
+    padding: var(--mf-space-3) var(--mf-space-4);
+    color: var(--mf-sidebar-text, #CBD5E1);
+    transition: all var(--mf-transition-base);
+    border-radius: var(--mf-radius-md);
+    margin: var(--mf-space-1) var(--mf-space-3);
+    text-decoration: none;
+}
+
+.metismenu li > a i {
+    margin-right: var(--mf-space-3);
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.metismenu li > a span {
+    flex: 1;
+    font-size: var(--mf-text-base);
+    white-space: nowrap;
+}
+
+.metismenu li > a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+    color: #FFFFFF;
+}
+
+.metismenu li.active > a,
+.metismenu li.active-nav > a {
+    background: var(--mf-primary-600);
+    color: var(--mf-text-inverse);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================
+   COLLAPSED STATE - Thin Sidebar with Icons
+   ============================================ */
+
+.page-container.sbar_collapsed .sidebar-menu {
+    width: var(--mf-sidebar-width-collapsed);
+    padding: 0;
+}
+
+/* Logo in collapsed state */
+.page-container.sbar_collapsed .extra-details {
+    padding: var(--mf-space-4) 0;
+    text-align: center;
+}
+
+.page-container.sbar_collapsed .sidebar-logo {
+    width: 40px;
+    height: 40px;
+    margin: var(--mf-space-5) auto;
+    display: block;
+}
+
+/* Menu items in collapsed state */
+.page-container.sbar_collapsed .metismenu li {
+    position: relative;
+    margin: var(--mf-space-2) var(--mf-space-2);
+}
+
+.page-container.sbar_collapsed .metismenu li > a {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--mf-space-3) var(--mf-space-2);
+    border-radius: var(--mf-radius-md);
+    text-align: center;
+    min-height: 70px;
+    position: relative;
+    margin: var(--mf-space-1) var(--mf-space-2);
+}
+
+/* Icon styling in collapsed state */
+.page-container.sbar_collapsed .metismenu li > a i {
+    font-size: 22px;
+    margin: 0 0 var(--mf-space-2) 0;
+    display: block;
+    width: auto;
+    flex-shrink: 0;
+}
+
+/* Text label below icon in collapsed state */
+.page-container.sbar_collapsed .metismenu li > a span {
+    font-size: var(--mf-text-xs);
+    font-weight: var(--mf-font-medium);
+    display: block !important;
+    margin: 0;
+    margin-top: var(--mf-space-1);
+    line-height: 1.2;
+    text-align: center;
+    word-break: break-word;
+    max-width: 100%;
+    white-space: normal;
+    color: inherit;
+}
+
+/* Hide menu arrow in collapsed state */
+.page-container.sbar_collapsed .metismenu li > a .menu-arrow,
+.page-container.sbar_collapsed .metismenu li > a:after {
+    display: none !important;
+}
+
+/* Hide submenus in collapsed state */
+.page-container.sbar_collapsed .metismenu .nav-second-level {
+    display: none !important;
+}
+
+/* Active state in collapsed mode */
+.page-container.sbar_collapsed .metismenu li.active > a,
+.page-container.sbar_collapsed .metismenu li.active-nav > a {
+    background: var(--mf-primary-600);
+    color: var(--mf-text-inverse);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.page-container.sbar_collapsed .metismenu li.active > a span,
+.page-container.sbar_collapsed .metismenu li.active-nav > a span {
+    color: var(--mf-text-inverse);
+}
+
+/* Hover state in collapsed mode */
+.page-container.sbar_collapsed .metismenu li > a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+    color: #FFFFFF;
+}
+
+/* Tooltip for collapsed menu items */
+.page-container.sbar_collapsed .metismenu li > a::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--mf-gray-900);
+    color: var(--mf-text-inverse);
+    padding: var(--mf-space-2) var(--mf-space-3);
+    border-radius: var(--mf-radius-md);
+    font-size: var(--mf-text-sm);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--mf-transition-base);
+    margin-left: var(--mf-space-2);
+    z-index: var(--mf-z-tooltip);
+    box-shadow: var(--mf-shadow-lg);
+}
+
+.page-container.sbar_collapsed .metismenu li > a::after {
+    content: '';
+    position: absolute;
+    left: calc(100% - 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: var(--mf-gray-900);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--mf-transition-base);
+    z-index: var(--mf-z-tooltip);
+}
+
+.page-container.sbar_collapsed .metismenu li > a:hover::before,
+.page-container.sbar_collapsed .metismenu li > a:hover::after {
+    opacity: 1;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .page-container.sbar_collapsed .metismenu li > a::before {
+    background: var(--mf-gray-800);
+    color: var(--mf-text-inverse);
+}
+
+[data-theme="dark"] .page-container.sbar_collapsed .metismenu li > a::after {
+    border-right-color: var(--mf-gray-800);
+}
+
+[data-theme="dark"] .sidebar-menu {
+    background: var(--mf-sidebar-bg);
+    border-right-color: var(--mf-border-light);
+}
+
+[data-theme="dark"] .metismenu li > a {
+    color: var(--mf-sidebar-text);
+}
+
+[data-theme="dark"] .metismenu li > a:hover {
+    background: var(--mf-sidebar-hover);
+}
+
+[data-theme="dark"] .metismenu li.active > a,
+[data-theme="dark"] .metismenu li.active-nav > a {
+    background: var(--mf-sidebar-active);
+}
+

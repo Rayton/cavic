@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $language=array();
 
@@ -497,3 +497,46 @@ $language["Message details are bellow"]="Message details are bellow";
 $language["Prev"]="Prev";
 $language["Accept"]="Accept";
 $language["Close"]="Close";
+
+
+$language["Approve Loan Application"]="Approve Loan Application";
+$language["Loan Approval"]="Loan Approval";
+$language["Approval Level"]="Approval Level";
+$language["Approval Progress"]="Approval Progress";
+$language["Trustee 1"]="Trustee 1";
+$language["Trustee 2"]="Trustee 2";
+$language["Secretary"]="Secretary";
+$language["Chairman"]="Chairman";
+$language["Loan Approver Settings"]="Loan Approver Settings";
+$language["Configure Approvers"]="Configure Approvers";
+$language["Approver"]="Approver";
+$language["Not Assigned"]="Not Assigned";
+$language["Review & Approve"]="Review & Approve";
+$language["No pending loan approvals at this time"]="No pending loan approvals at this time";
+$language["Reject Loan Application"]="Reject Loan Application";
+$language["Rejection Reason"]="Rejection Reason";
+$language["Please provide a reason for rejection"]="Please provide a reason for rejection";
+$language["Reject Loan"]="Reject Loan";
+$language["Loan approved successfully at"]="Loan approved successfully at";
+$language["Loan rejected at"]="Loan rejected at";
+$language["All loan approvals complete"]="All loan approvals complete";
+$language["Loan approval status updated"]="Loan approval status updated";
+$language["Loan Approval Required"]="Loan Approval Required";
+$language["Loan Approved at"]="Loan Approved at";
+$language["Loan Rejected at"]="Loan Rejected at";
+$language["All Loan Approvals Complete"]="All Loan Approvals Complete";
+$language["Loan Approval Update"]="Loan Approval Update";
+$language["A loan application requires your approval at the"]="A loan application requires your approval at the";
+$language["level"]="level";
+$language["Please review and approve the loan application"]="Please review and approve the loan application";
+$language["Your loan application has been approved at the"]="Your loan application has been approved at the";
+$language["Your loan application has been rejected at the"]="Your loan application has been rejected at the";
+$language["Congratulations! Your loan application has been approved by all required approvers and is now pending final administrative approval"]="Congratulations! Your loan application has been approved by all required approvers and is now pending final administrative approval";
+$language["Approved"]="Approved";
+$language["Rejected"]="Rejected";
+$language["Pending"]="Pending";
+$language["Level"]="Level";
+$language["Select Member"]="Select Member";
+$language["All approval levels must be completed first"]="All approval levels must be completed first";
+$language["All approval levels must be completed before final approval"]="All approval levels must be completed before final approval";
+$language["Switch Account"]="Switch Account";

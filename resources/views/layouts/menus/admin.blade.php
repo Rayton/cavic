@@ -158,6 +158,7 @@ $upcomming_repayments = request_count('upcomming_repayments', true);
 	<ul class="nav-second-level" aria-expanded="false">
 		<li class="nav-item"><a class="nav-link" href="{{ route('settings.index') }}">{{ _lang('System Settings') }}</a></li>
 		<li class="nav-item"><a class="nav-link" href="{{ route('currency.index') }}">{{ _lang('Currency Management') }}</a></li>
+		<li class="nav-item"><a class="nav-link" href="{{ route('leaders.index') }}">{{ _lang('Leaders Management') }}</a></li>
 		<li class="nav-item"><a class="nav-link" href="{{ route('email_templates.index') }}">{{ _lang('Notification Templates') }}</a></li>
 	</ul>
 </li>

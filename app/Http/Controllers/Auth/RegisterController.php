@@ -151,6 +151,49 @@ class RegisterController extends Controller {
 
         $member->save();
 
+        // Create tenant for member
+        $mainTenant = app('tenant');
+        $memberPackage = get_or_create_members_package();
+        
+        // Generate unique slug for member tenant
+        $memberSlug = strtolower(str_replace(' ', '-', $mainTenant->slug . '-' . $member->first_name . '-' . $member->last_name));
+        $memberSlug = preg_replace('/[^a-z0-9\-]/', '', $memberSlug);
+        
+        // Ensure slug is unique
+        $originalSlug = $memberSlug;
+        $counter = 1;
+        while (Tenant::where('slug', $memberSlug)->exists()) {
+            $memberSlug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        // Create member tenant
+        $memberTenant = new Tenant();
+        $memberTenant->slug = $memberSlug;
+        $memberTenant->name = $mainTenant->name . ' - ' . $member->first_name . ' ' . $member->last_name;
+        $memberTenant->membership_type = 'member';
+        $memberTenant->package_id = $memberPackage->id;
+        $memberTenant->subscription_date = now();
+        $memberTenant->valid_to = update_membership_date($memberPackage, $memberTenant->subscription_date);
+        $memberTenant->status = 1;
+        $memberTenant->save();
+        
+        // Link member to their tenant
+        $member->member_tenant_id = $memberTenant->id;
+        $member->save();
+        
+        // Create admin user for member tenant
+        $memberAdminUser = new User();
+        $memberAdminUser->name = $member->first_name . ' ' . $member->last_name;
+        $memberAdminUser->email = $request->email;
+        $memberAdminUser->password = Hash::make($request->password);
+        $memberAdminUser->user_type = 'admin';
+        $memberAdminUser->tenant_id = $memberTenant->id;
+        $memberAdminUser->tenant_owner = 1;
+        $memberAdminUser->status = 0; // Same status as member
+        $memberAdminUser->profile_picture = 'default.png';
+        $memberAdminUser->save();
+
         //Increment Member No
         $memberNo = get_tenant_option('starting_member_no', app('tenant')->id);
         if ($memberNo != '') {

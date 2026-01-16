@@ -109,14 +109,14 @@
 
 		<div class="page-container">
 		    <!-- sidebar menu area start -->
-			<div class="sidebar-menu">
+			<div class="sidebar-menu" style="display: flex; flex-direction: column;">
 				<div class="extra-details">
 					<a href="{{ $user_type == 'superadmin' ? route('admin.dashboard.index') : route('dashboard.index') }}">
 						<img class="sidebar-logo" src="{{ get_logo() }}" alt="logo">
 					</a>
 				</div>
 
-				<div class="main-menu">
+				<div class="main-menu" style="flex: 1; overflow-y: auto;">
 					<div class="menu-inner">
 						<nav>
 							<ul class="metismenu {{ $user_type == 'user' ? 'staff-menu' : '' }}" id="menu">
@@ -125,6 +125,58 @@
 						</nav>
 					</div>
 				</div>
+				
+				<!-- Tenant Switcher -->
+				@if(auth()->check() && (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'customer'))
+					@php
+						$user = auth()->user();
+						$mainTenant = \App\Models\Tenant::find($user->tenant_id);
+						$memberTenant = null;
+						if ($user->user_type == 'customer') {
+							$member = \App\Models\Member::where('user_id', $user->id)->first();
+							if ($member && $member->member_tenant_id) {
+								$memberTenant = \App\Models\Tenant::find($member->member_tenant_id);
+							}
+						} elseif ($user->user_type == 'admin' && $user->tenant_owner == 1) {
+							// For admin users, check if they have a member record with a member tenant
+							$member = \App\Models\Member::where('user_id', $user->id)->first();
+							if ($member && $member->member_tenant_id) {
+								$memberTenant = \App\Models\Tenant::find($member->member_tenant_id);
+							}
+						}
+						$currentTenant = app('tenant');
+						$hasMultipleTenants = ($mainTenant && $memberTenant) || ($user->user_type == 'admin' && $memberTenant);
+					@endphp
+					@if($hasMultipleTenants)
+						<div class="tenant-switcher" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+							<label style="color: rgba(255,255,255,0.7); font-size: 11px; text-transform: uppercase; margin-bottom: 8px; display: block;">{{ _lang('Switch Account') }}</label>
+							<div class="dropdown">
+								<button class="btn btn-sm btn-block text-left" type="button" id="tenantSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 8px 12px; border-radius: 4px; width: 100%; font-size: 12px;">
+									<span id="current-tenant-name">{{ strlen($currentTenant->name) > 25 ? substr($currentTenant->name, 0, 22) . '...' : $currentTenant->name }}</span>
+									<i class="ti-angle-down float-right" style="margin-top: 2px;"></i>
+								</button>
+								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="tenantSwitcher" style="min-width: 200px; max-width: 250px;">
+									@if($mainTenant)
+										<a class="dropdown-item" href="{{ route('switch_tenant') }}?tenant_slug={{ $mainTenant->slug }}">
+											<i class="ti-home mr-2"></i>{{ $mainTenant->name }}
+											@if($currentTenant->id == $mainTenant->id)
+												<i class="ti-check float-right text-success"></i>
+											@endif
+										</a>
+									@endif
+									@if($memberTenant)
+										<a class="dropdown-item" href="{{ route('switch_tenant') }}?tenant_slug={{ $memberTenant->slug }}">
+											<i class="ti-user mr-2"></i>{{ $memberTenant->name }}
+											@if($currentTenant->id == $memberTenant->id)
+												<i class="ti-check float-right text-success"></i>
+											@endif
+										</a>
+									@endif
+								</div>
+							</div>
+						</div>
+					@endif
+				@endif
 			</div>
 			<!-- sidebar menu area end -->
 
@@ -201,7 +253,7 @@
 								<li>
 									<div class="user-profile">
 										<h4 class="user-name dropdown-toggle" data-toggle="dropdown">
-											<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar"> {{ Auth::user()->name }} <i class="fa fa-angle-down"></i>
+											<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar"> {{ app('tenant')->name ?? Auth::user()->name }} <i class="fa fa-angle-down"></i>
 										</h4>
 										<div class="dropdown-menu">
 											@if(auth()->user()->user_type == 'customer')

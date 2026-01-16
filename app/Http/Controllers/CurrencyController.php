@@ -49,7 +49,7 @@ class CurrencyController extends Controller {
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             'full_name'     => 'required|max:50',
-            'name'          => 'required|min:3|max:3',
+            'name'          => 'required|min:3|max:25',
             'exchange_rate' => 'required|numeric',
             'base_currency' => 'required',
             'status'        => 'required',
@@ -134,7 +134,7 @@ class CurrencyController extends Controller {
     public function update(Request $request, $tenant, $id) {
         $validator = Validator::make($request->all(), [
             'full_name'     => 'required|max:50',
-            'name'          => 'required|min:3|max:3',
+            'name'          => 'required|min:3|max:25',
             'exchange_rate' => 'required|numeric',
             'base_currency' => 'required',
             'status'        => 'required',

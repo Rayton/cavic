@@ -1,0 +1,90 @@
+/* ============================================
+   MICROFINANCE CUSTOM CARDS
+   ============================================ */
+
+.mf-card {
+    background: var(--mf-bg-card);
+    border-radius: var(--mf-radius-lg);
+    padding: var(--mf-space-6);
+    box-shadow: var(--mf-shadow-md);
+    border: 1px solid var(--mf-border-light);
+    transition: all var(--mf-transition-base);
+}
+
+.mf-card:hover {
+    box-shadow: var(--mf-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Financial Stat Card */
+.mf-stat-card {
+    background: linear-gradient(135deg, var(--mf-primary-600) 0%, var(--mf-primary-500) 100%);
+    border-radius: var(--mf-radius-xl);
+    padding: var(--mf-space-6);
+    color: var(--mf-text-inverse);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--mf-shadow-lg);
+}
+
+.mf-stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.mf-stat-card.success {
+    background: linear-gradient(135deg, var(--mf-success-600) 0%, var(--mf-success-500) 100%);
+}
+
+.mf-stat-card.warning {
+    background: linear-gradient(135deg, var(--mf-warning-600) 0%, var(--mf-warning-500) 100%);
+}
+
+.mf-stat-card.danger {
+    background: linear-gradient(135deg, var(--mf-danger-600) 0%, var(--mf-danger-500) 100%);
+}
+
+.mf-stat-card .icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--mf-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--mf-space-4);
+    backdrop-filter: blur(10px);
+}
+
+.mf-stat-card .value {
+    font-size: var(--mf-text-3xl);
+    font-weight: var(--mf-font-bold);
+    margin-bottom: var(--mf-space-2);
+}
+
+.mf-stat-card .label {
+    font-size: var(--mf-text-sm);
+    opacity: 0.9;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Enhance existing dashboard cards */
+.dashboard-card {
+    transition: all var(--mf-transition-base);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--mf-shadow-lg);
+}
+

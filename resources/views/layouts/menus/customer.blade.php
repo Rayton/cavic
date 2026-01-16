@@ -7,6 +7,7 @@
 	<ul class="nav-second-level" aria-expanded="false">
         <li class="nav-item"><a class="nav-link" href="{{ route('loans.my_loans') }}">{{ _lang('My Loans') }}</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ route('loans.loan_products') }}">{{ _lang('Apply New Loan') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('loan_approvals.index') }}">{{ _lang('Approve Loan Application') }}</a></li>
 	</ul>
 </li>
 

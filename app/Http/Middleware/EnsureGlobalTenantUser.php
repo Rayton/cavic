@@ -53,6 +53,11 @@ class EnsureGlobalTenantUser
 
             return $next($request);
         }
+        // If user is logged in but tenant doesn't match, redirect to tenant login
+        if (Auth::check()) {
+            $tenant = app('tenant');
+            return redirect()->route('tenant.login', ['tenant' => $tenant->slug])->with('error', _lang('You do not have access to this tenant'));
+        }
         return redirect()->route('login');
     }
 }

@@ -49,4 +49,20 @@ class Member extends Model {
     public function documents() {
         return $this->hasMany('App\Models\MemberDocument', 'member_id');
     }
+
+    public function memberTenant() {
+        return $this->belongsTo('App\Models\Tenant', 'member_tenant_id')->withDefault();
+    }
+
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForMail($notification)
+    {
+        // Return the member's email address
+        return $this->email;
+    }
 }

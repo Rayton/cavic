@@ -8,11 +8,26 @@
                 <div class="panel-title">{{ _lang('View Loan Details') }}</div>
                 @if($loan->status == 0)
                 <div>
+                @php
+                    $hasApprovals = $loan->approvals && $loan->approvals->count() > 0;
+                    $allApprovalsComplete = $hasApprovals ? $loan->isFullyApproved() : true;
+                    $canApprove = !$hasApprovals || $allApprovalsComplete;
+                @endphp
+                @if($canApprove)
                 <a class="btn btn-primary btn-xs" href="{{ route('loans.approve', $loan['id']) }}">
                     <i class="fas fa-check-circle mr-1"></i>{{ _lang('Click to Approve') }}</a>
+                @else
+                <button class="btn btn-primary btn-xs" disabled title="{{ _lang('All approval levels must be completed first') }}" style="opacity: 0.6; cursor: not-allowed;">
+                    <i class="fas fa-check-circle mr-1"></i>{{ _lang('Click to Approve') }}</button>
+                @endif
                 <a class="btn btn-danger btn-xs confirm-alert" data-message="{{ _lang('Are you sure you want to reject this loan application?') }}" href="#">
                     <i class="fas fa-times-circle mr-1"></i>{{ _lang('Click to Reject') }}
                 </a>
+                @if(!$canApprove)
+                <div class="mt-2">
+                    <small class="text-warning"><i class="fas fa-exclamation-triangle"></i> {{ _lang('All approval levels must be completed before final approval') }}</small>
+                </div>
+                @endif
                 </div>
                 @endif
             </div>

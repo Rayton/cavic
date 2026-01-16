@@ -81,6 +81,26 @@ class Loan extends Model
         return $this->hasMany('App\Models\Guarantor', 'loan_id');
     }
 
+    public function trustee1()
+    {
+        return $this->belongsTo('App\Models\Member', 'trustee1_member_id')->withDefault();
+    }
+
+    public function trustee2()
+    {
+        return $this->belongsTo('App\Models\Member', 'trustee2_member_id')->withDefault();
+    }
+
+    public function secretary()
+    {
+        return $this->belongsTo('App\Models\Leader', 'secretary_leader_id')->withDefault();
+    }
+
+    public function chairman()
+    {
+        return $this->belongsTo('App\Models\Leader', 'chairman_leader_id')->withDefault();
+    }
+
     public function repayments()
     {
         return $this->hasMany('App\Models\LoanRepayment', 'loan_id');
@@ -97,6 +117,41 @@ class Loan extends Model
             ->where('status', 0)
             ->orderBy('id', 'asc')
             ->withDefault();
+    }
+
+    public function approvals()
+    {
+        return $this->hasMany('App\Models\LoanApproval', 'loan_id')->orderBy('approval_level', 'asc');
+    }
+
+    public function current_approval()
+    {
+        return $this->hasOne('App\Models\LoanApproval', 'loan_id')
+            ->where('status', LoanApproval::STATUS_PENDING)
+            ->orderBy('approval_level', 'asc')
+            ->withDefault();
+    }
+
+    public function isFullyApproved()
+    {
+        $allApprovals = $this->approvals;
+        if ($allApprovals->count() < 4) {
+            return false;
+        }
+        return $allApprovals->every(function ($approval) {
+            return $approval->status == LoanApproval::STATUS_APPROVED;
+        });
+    }
+
+    public function getApprovalProgressAttribute()
+    {
+        $approvals = $this->approvals;
+        $approved = $approvals->where('status', LoanApproval::STATUS_APPROVED)->count();
+        return [
+            'current' => $approved,
+            'total' => 4,
+            'percentage' => ($approved / 4) * 100
+        ];
     }
 
     public function getFirstPaymentDateAttribute($value)

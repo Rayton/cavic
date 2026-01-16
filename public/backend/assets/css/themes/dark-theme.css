@@ -1,0 +1,114 @@
+/* ============================================
+   DARK THEME OVERRIDES
+   ============================================ */
+
+[data-theme="dark"] {
+    /* Backgrounds */
+    --mf-bg-primary: #0F172A;
+    --mf-bg-secondary: #1E293B;
+    --mf-bg-tertiary: #334155;
+    --mf-bg-sidebar: #0F172A;
+    --mf-bg-header: #1E293B;
+    --mf-bg-card: #1E293B;
+    --mf-bg-input: #334155;
+    --mf-bg-hover: #334155;
+    
+    /* Text Colors */
+    --mf-text-primary: #F1F5F9;
+    --mf-text-secondary: #CBD5E1;
+    --mf-text-tertiary: #94A3B8;
+    --mf-text-inverse: #0F172A;
+    --mf-text-muted: #64748B;
+    
+    /* Borders */
+    --mf-border-light: #334155;
+    --mf-border-medium: #475569;
+    --mf-border-dark: #64748B;
+    
+    /* Shadows - Adjusted for dark mode */
+    --mf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --mf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --mf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --mf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    
+    /* Card specific */
+    --mf-card-bg: #1E293B;
+    --mf-card-border: #334155;
+    
+    /* Input specific */
+    --mf-input-bg: #334155;
+    --mf-input-border: #475569;
+    --mf-input-text: #F1F5F9;
+    
+    /* Sidebar specific */
+    --mf-sidebar-bg: #0F172A;
+    --mf-sidebar-text: #CBD5E1;
+    --mf-sidebar-hover: #1E293B;
+    --mf-sidebar-active: #3B82F6;
+}
+
+/* Dark theme body adjustments */
+[data-theme="dark"] body {
+    background-color: var(--mf-bg-primary);
+    color: var(--mf-text-primary);
+}
+
+[data-theme="dark"] .main-content {
+    background-color: var(--mf-bg-primary);
+}
+
+[data-theme="dark"] .header-area {
+    background: var(--mf-bg-header);
+    border-bottom-color: var(--mf-border-light);
+}
+
+[data-theme="dark"] .card {
+    background-color: var(--mf-bg-card);
+    border-color: var(--mf-card-border);
+    color: var(--mf-text-primary);
+}
+
+[data-theme="dark"] .form-control {
+    background-color: var(--mf-input-bg);
+    border-color: var(--mf-input-border);
+    color: var(--mf-input-text);
+}
+
+[data-theme="dark"] .form-control:focus {
+    background-color: var(--mf-input-bg);
+    border-color: var(--mf-primary-500);
+    color: var(--mf-input-text);
+}
+
+[data-theme="dark"] .table {
+    color: var(--mf-text-primary);
+}
+
+[data-theme="dark"] .table thead th {
+    border-color: var(--mf-border-light);
+    background-color: var(--mf-bg-tertiary);
+}
+
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: var(--mf-border-light);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--mf-bg-card);
+    color: var(--mf-text-primary);
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--mf-bg-card);
+    border-color: var(--mf-border-light);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--mf-text-primary);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--mf-bg-hover);
+}
+

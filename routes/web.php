@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\MessageController;
@@ -322,6 +323,14 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                     'index', 'edit', 'update', 'show',
                 ])->middleware("demo");
 
+                //Leaders Management
+                Route::get('leaders', [LeaderController::class, 'index'])->name('leaders.index');
+                Route::get('leaders/create/{position?}', [LeaderController::class, 'create'])->name('leaders.create');
+                Route::post('leaders', [LeaderController::class, 'store'])->name('leaders.store');
+                Route::get('leaders/{id}/edit', [LeaderController::class, 'edit'])->name('leaders.edit');
+                Route::match(['put', 'patch'], 'leaders/{id}', [LeaderController::class, 'update'])->name('leaders.update');
+                Route::delete('leaders/{id}', [LeaderController::class, 'destroy'])->name('leaders.destroy');
+
             });
 
             /** Tenant Role based user Routes **/
@@ -458,6 +467,12 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 Route::match(['get', 'post'], 'loans/payment/{loan_id}', [App\Http\Controllers\Customer\LoanController::class, 'loan_payment'])->name('loans.loan_payment');
                 Route::get('loans/my_loans', [App\Http\Controllers\Customer\LoanController::class, 'index'])->name('loans.my_loans');
 
+                //Loan Approval Controller
+                Route::get('loan_approvals', [App\Http\Controllers\LoanApprovalController::class, 'index'])->name('loan_approvals.index');
+                Route::get('loan_approvals/{id}', [App\Http\Controllers\LoanApprovalController::class, 'show'])->name('loan_approvals.show');
+                Route::post('loan_approvals/{id}/approve', [App\Http\Controllers\LoanApprovalController::class, 'approve'])->name('loan_approvals.approve');
+                Route::post('loan_approvals/{id}/reject', [App\Http\Controllers\LoanApprovalController::class, 'reject'])->name('loan_approvals.reject');
+
                 //Deposit Money
                 Route::match(['get', 'post'], 'deposit/manual_deposit/{id}', [App\Http\Controllers\Customer\DepositController::class, 'manual_deposit'])->name('deposit.manual_deposit');
                 Route::get('deposit/offline_methods', [App\Http\Controllers\Customer\DepositController::class, 'manual_methods'])->name('deposit.manual_methods');
@@ -495,6 +510,88 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
         }
         return back();
     })->name('switch_branch');
+
+    Route::get('switch_tenant', function () {
+        if (!auth()->check()) {
+            return back();
+        }
+        
+        $currentUser = auth()->user();
+        
+        if (isset($_GET['tenant_slug'])) {
+            $targetTenant = \App\Models\Tenant::where('slug', $_GET['tenant_slug'])->first();
+            if (!$targetTenant) {
+                return back()->with('error', _lang('Tenant not found'));
+            }
+            
+            // Use the same logic as login - find all users with the same email
+            // This mimics the showTenants() method behavior for automatic switching
+            $availableUsers = \App\Models\User::with('tenant')
+                ->where('email', $currentUser->email)
+                ->where('user_type', '!=', 'superadmin')
+                ->where('status', 1)
+                ->get();
+            
+            // Find the user that belongs to the target tenant
+            $targetUser = $availableUsers->first(function($user) use ($targetTenant) {
+                return $user->tenant_id == $targetTenant->id;
+            });
+            
+            // If not found by email matching, try alternative methods for member tenants
+            if (!$targetUser) {
+                // Check if user is already in target tenant
+                if ($currentUser->tenant_id == $targetTenant->id) {
+                    $targetUser = $currentUser;
+                }
+                // If customer switching to member tenant, find member and get admin user
+                else if ($currentUser->user_type == 'customer') {
+                    $member = \App\Models\Member::where('user_id', $currentUser->id)
+                        ->where('tenant_id', $currentUser->tenant_id)
+                        ->first();
+                    
+                    if ($member && $member->member_tenant_id == $targetTenant->id) {
+                        // Find admin user in member tenant (direct lookup - should be only one)
+                        $targetUser = \App\Models\User::where('tenant_id', $targetTenant->id)
+                            ->where('tenant_owner', 1)
+                            ->first();
+                    }
+                }
+                // If admin in member tenant switching to main tenant
+                else if ($currentUser->user_type == 'admin' && $currentUser->tenant_owner == 1) {
+                    $member = \App\Models\Member::where('member_tenant_id', $currentUser->tenant_id)->first();
+                    if ($member && $member->tenant_id == $targetTenant->id && $member->user_id) {
+                        $targetUser = \App\Models\User::find($member->user_id);
+                    }
+                }
+            }
+            
+            if ($targetUser && $targetUser->status == 1) {
+                // Log in as target user if different (this changes user_type from customer to admin for member tenant)
+                if ($targetUser->id != $currentUser->id) {
+                    auth()->login($targetUser);
+                    request()->session()->regenerate();
+                }
+                
+                // Use server-side redirect to immediately update the URL
+                // This is the most reliable way to ensure browser URL bar updates
+                return redirect()->route('dashboard.index', ['tenant' => $targetTenant->slug]);
+            } else {
+                \Log::warning('Tenant switch failed', [
+                    'current_user_id' => $currentUser->id,
+                    'current_user_email' => $currentUser->email,
+                    'current_user_type' => $currentUser->user_type,
+                    'current_tenant_id' => $currentUser->tenant_id,
+                    'target_tenant_id' => $targetTenant->id,
+                    'target_tenant_slug' => $targetTenant->slug,
+                    'available_users_count' => $availableUsers->count(),
+                ]);
+                
+                return back()->with('error', _lang('You do not have access to this tenant'));
+            }
+        }
+        
+        return back();
+    })->name('switch_tenant');
 
     Route::get('tenants/check-tenant-slug/{ignoreId?}', [TenantController::class, 'checkSlug'])->name('check-slug');
 
