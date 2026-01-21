@@ -1422,7 +1422,7 @@ if (! function_exists('get_or_create_members_package')) {
      */
     function get_or_create_members_package() {
         $package = \App\Models\Package::where('name', 'Members')->first();
-        
+
         if (!$package) {
             $package = new \App\Models\Package();
             $package->name = 'Members';
@@ -1440,7 +1440,7 @@ if (! function_exists('get_or_create_members_package')) {
             $package->member_portal = 1;
             $package->save();
         }
-        
+
         return $package;
     }
 }

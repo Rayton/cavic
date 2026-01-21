@@ -607,7 +607,7 @@
 					<div class="card-body">
 						<div class="row">
 							<div class="col-md-6">
-								<form method="post" class="settings-submit params-panel" autocomplete="off" action="{{ route('admin.settings.uplaod_logo') }}" enctype="multipart/form-data">
+								<form method="post" class="settings-submit params-panel" autocomplete="off" action="{{ route('admin.settings.upload_logo') }}" enctype="multipart/form-data">
 									@csrf
 									<div class="row">
 										<div class="col-md-12">

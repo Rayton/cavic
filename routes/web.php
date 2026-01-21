@@ -169,7 +169,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
 
                 //Utility Controller
                 Route::match(['get', 'post'], 'general_settings/{store?}', [UtilityController::class, 'settings'])->name('settings.update_settings');
-                Route::post('upload_logo', [UtilityController::class, 'upload_logo'])->name('settings.uplaod_logo');
+                Route::post('upload_logo', [UtilityController::class, 'upload_logo'])->name('settings.upload_logo');
                 Route::post('remove_cache', [UtilityController::class, 'remove_cache'])->name('settings.remove_cache');
                 Route::post('send_test_email', [UtilityController::class, 'send_test_email'])->name('settings.send_test_email');
 
@@ -515,26 +515,26 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
         if (!auth()->check()) {
             return back();
         }
-        
+
         $currentUser = auth()->user();
-        
+
         if (!isset($_GET['tenant_slug'])) {
             return back();
         }
-        
+
         $targetTenant = \App\Models\Tenant::where('slug', $_GET['tenant_slug'])->first();
         if (!$targetTenant) {
             return back()->with('error', _lang('Tenant not found'));
         }
-        
+
         // Logout current user
         auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
-        
+
         // Redirect to target tenant login page with email pre-filled
         $loginUrl = url('/' . $targetTenant->slug . '/login?email=' . urlencode($currentUser->email));
-        
+
         return redirect($loginUrl);
     })->name('switch_tenant');
 

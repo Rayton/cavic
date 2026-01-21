@@ -85,24 +85,56 @@ class TenantSettingsController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            $image           = $request->file('logo');
-            $name            = 'logo-' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('/uploads/media');
-            $image->move($destinationPath, $name);
+            try {
+                $image           = $request->file('logo');
+                $name            = 'logo-' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $destinationPath = public_path('/uploads/media');
+                
+                // Ensure directory exists
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                
+                // Move uploaded file
+                if (!$image->move($destinationPath, $name)) {
+                    throw new \Exception(_lang('Failed to upload logo. Please check directory permissions.'));
+                }
 
-            update_tenant_option("logo", $name);
+                update_tenant_option("logo", $name);
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'result'  => 'success',
-                    'action'  => 'update',
-                    'message' => _lang('Logo Upload successfully'),
-                ]);
+                if ($request->ajax()) {
+                    return response()->json([
+                        'result'  => 'success',
+                        'action'  => 'update',
+                        'message' => _lang('Logo Upload successfully'),
+                    ]);
+                }
+
+                return back()->with('success', _lang('Logo Upload successfully'));
+            } catch (\Exception $e) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'result'  => 'error',
+                        'action'  => 'update',
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+
+                return back()->with('error', $e->getMessage());
             }
-
-            return back()->with('success', _lang('Saved successfully'));
-
         }
+
+        // Return error if no file was uploaded
+        $errorMessage = _lang('No file was uploaded.');
+        if ($request->ajax()) {
+            return response()->json([
+                'result'  => 'error',
+                'action'  => 'update',
+                'message' => $errorMessage,
+            ]);
+        }
+
+        return back()->with('error', $errorMessage);
     }
 
     public function store_email_settings(Request $request)

@@ -48,6 +48,10 @@ class LoginController extends Controller {
     }
 
     public function showTenantLoginForm() {
+        // This should only be called when tenant is bound (via tenant middleware)
+        if (!app()->bound('tenant')) {
+            return redirect()->route('login');
+        }
         return view('auth.login', ['postUrl' => route('tenant.login', app('tenant')->slug), 'adminLogin' => false]);
     }
 
@@ -65,7 +69,7 @@ class LoginController extends Controller {
     }
 
     protected function credentials(Request $request) {
-        if ($request->is('admin/*')) {
+        if ($request->is('admin/*') || $request->routeIs('admin.login')) {
             return [
                 'email'     => $request->{$this->username()},
                 'password'  => $request->password,
@@ -74,13 +78,23 @@ class LoginController extends Controller {
                 'tenant_id' => null,
             ];
         } else {
-            $tenant = app('tenant');
-            return [
-                'email'     => $request->{$this->username()},
-                'password'  => $request->password,
-                'status'    => 1,
-                'tenant_id' => $tenant->id,
-            ];
+            // Only access tenant if it's bound (tenant middleware has run)
+            if (app()->bound('tenant')) {
+                $tenant = app('tenant');
+                return [
+                    'email'     => $request->{$this->username()},
+                    'password'  => $request->password,
+                    'status'    => 1,
+                    'tenant_id' => $tenant->id,
+                ];
+            } else {
+                // Fallback if tenant is not bound
+                return [
+                    'email'     => $request->{$this->username()},
+                    'password'  => $request->password,
+                    'status'    => 1,
+                ];
+            }
         }
     }
 
@@ -114,7 +128,8 @@ class LoginController extends Controller {
                 ->withErrors($errors);
         }
 
-        if($user->user_type == 'customer' && $user->tenant->package->member_portal != 1){
+        // Only check tenant package for customer users who have a tenant
+        if($user->user_type == 'customer' && $user->tenant_id && $user->tenant && $user->tenant->package && $user->tenant->package->member_portal != 1){
             $errors = [$this->username() => _lang('Your subscription plan does not include access to the Member Portal.')];
             Auth::logout();
             return back()->withInput($request->only($this->username(), 'remember'))
@@ -131,15 +146,23 @@ class LoginController extends Controller {
             return $response;
         }
 
-        if ($request->is('admin/*')) {
+        if ($request->is('admin/*') || $request->routeIs('admin.login') || auth()->user()->user_type == 'superadmin') {
             return $request->wantsJson()
             ? new JsonResponse([], 204)
             : redirect()->intended(route('admin.dashboard.index'));
         } else {
-            $tenant = app('tenant');
-            return $request->wantsJson()
-            ? new JsonResponse([], 204)
-            : redirect()->intended(route('dashboard.index'));
+            // Only access tenant if it's bound
+            if (app()->bound('tenant')) {
+                $tenant = app('tenant');
+                return $request->wantsJson()
+                ? new JsonResponse([], 204)
+                : redirect()->intended(route('dashboard.index', ['tenant' => $tenant->slug]));
+            } else {
+                // Fallback redirect
+                return $request->wantsJson()
+                ? new JsonResponse([], 204)
+                : redirect()->intended('/dashboard');
+            }
         }
     }
 

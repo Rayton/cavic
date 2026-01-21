@@ -76,37 +76,100 @@ class UtilityController extends Controller {
         ]);
 
         if ($request->hasFile('logo')) {
-            $image           = $request->file('logo');
-            $name            = 'logo.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('/uploads/media');
-            $image->move($destinationPath, $name);
+            try {
+                $image           = $request->file('logo');
+                $name            = 'logo.' . $image->getClientOriginalExtension();
+                $destinationPath = public_path('/uploads/media');
+                
+                // Ensure directory exists
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                
+                // Delete old logo files (logo.png, logo.jpg, logo.jpeg, etc.)
+                $oldLogoFiles = glob($destinationPath . '/logo.*');
+                foreach ($oldLogoFiles as $oldFile) {
+                    if (is_file($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+                
+                // Get old logo value from database before updating
+                $oldLogo = Setting::where('name', 'logo')->value('value');
+                
+                // Delete target file if it exists (Windows compatibility)
+                $targetFile = $destinationPath . '/' . $name;
+                if (file_exists($targetFile)) {
+                    @unlink($targetFile);
+                }
+                
+                // Move uploaded file
+                if (!$image->move($destinationPath, $name)) {
+                    throw new \Exception(_lang('Failed to upload logo. Please check directory permissions.'));
+                }
+                
+                // Verify file was saved
+                if (!file_exists($targetFile)) {
+                    throw new \Exception(_lang('Logo file was not saved correctly.'));
+                }
 
-            $data               = [];
-            $data['value']      = $name;
-            $data['updated_at'] = Carbon::now();
+                $data               = [];
+                $data['value']      = $name;
+                $data['updated_at'] = Carbon::now();
 
-            if (Setting::where('name', "logo")->exists()) {
-                Setting::where('name', '=', "logo")->update($data);
-            } else {
-                $data['name']       = "logo";
-                $data['created_at'] = Carbon::now();
-                Setting::insert($data);
+                if (Setting::where('name', "logo")->exists()) {
+                    Setting::where('name', '=', "logo")->update($data);
+                } else {
+                    $data['name']       = "logo";
+                    $data['created_at'] = Carbon::now();
+                    Setting::insert($data);
+                }
+
+                // Clear cache for logo
+                Cache::forget("logo");
+                Cache::put("logo", $name);
+                
+                // Delete old logo file if it exists and is different
+                if ($oldLogo && $oldLogo != $name && file_exists($destinationPath . '/' . $oldLogo)) {
+                    @unlink($destinationPath . '/' . $oldLogo);
+                }
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'result'  => 'success',
+                        'action'  => 'update',
+                        'message' => _lang('Logo Upload successfully'),
+                    ]);
+                }
+
+                return redirect()->route('admin.settings.update_settings')
+                    ->with('success', _lang('Logo Upload successfully'));
+            } catch (\Exception $e) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'result'  => 'error',
+                        'action'  => 'update',
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+
+                return redirect()->route('admin.settings.update_settings')
+                    ->with('error', $e->getMessage());
             }
-
-            Cache::put("logo", $name);
-
-            if ($request->ajax()) {
-                return response()->json([
-                    'result'  => 'success',
-                    'action'  => 'update',
-                    'message' => _lang('Logo Upload successfully'),
-                ]);
-            }
-
-            return redirect()->route('admin.settings.update_settings')
-                ->with('success', _lang('Saved successfully'));
-
         }
+
+        // Return error if no file was uploaded
+        $errorMessage = _lang('No file was uploaded.');
+        if ($request->ajax()) {
+            return response()->json([
+                'result'  => 'error',
+                'action'  => 'update',
+                'message' => $errorMessage,
+            ]);
+        }
+
+        return redirect()->route('admin.settings.update_settings')
+            ->with('error', $errorMessage);
     }
 
     public function upload_file($file_name, Request $request) {

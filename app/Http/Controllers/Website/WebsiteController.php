@@ -62,7 +62,7 @@ class WebsiteController extends Controller {
         if (isset($data['pageData']->title)) {
             $data['page_title'] = $data['pageData']->title;
         }
-        $data['features']     = Feature::active()->with('translation')->get();
+        $data['features']     = Feature::active()->get();
         $data['packages']     = Package::active()->get();
         $data['blog_posts']   = Post::active()->limit(3)->orderBy('id', 'desc')->get();
         $data['testimonials'] = Testimonial::all();
@@ -86,7 +86,7 @@ class WebsiteController extends Controller {
         $data['pageMedia']  = json_decode(get_trans_option('features_page_media'));
         $data['page_title'] = isset($data['pageData']->title) ? $data['pageData']->title : '';
 
-        $data['features'] = Feature::with('translation')->get();
+        $data['features'] = Feature::all();
         return view('website.features', $data);
     }
 

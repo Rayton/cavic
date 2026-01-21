@@ -7,6 +7,7 @@ use App\Models\DepositMethod;
 use App\Models\DepositRequest;
 use App\Models\SavingsAccount;
 use App\Models\Transaction;
+use App\Notifications\NewDepositRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -39,8 +40,16 @@ class DepositController extends Controller {
      */
     public function automatic_methods() {
         $alert_col       = 'col-lg-8 offset-lg-2';
+        // Get tenant ID safely
+        $tenantId = null;
+        if (app()->bound('tenant')) {
+            $tenantId = app('tenant')->id;
+        } elseif (isset(request()->tenant) && request()->tenant) {
+            $tenantId = request()->tenant->id;
+        }
+        
         $deposit_methods = AutomaticGateway::active()
-            ->where('tenant_id', request()->tenant->id)
+            ->where('tenant_id', $tenantId)
             ->get();
         return view('backend.customer.deposit.automatic_methods', compact('deposit_methods', 'alert_col'));
     }
@@ -111,6 +120,17 @@ class DepositController extends Controller {
             $depositRequest->requirements      = json_encode($request->requirements);
             $depositRequest->attachment        = $attachment;
             $depositRequest->save();
+
+            // Reload deposit request with relationships for email notification
+            $depositRequest->load(['member', 'method.currency', 'account.savings_type.currency']);
+
+            // Send email notification to member
+            try {
+                $depositRequest->member->notify(new NewDepositRequest($depositRequest));
+            } catch (\Exception $e) {
+                // Log error but don't fail the request
+                \Log::error('Failed to send deposit request notification: ' . $e->getMessage());
+            }
 
             if (! $request->ajax()) {
                 return redirect()->route('deposit.manual_methods')->with('success', _lang('Deposit Request submited successfully'));

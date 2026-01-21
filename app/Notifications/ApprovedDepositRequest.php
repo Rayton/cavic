@@ -23,8 +23,12 @@ class ApprovedDepositRequest extends Notification {
     public function __construct($transaction) {
         Overrider::load("Settings");
         $this->transaction = $transaction;
-        $this->template    = EmailTemplate::where('slug', 'DEPOSIT_REQUEST_APPROVED')
-            ->where('tenant_id', request()->tenant->id)
+        
+        // Get tenant ID from transaction's tenant_id or from request if available
+        $tenantId = $transaction->tenant_id ?? (app()->bound('tenant') ? app('tenant')->id : null);
+        
+        $this->template = EmailTemplate::where('slug', 'DEPOSIT_REQUEST_APPROVED')
+            ->where('tenant_id', $tenantId)
             ->first();
 
         $balance  = get_account_balance($this->transaction->savings_account_id, $this->transaction->member_id);

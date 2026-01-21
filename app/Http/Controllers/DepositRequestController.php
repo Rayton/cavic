@@ -140,9 +140,16 @@ class DepositRequestController extends Controller {
         $depositRequest->transaction_id = $transaction->id;
         $depositRequest->save();
 
+        // Reload transaction with relationships for email notification
+        $transaction->load(['member', 'account.savings_type.currency']);
+
+        // Send email notification to member
         try {
             $transaction->member->notify(new ApprovedDepositRequest($transaction));
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            // Log error but don't fail the approval
+            \Log::error('Failed to send deposit approval notification: ' . $e->getMessage());
+        }
 
         DB::commit();
         return redirect()->route('deposit_requests.index')->with('success', _lang('Request Approved'));

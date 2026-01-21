@@ -144,22 +144,23 @@
 								$memberTenant = \App\Models\Tenant::find($member->member_tenant_id);
 							}
 						}
-						$currentTenant = app('tenant');
+						// Only get current tenant if it's bound (for tenant routes)
+						$currentTenant = app()->bound('tenant') ? app('tenant') : $mainTenant;
 						$hasMultipleTenants = ($mainTenant && $memberTenant) || ($user->user_type == 'admin' && $memberTenant);
 					@endphp
-					@if($hasMultipleTenants)
+					@if($hasMultipleTenants && $currentTenant)
 						<div class="tenant-switcher" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
 							<label style="color: rgba(255,255,255,0.7); font-size: 11px; text-transform: uppercase; margin-bottom: 8px; display: block;">{{ _lang('Switch Account') }}</label>
 							<div class="dropdown">
 								<button class="btn btn-sm btn-block text-left" type="button" id="tenantSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 8px 12px; border-radius: 4px; width: 100%; font-size: 12px;">
-									<span id="current-tenant-name">{{ strlen($currentTenant->name) > 25 ? substr($currentTenant->name, 0, 22) . '...' : $currentTenant->name }}</span>
+									<span id="current-tenant-name">{{ $currentTenant ? (strlen($currentTenant->name) > 25 ? substr($currentTenant->name, 0, 22) . '...' : $currentTenant->name) : '' }}</span>
 									<i class="ti-angle-down float-right" style="margin-top: 2px;"></i>
 								</button>
 								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="tenantSwitcher" style="min-width: 200px; max-width: 250px;">
 									@if($mainTenant)
 										<a class="dropdown-item" href="{{ route('switch_tenant') }}?tenant_slug={{ $mainTenant->slug }}">
 											<i class="ti-home mr-2"></i>{{ $mainTenant->name }}
-											@if($currentTenant->id == $mainTenant->id)
+											@if($currentTenant && $currentTenant->id == $mainTenant->id)
 												<i class="ti-check float-right text-success"></i>
 											@endif
 										</a>
@@ -167,7 +168,7 @@
 									@if($memberTenant)
 										<a class="dropdown-item" href="{{ route('switch_tenant') }}?tenant_slug={{ $memberTenant->slug }}">
 											<i class="ti-user mr-2"></i>{{ $memberTenant->name }}
-											@if($currentTenant->id == $memberTenant->id)
+											@if($currentTenant && $currentTenant->id == $memberTenant->id)
 												<i class="ti-check float-right text-success"></i>
 											@endif
 										</a>
@@ -253,7 +254,7 @@
 								<li>
 									<div class="user-profile">
 										<h4 class="user-name dropdown-toggle" data-toggle="dropdown">
-											<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar"> {{ app('tenant')->name ?? Auth::user()->name }} <i class="fa fa-angle-down"></i>
+											<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar"> {{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }} <i class="fa fa-angle-down"></i>
 										</h4>
 										<div class="dropdown-menu">
 											@if(auth()->user()->user_type == 'customer')

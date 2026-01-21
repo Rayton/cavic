@@ -15,6 +15,11 @@ class EnsureGlobalTenantUser
      */
     public function handle($request, Closure $next)
     {
+        // Only proceed if tenant is bound (this middleware should only run after tenant middleware)
+        if (!app()->bound('tenant')) {
+            return $next($request);
+        }
+        
         $tenant = app('tenant');
         if (Auth::check() && Auth::user()->tenant_id == $tenant->id && Auth::user()->user_type != 'superadmin') {
 
@@ -55,8 +60,13 @@ class EnsureGlobalTenantUser
         }
         // If user is logged in but tenant doesn't match, redirect to tenant login
         if (Auth::check()) {
-            $tenant = app('tenant');
-            return redirect()->route('tenant.login', ['tenant' => $tenant->slug])->with('error', _lang('You do not have access to this tenant'));
+            if (app()->bound('tenant')) {
+                $tenant = app('tenant');
+                return redirect()->route('tenant.login', ['tenant' => $tenant->slug])->with('error', _lang('You do not have access to this tenant'));
+            } else {
+                // No tenant bound, redirect to general login
+                return redirect()->route('login');
+            }
         }
         return redirect()->route('login');
     }

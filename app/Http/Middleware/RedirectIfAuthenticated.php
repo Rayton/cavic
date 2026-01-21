@@ -16,13 +16,16 @@ class RedirectIfAuthenticated {
         if (Auth::check()) {
             $user = Auth::user();
             // Redirect super admins to admin dashboard
-            if (is_null($user->tenant_id)) {
+            if (is_null($user->tenant_id) || $user->user_type == 'superadmin') {
                 return redirect()->route('admin.dashboard.index');
             }
-            if($request->tenant == null){
-                return redirect()->route('dashboard.index', ['tenant' => $user->tenant->slug]);
+            // For tenant users, redirect to their tenant dashboard
+            if ($user->tenant && $user->tenant->slug) {
+                if($request->tenant == null || !app()->bound('tenant')){
+                    return redirect()->route('dashboard.index', ['tenant' => $user->tenant->slug]);
+                }
+                return redirect()->route('dashboard.index');
             }
-            return redirect()->route('dashboard.index');
         }
         return $next($request);
     }

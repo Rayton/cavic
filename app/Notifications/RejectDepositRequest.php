@@ -23,8 +23,12 @@ class RejectDepositRequest extends Notification {
     public function __construct($depositRequest) {
         Overrider::load("Settings");
         $this->depositRequest = $depositRequest;
-        $this->template       = EmailTemplate::where('slug', 'DEPOSIT_REQUEST_REJECTED')
-            ->where('tenant_id', request()->tenant->id)
+        
+        // Get tenant ID from deposit request's tenant_id or from request if available
+        $tenantId = $depositRequest->tenant_id ?? (app()->bound('tenant') ? app('tenant')->id : null);
+        
+        $this->template = EmailTemplate::where('slug', 'DEPOSIT_REQUEST_REJECTED')
+            ->where('tenant_id', $tenantId)
             ->first();
 
         $balance  = get_account_balance($this->depositRequest->credit_account_id, $this->depositRequest->member_id);
