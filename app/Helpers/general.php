@@ -1066,15 +1066,27 @@ if (! function_exists('get_currency_list')) {
 }
 
 if (! function_exists('decimalPlace')) {
-    function decimalPlace($number, $symbol = '') {
+    function decimalPlace($number, $symbol = '', $decimal_places = null) {
+        $decimal_sep   = get_option('decimal_sep', '.');
+        $thousand_sep  = get_option('thousand_sep', ',');
+        if (isset(request()->tenant->id)) {
+            $decimal_sep   = get_tenant_option('decimal_sep', $decimal_sep);
+            $thousand_sep  = get_tenant_option('thousand_sep', $thousand_sep);
+        }
+        $decimal_sep   = $decimal_sep == '' ? ' ' : $decimal_sep;
+        $thousand_sep  = $thousand_sep == '' ? ' ' : $thousand_sep;
+        $formatted     = $decimal_places !== null
+            ? number_format((float) $number, (int) $decimal_places, $decimal_sep, $thousand_sep)
+            : money_format_2($number);
+
         if ($symbol == '') {
-            return money_format_2($number);
+            return $formatted;
         }
 
         if (get_currency_position() == 'right') {
-            return money_format_2($number) . get_currency_symbol($symbol);
+            return $formatted . get_currency_symbol($symbol);
         } else {
-            return get_currency_symbol($symbol) . money_format_2($number);
+            return get_currency_symbol($symbol) . $formatted;
         }
     }
 }
