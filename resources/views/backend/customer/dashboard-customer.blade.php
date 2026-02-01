@@ -21,11 +21,14 @@
 .upcoming-payment-table tbody td { padding: 0.4rem 0.5rem; vertical-align: middle; border-color: #dee2e6; }
 .upcoming-payment-table .badge-upcoming { background: #28a745; color: #fff; padding: 0.2em 0.5em; border-radius: 50px; font-weight: 500; font-size: 0.7rem; }
 .upcoming-payment-table .badge-due { background: #dc3545; color: #fff; padding: 0.2em 0.5em; border-radius: 50px; font-weight: 500; font-size: 0.7rem; }
-.upcoming-payment-table .btn-pay-now { background: #1A8E8F; border-color: #1A8E8F; color: #fff; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 4px; }
-.upcoming-payment-table .btn-pay-now:hover { background: #157a7b; border-color: #157a7b; color: #fff; }
-/* Brand color (CAVIC teal) for dashboard buttons */
-.dashboard-brand-btn, .customer-dashboard-card .btn-primary, .chart-card-compact .btn-primary { background: #1A8E8F !important; border-color: #1A8E8F !important; color: #fff !important; }
-.dashboard-brand-btn:hover, .customer-dashboard-card .btn-primary:hover, .chart-card-compact .btn-primary:hover { background: #157a7b !important; border-color: #157a7b !important; color: #fff !important; }
+/* Dashboard buttons: outline by default, fill on hover (brand #1A8E8F) */
+.upcoming-payment-table .btn-pay-now { background: transparent !important; border: 1px solid #1A8E8F; color: #1A8E8F; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px; transition: background 0.2s, color 0.2s; }
+.upcoming-payment-table .btn-pay-now:hover { background: #1A8E8F !important; border-color: #1A8E8F; color: #fff !important; }
+.dashboard-brand-btn, .customer-dashboard-card .btn-primary, .chart-card-compact .btn-primary { background: transparent !important; border: 1px solid #1A8E8F !important; color: #1A8E8F !important; border-radius: 6px; transition: background 0.2s, color 0.2s; }
+.dashboard-brand-btn:hover, .customer-dashboard-card .btn-primary:hover, .chart-card-compact .btn-primary:hover { background: #1A8E8F !important; border-color: #1A8E8F !important; color: #fff !important; }
+/* Recent transactions View button: outline, fill on hover */
+.customer-dashboard-card + .row .btn-outline-primary, .main-content-inner .btn-outline-primary { background: transparent !important; border: 1px solid #1A8E8F !important; color: #1A8E8F !important; border-radius: 6px; transition: background 0.2s, color 0.2s; }
+.customer-dashboard-card + .row .btn-outline-primary:hover, .main-content-inner .btn-outline-primary:hover { background: #1A8E8F !important; border-color: #1A8E8F !important; color: #fff !important; }
 .last-contrib-table { margin-bottom: 0; font-size: 0.8125rem; }
 .last-contrib-table thead th { padding: 0.4rem 0.5rem; font-size: 0.75rem; background: #f8f9fa; font-weight: 600; border-color: #dee2e6; }
 .last-contrib-table tbody td { padding: 0.35rem 0.5rem; font-size: 0.75rem; border-color: #dee2e6; }
@@ -402,10 +405,20 @@
 			var canvasId = 'chart-contrib-' + idx;
 			col.innerHTML = '<div class="card mb-3 chart-card-compact"><div class="card-header py-2">' + (ds.label || '') + '</div><div class="card-body py-2"><div class="chart-wrap"><canvas id="' + canvasId + '"></canvas></div></div></div>';
 			container.appendChild(col);
+			var barColor = ds.backgroundColor || '#1A8E8F';
+			var dataArr = Array.isArray(ds.data) ? ds.data.map(function(v) { return Number(v); }) : (labels ? labels.map(function() { return 0; }) : []);
 			var ctx = document.getElementById(canvasId).getContext('2d');
 			var chart = new Chart(ctx, {
 				type: 'bar',
-				data: { labels: labels, datasets: [{ label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor || '#007bff' }] },
+				data: {
+					labels: labels || [],
+					datasets: [{
+						label: ds.label || '',
+						data: dataArr,
+						backgroundColor: barColor,
+						hoverBackgroundColor: barColor
+					}]
+				},
 				options: compactOptions
 			});
 			chartContribInstances.push(chart);

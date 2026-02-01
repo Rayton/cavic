@@ -280,38 +280,81 @@ class DashboardController extends Controller {
             $byMonth = $rows->keyBy('month');
             $data   = [];
             foreach ($monthKeys as $mk) {
-                $data[] = (float) ($byMonth->get($mk)->total ?? 0);
+                $row = $byMonth->get($mk);
+                $data[] = (float) ($row ? $row->total : 0);
             }
             $datasetsLoan[] = ['label' => $label, 'data' => $data, 'borderColor' => $color, 'backgroundColor' => $color, 'fill' => false];
         }
 
-        // Account type contributions: deposits (dr_cr=cr) excluding Loans/Mkopo/Mikopo, by month and by account type
-        $contributions = Transaction::where('transactions.member_id', $memberId)
-            ->where('transactions.dr_cr', 'cr')
-            ->whereBetween(DB::raw('DATE(transactions.trans_date)'), [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')])
-            ->whereRaw('LOWER(savings_products.name) NOT IN (?, ?, ?)', ['loans', 'mkopo', 'mikopo'])
-            ->join('savings_accounts', 'transactions.savings_account_id', '=', 'savings_accounts.id')
-            ->join('savings_products', 'savings_accounts.savings_product_id', '=', 'savings_products.id')
-            ->selectRaw('savings_products.name as type_name, savings_products.id as product_id, DATE_FORMAT(transactions.trans_date, "%Y-%m") as month, SUM(transactions.amount) as total')
-            ->groupBy('savings_products.id', 'savings_products.name', 'month')
-            ->get();
+        // Account type contributions: non-loan accounts for member (direct query like test_chart_data.php), sum cr by month
+        $accountsQuery = \App\Models\SavingsAccount::withoutGlobalScopes()
+            ->where('member_id', $memberId)
+            ->with('savings_type');
+        if ($tenantId = auth()->user()->tenant_id ?? null) {
+            $accountsQuery->where('tenant_id', $tenantId);
+        }
+        $accounts = $accountsQuery->get();
+        $excludeTypes = ['loans', 'mkopo', 'mikopo'];
+        $accountsFiltered = $accounts->filter(function ($a) use ($excludeTypes) {
+            $name = $a->savings_type ? strtolower(trim($a->savings_type->name ?? '')) : '';
+            return ! in_array($name, $excludeTypes);
+        });
 
         $barColors = ['#007bff', '#28a745', '#fd7e14', '#6f42c1', '#17a2b8'];
-        $contribByType = $contributions->groupBy('product_id');
         $datasetsBar   = [];
         $totalByMonth  = array_fill_keys($monthKeys, 0);
-        foreach ($contribByType as $productId => $rows) {
-            $typeName = $rows->first()->type_name;
-            $byMonth  = $rows->keyBy('month');
-            $data     = [];
+        $tenantId      = auth()->user()->tenant_id ?? null;
+
+        foreach ($accountsFiltered->groupBy('savings_product_id') as $productId => $group) {
+            $first   = $group->first();
+            $typeName = $first->savings_type ? $first->savings_type->name : _lang('Account');
+            $accountIds = $group->pluck('id')->toArray();
+
+            if (empty($accountIds)) {
+                continue;
+            }
+
+            // Direct DB query: no Eloquent scopes, same filters as balance (dr_cr=cr, optional tenant_id)
+            $baseQuery = DB::table('transactions')
+                ->where('member_id', $memberId)
+                ->where('dr_cr', 'cr')
+                ->whereIn('savings_account_id', $accountIds)
+                ->whereBetween(DB::raw('DATE(trans_date)'), [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')]);
+            if ($tenantId) {
+                $baseQuery->where('tenant_id', $tenantId);
+            }
+            $rows = (clone $baseQuery)
+                ->selectRaw('DATE_FORMAT(trans_date, "%Y-%m") as month_key, SUM(amount) as total')
+                ->groupBy(DB::raw('DATE_FORMAT(trans_date, "%Y-%m")'))
+                ->get();
+            $txns = $rows->keyBy('month_key');
+            // Fallback: if grouped query returns nothing, fetch raw rows and sum by month in PHP (handles strict SQL mode)
+            if ($txns->isEmpty()) {
+                $rawRows = (clone $baseQuery)->select('trans_date', 'amount')->get();
+                $byMonth = [];
+                foreach ($rawRows as $r) {
+                    if (empty($r->trans_date)) {
+                        continue;
+                    }
+                    $mk = Carbon::parse($r->trans_date)->format('Y-m');
+                    $byMonth[$mk] = ($byMonth[$mk] ?? 0) + (float) $r->amount;
+                }
+                $txns = collect($byMonth)->map(function ($total, $month_key) {
+                    return (object) ['month_key' => $month_key, 'total' => $total];
+                })->keyBy('month_key');
+            }
+
+            $data = [];
             foreach ($monthKeys as $mk) {
-                $val = (float) ($byMonth->get($mk)->total ?? 0);
+                $row = $txns->get($mk);
+                $val = $row ? (float) $row->total : 0;
                 $data[] = $val;
                 $totalByMonth[$mk] += $val;
             }
             $color = $barColors[count($datasetsBar) % count($barColors)];
             $datasetsBar[] = ['label' => $typeName, 'data' => $data, 'backgroundColor' => $color];
         }
+
         $totalData = [];
         foreach ($monthKeys as $mk) {
             $totalData[] = $totalByMonth[$mk] ?? 0;

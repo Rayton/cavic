@@ -45,6 +45,9 @@
 		<link rel="stylesheet" href="{{ asset('public/backend/assets/css/styles.css') . '?v=' . filemtime(public_path('backend/assets/css/styles.css')) }}">
 		<link rel="stylesheet" href="{{ asset('public/backend/assets/css/responsive.css?v=1.0') }}">
 
+		<!-- Dashboard Deposit button: filled by default -->
+		<style>.btn-deposit-header { background: #1A8E8F !important; border: 1px solid #1A8E8F !important; color: #fff !important; border-radius: 6px; transition: background 0.2s, color 0.2s; }.btn-deposit-header:hover { background: #157a7b !important; border-color: #157a7b !important; color: #fff !important; }</style>
+
 		<!-- Modernizr -->
 		<script src="{{ asset('public/backend/assets/js/vendor/modernizr-3.6.0.min.js') }}"></script>
 
@@ -304,7 +307,7 @@
 
 								<div class="d-flex align-items-center gap-2">
 									@if(auth()->user()->user_type == 'customer')
-									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm">{{ _lang('Deposit') }}</a>
+									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm btn-deposit-header">{{ _lang('Deposit') }}</a>
 									@endif
 									<!--Branch Switcher-->
 									@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
