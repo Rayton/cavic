@@ -21,8 +21,11 @@
 .upcoming-payment-table tbody td { padding: 0.4rem 0.5rem; vertical-align: middle; border-color: #dee2e6; }
 .upcoming-payment-table .badge-upcoming { background: #28a745; color: #fff; padding: 0.2em 0.5em; border-radius: 50px; font-weight: 500; font-size: 0.7rem; }
 .upcoming-payment-table .badge-due { background: #dc3545; color: #fff; padding: 0.2em 0.5em; border-radius: 50px; font-weight: 500; font-size: 0.7rem; }
-.upcoming-payment-table .btn-pay-now { background: #6f42c1; border-color: #6f42c1; color: #fff; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 4px; }
-.upcoming-payment-table .btn-pay-now:hover { background: #5a32a3; border-color: #5a32a3; color: #fff; }
+.upcoming-payment-table .btn-pay-now { background: #1A8E8F; border-color: #1A8E8F; color: #fff; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 4px; }
+.upcoming-payment-table .btn-pay-now:hover { background: #157a7b; border-color: #157a7b; color: #fff; }
+/* Brand color (CAVIC teal) for dashboard buttons */
+.dashboard-brand-btn, .customer-dashboard-card .btn-primary, .chart-card-compact .btn-primary { background: #1A8E8F !important; border-color: #1A8E8F !important; color: #fff !important; }
+.dashboard-brand-btn:hover, .customer-dashboard-card .btn-primary:hover, .chart-card-compact .btn-primary:hover { background: #157a7b !important; border-color: #157a7b !important; color: #fff !important; }
 .last-contrib-table { margin-bottom: 0; font-size: 0.8125rem; }
 .last-contrib-table thead th { padding: 0.4rem 0.5rem; font-size: 0.75rem; background: #f8f9fa; font-weight: 600; border-color: #dee2e6; }
 .last-contrib-table tbody td { padding: 0.35rem 0.5rem; font-size: 0.75rem; border-color: #dee2e6; }
@@ -209,6 +212,52 @@
 	</div>
 </div>
 
+{{-- Compact charts: Loan Repayment Trend + Account Type Contributions (one card per type) --}}
+<style>
+.chart-card-compact .card-header { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+.chart-card-compact .card-body { padding: 0.5rem 0.75rem; }
+.chart-card-compact .chart-wrap { height: 200px; position: relative; }
+.chart-card-compact canvas { max-height: 200px; }
+</style>
+<div class="row mb-3 align-items-stretch">
+	<div class="col-lg-6 mb-3 mb-lg-0">
+		<div class="card h-100 chart-card-compact">
+			<div class="card-header d-flex justify-content-between align-items-center flex-wrap py-2">
+				<span>{{ _lang('Loan Repayment Trend') }}</span>
+				<div class="d-flex align-items-center flex-wrap gap-1 mt-1 mt-md-0">
+					<input type="date" id="chart-loan-from" class="form-control form-control-sm" style="max-width: 120px;">
+					<span class="text-muted">–</span>
+					<input type="date" id="chart-loan-to" class="form-control form-control-sm" style="max-width: 120px;">
+					<button type="button" id="chart-loan-apply" class="btn btn-primary btn-sm dashboard-brand-btn">{{ _lang('Apply') }}</button>
+				</div>
+			</div>
+			<div class="card-body py-2">
+				<div class="chart-wrap">
+					<canvas id="chartLoanRepayment"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6">
+		<div class="card h-100 chart-card-compact">
+			<div class="card-header d-flex justify-content-between align-items-center flex-wrap py-2">
+				<span>{{ _lang('Account Type Contributions') }}</span>
+				<div class="d-flex align-items-center flex-wrap gap-1 mt-1 mt-md-0">
+					<input type="date" id="chart-contrib-from" class="form-control form-control-sm" style="max-width: 120px;">
+					<span class="text-muted">–</span>
+					<input type="date" id="chart-contrib-to" class="form-control form-control-sm" style="max-width: 120px;">
+					<button type="button" id="chart-contrib-apply" class="btn btn-primary btn-sm dashboard-brand-btn">{{ _lang('Apply') }}</button>
+				</div>
+			</div>
+			<div class="card-body py-2">
+				<div class="row g-2" id="account-type-cards">
+					{{-- One compact card per type (Hisa, Jamii, ...) rendered by JS --}}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="row">
 	<div class="col-xl-12">
 		<div class="card mb-4">
@@ -293,4 +342,121 @@
 		</div>
 	</div>
 </div>
+@endsection
+
+@section('js-script')
+<script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
+<script>
+(function() {
+	var chartDataUrl = "{{ route('dashboard.chart_data') }}";
+	var defaultTo = new Date();
+	var defaultFrom = new Date(defaultTo.getFullYear(), defaultTo.getMonth() - 11, 1);
+	var chartLoan = null;
+	var chartContribInstances = [];
+
+	var compactOptions = {
+		responsive: true,
+		maintainAspectRatio: true,
+		layout: { padding: { top: 4, bottom: 4, left: 8, right: 8 } },
+		plugins: {
+			legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+		},
+		scales: {
+			y: { beginAtZero: true, ticks: { font: { size: 10 }, maxTicksLimit: 6 } },
+			x: { ticks: { font: { size: 10 }, maxRotation: 45 } }
+		}
+	};
+
+	function formatDate(d) {
+		return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+	}
+
+	function setDefaultDates() {
+		document.getElementById('chart-loan-from').value = formatDate(defaultFrom);
+		document.getElementById('chart-loan-to').value = formatDate(defaultTo);
+		document.getElementById('chart-contrib-from').value = formatDate(defaultFrom);
+		document.getElementById('chart-contrib-to').value = formatDate(defaultTo);
+	}
+
+	function fetchChartData(fromDate, toDate, callback) {
+		var url = chartDataUrl + '?from_date=' + encodeURIComponent(fromDate) + '&to_date=' + encodeURIComponent(toDate);
+		fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+			.then(function(r) { return r.json(); })
+			.then(callback)
+			.catch(function() { if (typeof callback === 'function') callback({ loan_repayment_trend: { labels: [], datasets: [] }, account_contributions: { labels: [], datasets: [] } }); });
+	}
+
+	function renderAccountTypeCards(labels, datasets) {
+		var container = document.getElementById('account-type-cards');
+		container.innerHTML = '';
+		chartContribInstances.forEach(function(c) { if (c) c.destroy(); });
+		chartContribInstances = [];
+		var typesOnly = (datasets || []).filter(function(d) { return d.type !== 'line' && d.label !== 'Total'; });
+		if (typesOnly.length === 0) {
+			container.innerHTML = '<div class="col-12"><p class="text-muted small mb-0 py-2">' + (typeof $lang_no_data_found !== 'undefined' ? $lang_no_data_found : 'No data available') + '</p></div>';
+			return;
+		}
+		typesOnly.forEach(function(ds, idx) {
+			var col = document.createElement('div');
+			col.className = 'col-sm-6';
+			var canvasId = 'chart-contrib-' + idx;
+			col.innerHTML = '<div class="card mb-3 chart-card-compact"><div class="card-header py-2">' + (ds.label || '') + '</div><div class="card-body py-2"><div class="chart-wrap"><canvas id="' + canvasId + '"></canvas></div></div></div>';
+			container.appendChild(col);
+			var ctx = document.getElementById(canvasId).getContext('2d');
+			var chart = new Chart(ctx, {
+				type: 'bar',
+				data: { labels: labels, datasets: [{ label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor || '#007bff' }] },
+				options: compactOptions
+			});
+			chartContribInstances.push(chart);
+		});
+	}
+
+	function initCharts() {
+		setDefaultDates();
+		var from = document.getElementById('chart-loan-from').value;
+		var to = document.getElementById('chart-loan-to').value;
+
+		fetchChartData(from, to, function(data) {
+			var loanCtx = document.getElementById('chartLoanRepayment').getContext('2d');
+			if (chartLoan) chartLoan.destroy();
+			chartLoan = new Chart(loanCtx, {
+				type: 'line',
+				data: data.loan_repayment_trend || { labels: [], datasets: [] },
+				options: compactOptions
+			});
+
+			var contrib = data.account_contributions || { labels: [], datasets: [] };
+			renderAccountTypeCards(contrib.labels || [], contrib.datasets || []);
+		});
+	}
+
+	function applyLoanDates() {
+		var from = document.getElementById('chart-loan-from').value;
+		var to = document.getElementById('chart-loan-to').value;
+		fetchChartData(from, to, function(data) {
+			if (chartLoan && data.loan_repayment_trend) {
+				chartLoan.data.labels = data.loan_repayment_trend.labels;
+				chartLoan.data.datasets = data.loan_repayment_trend.datasets;
+				chartLoan.update();
+			}
+		});
+	}
+
+	function applyContribDates() {
+		var from = document.getElementById('chart-contrib-from').value;
+		var to = document.getElementById('chart-contrib-to').value;
+		fetchChartData(from, to, function(data) {
+			var contrib = data.account_contributions || { labels: [], datasets: [] };
+			renderAccountTypeCards(contrib.labels || [], contrib.datasets || []);
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', function() {
+		initCharts();
+		document.getElementById('chart-loan-apply').addEventListener('click', applyLoanDates);
+		document.getElementById('chart-contrib-apply').addEventListener('click', applyContribDates);
+	});
+})();
+</script>
 @endsection

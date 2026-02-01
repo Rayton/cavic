@@ -7,7 +7,10 @@ use App\Models\LoanPayment;
 use App\Models\LoanRepayment;
 use App\Models\Member;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller {
     /**
@@ -223,6 +226,102 @@ class DashboardController extends Controller {
         }
 
         echo json_encode(['month' => $months, 'deposit' => $deposit, 'withdraw' => $withdraw]);
+    }
+
+    /**
+     * JSON chart data for customer dashboard: loan repayment trend and account type contributions.
+     * Query params: from_date (Y-m-d), to_date (Y-m-d). Default: last 12 months.
+     */
+    public function chartData(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || $user->user_type !== 'customer' || !$user->member) {
+            return response()->json(['loan_repayment_trend' => [], 'account_contributions' => []], 403);
+        }
+
+        $memberId = $user->member->id;
+        $toDate   = $request->has('to_date') ? Carbon::parse($request->to_date) : Carbon::today();
+        $fromDate = $request->has('from_date') ? Carbon::parse($request->from_date) : $toDate->copy()->subMonths(11)->startOfMonth();
+
+        if ($fromDate->gt($toDate)) {
+            $fromDate = $toDate->copy()->subMonths(11)->startOfMonth();
+        }
+
+        $labels = [];
+        for ($d = $fromDate->copy(); $d->lte($toDate); $d->addMonth()) {
+            $labels[] = $d->format('M Y');
+        }
+        $monthKeys = [];
+        for ($d = $fromDate->copy(); $d->lte($toDate); $d->addMonth()) {
+            $monthKeys[] = $d->format('Y-m');
+        }
+
+        // Loan repayment trend: per loan, sum amount per month (Transaction type Loan_Repayment, member_id)
+        $repayments = Transaction::withoutGlobalScopes()
+            ->where('member_id', $memberId)
+            ->where('type', 'Loan_Repayment')
+            ->whereBetween(DB::raw('DATE(trans_date)'), [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')])
+            ->selectRaw('loan_id, DATE_FORMAT(trans_date, "%Y-%m") as month, SUM(amount) as total')
+            ->groupBy('loan_id', 'month')
+            ->get();
+
+        $loans = Loan::withoutGlobalScopes()
+            ->where('borrower_id', $memberId)
+            ->whereIn('id', $repayments->pluck('loan_id')->unique()->filter())
+            ->get()
+            ->keyBy('id');
+
+        $datasetsLoan = [];
+        $colors       = ['#007bff', '#28a745', '#fd7e14', '#6f42c1', '#20c997'];
+        foreach ($repayments->groupBy('loan_id') as $loanId => $rows) {
+            $loan   = $loans->get($loanId);
+            $label  = $loan ? ('Loan ' . $loan->loan_id) : ('Loan ' . $loanId);
+            $color  = $colors[count($datasetsLoan) % count($colors)];
+            $byMonth = $rows->keyBy('month');
+            $data   = [];
+            foreach ($monthKeys as $mk) {
+                $data[] = (float) ($byMonth->get($mk)->total ?? 0);
+            }
+            $datasetsLoan[] = ['label' => $label, 'data' => $data, 'borderColor' => $color, 'backgroundColor' => $color, 'fill' => false];
+        }
+
+        // Account type contributions: deposits (dr_cr=cr) excluding Loans/Mkopo/Mikopo, by month and by account type
+        $contributions = Transaction::where('transactions.member_id', $memberId)
+            ->where('transactions.dr_cr', 'cr')
+            ->whereBetween(DB::raw('DATE(transactions.trans_date)'), [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')])
+            ->whereRaw('LOWER(savings_products.name) NOT IN (?, ?, ?)', ['loans', 'mkopo', 'mikopo'])
+            ->join('savings_accounts', 'transactions.savings_account_id', '=', 'savings_accounts.id')
+            ->join('savings_products', 'savings_accounts.savings_product_id', '=', 'savings_products.id')
+            ->selectRaw('savings_products.name as type_name, savings_products.id as product_id, DATE_FORMAT(transactions.trans_date, "%Y-%m") as month, SUM(transactions.amount) as total')
+            ->groupBy('savings_products.id', 'savings_products.name', 'month')
+            ->get();
+
+        $barColors = ['#007bff', '#28a745', '#fd7e14', '#6f42c1', '#17a2b8'];
+        $contribByType = $contributions->groupBy('product_id');
+        $datasetsBar   = [];
+        $totalByMonth  = array_fill_keys($monthKeys, 0);
+        foreach ($contribByType as $productId => $rows) {
+            $typeName = $rows->first()->type_name;
+            $byMonth  = $rows->keyBy('month');
+            $data     = [];
+            foreach ($monthKeys as $mk) {
+                $val = (float) ($byMonth->get($mk)->total ?? 0);
+                $data[] = $val;
+                $totalByMonth[$mk] += $val;
+            }
+            $color = $barColors[count($datasetsBar) % count($barColors)];
+            $datasetsBar[] = ['label' => $typeName, 'data' => $data, 'backgroundColor' => $color];
+        }
+        $totalData = [];
+        foreach ($monthKeys as $mk) {
+            $totalData[] = $totalByMonth[$mk] ?? 0;
+        }
+        $datasetsBar[] = ['label' => _lang('Total'), 'data' => $totalData, 'type' => 'line', 'borderColor' => '#dc3545', 'backgroundColor' => 'transparent', 'fill' => false];
+
+        return response()->json([
+            'loan_repayment_trend'   => ['labels' => $labels, 'datasets' => $datasetsLoan],
+            'account_contributions'  => ['labels' => $labels, 'datasets' => $datasetsBar],
+        ]);
     }
 
 }

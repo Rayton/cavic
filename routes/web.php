@@ -233,6 +233,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
         //Tenant Dashboard
         Route::prefix('{tenant}')->middleware(['tenant', 'tenant.global'])->group(function () {
             Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+            Route::get('dashboard/chart_data', [DashboardController::class, 'chartData'])->name('dashboard.chart_data');
 
             //2FA Verification
             Route::post('/2fa', [TwoFactorController::class, 'verify'])->name('2fa.verify');
