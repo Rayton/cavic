@@ -297,24 +297,31 @@
 				<div class="page-title-area">
 					<div class="row align-items-center py-3">
 						<div class="col-sm-12">
-							<div class="d-flex align-items-center justify-content-between">
-								<h6>{{ _lang('Dashboard') }}</h6>
+							<div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+								<h6 class="mb-0">
+									<span id="dashboard-greeting" data-morning="{{ _lang('Good morning') }}" data-afternoon="{{ _lang('Good afternoon') }}" data-evening="{{ _lang('Good evening') }}" data-night="{{ _lang('Good night') }}"></span>{{ auth()->user()->user_type == 'customer' && auth()->user()->member ? ', ' . auth()->user()->member->first_name . ' ' . auth()->user()->member->last_name : (auth()->user()->name ? ', ' . auth()->user()->name : '') }}
+								</h6>
 
-								<!--Branch Switcher-->
-								@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
-								<div class="dropdown">
-									<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
-									</a>
-									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="selectLanguage">
-										<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
-										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
-										@foreach( \App\Models\Branch::all() as $branch )
-										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
-										@endforeach
+								<div class="d-flex align-items-center gap-2">
+									@if(auth()->user()->user_type == 'customer')
+									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm">{{ _lang('Deposit') }}</a>
+									@endif
+									<!--Branch Switcher-->
+									@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+									<div class="dropdown">
+										<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
+										</a>
+										<div class="dropdown-menu dropdown-menu-right" aria-labelledby="selectLanguage">
+											<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
+											<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
+											@foreach( \App\Models\Branch::all() as $branch )
+											<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
+											@endforeach
+										</div>
 									</div>
+									@endif
 								</div>
-								@endif
 							</div>
 						</div>
 					</div>
@@ -374,6 +381,21 @@
         <script src="{{ asset('public/backend/assets/js/scripts.js'). '?v=' . filemtime(public_path('backend/assets/js/scripts.js')) }}"></script>
 
 		@include('layouts.others.alert')
+
+		<!-- Dashboard greeting by local time -->
+		<script>
+		(function() {
+			var el = document.getElementById('dashboard-greeting');
+			if (!el) return;
+			var hour = new Date().getHours();
+			var key = 'morning';
+			if (hour >= 12 && hour < 17) key = 'afternoon';
+			else if (hour >= 17 && hour < 21) key = 'evening';
+			else if (hour >= 21 || hour < 5) key = 'night';
+			var text = el.getAttribute('data-' + key) || ('Good ' + key);
+			el.textContent = text;
+		})();
+		</script>
 
 		<!-- Custom JS -->
 		@yield('js-script')
