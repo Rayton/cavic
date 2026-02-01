@@ -3,6 +3,10 @@
 </li>
 
 <li>
+	<a href="{{ route('my_wallet.index') }}"><i class="fas fa-wallet"></i><span>{{ _lang('My Wallet') }}</span></a>
+</li>
+
+<li>
 	<a href="javascript: void(0);"><i class="fas fa-hand-holding-usd"></i><span>{{ _lang('Loans') }}</span><span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span></a>
 	<ul class="nav-second-level" aria-expanded="false">
         <li class="nav-item"><a class="nav-link" href="{{ route('loans.my_loans') }}">{{ _lang('My Loans') }}</a></li>

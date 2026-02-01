@@ -111,6 +111,14 @@ class Loan extends Model
         return $this->hasMany('App\Models\LoanPayment', 'loan_id');
     }
 
+    /**
+     * Transactions of type Loan_Repayment for this loan (actual amounts paid).
+     */
+    public function repaymentTransactions()
+    {
+        return $this->hasMany('App\Models\Transaction', 'loan_id')->where('type', 'Loan_Repayment');
+    }
+
     public function next_payment()
     {
         return $this->hasOne('App\Models\LoanRepayment', 'loan_id')

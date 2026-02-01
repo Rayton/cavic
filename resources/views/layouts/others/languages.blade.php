@@ -28,6 +28,7 @@
 	var $lang_previous = "{{ _lang('Previous') }}";
 	var $lang_copy = "{{ _lang('Copy') }}";
 	var $lang_excel = "{{ _lang('Excel') }}";
+	var $lang_csv = "{{ _lang('CSV') }}";
 	var $lang_pdf = "{{ _lang('PDF') }}";
 	var $lang_print = "{{ _lang('Print') }}";
 	var $lang_add_new = "{{ _lang('Add New') }}";

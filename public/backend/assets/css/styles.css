@@ -260,7 +260,8 @@ h5,
 }
 
 .sidebar-menu .sidebar-logo {
-    max-height: 50px;
+    max-height: 80px;
+    max-width: 300px;
     border-radius: 6px;
 }
 
@@ -3355,7 +3356,8 @@ li.parsley-required {
 }
 
 .report-header .logo{
-    max-width: 200px;
+    max-width: 300px;
+    max-height: 120px;
 }
 
 .action-col {
@@ -5422,7 +5424,7 @@ Payment Gateway
 .pos-print .divider{border-bottom: 1px dashed #393b39; margin-bottom: 5px; margin-top: 5px;}
 .pos-print .border-top{ border-top: 1px dashed #393b39;}
 .pos-print .border-top-bottom{ border-top: 1px dashed #393b39; border-bottom: 1px dashed #393b39;}
-#receipt .logo{max-width: 150px;}
+#receipt .logo{max-width: 220px; max-height: 100px;}
 #receipt .table{max-width: 800px;}
 .print-only{display: none;}
 @media print {

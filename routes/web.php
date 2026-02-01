@@ -451,6 +451,11 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 //Membership Details
                 Route::get('profile/membership_details', [ProfileController::class, 'membership_details'])->name('profile.membership_details');
 
+                //My Wallet
+                Route::get('my_wallet', [App\Http\Controllers\Customer\MyWalletController::class, 'index'])->name('my_wallet.index');
+                Route::get('my_wallet/loan/{id}/repayments', [App\Http\Controllers\Customer\MyWalletController::class, 'loanRepayments'])->name('my_wallet.loan_repayments');
+                Route::get('my_wallet/loan/{id}/deposits', [App\Http\Controllers\Customer\MyWalletController::class, 'loanDeposits'])->name('my_wallet.loan_deposits');
+
                 //Transfer Controller
                 Route::match(['get', 'post'], 'transfer/own_account_transfer', [App\Http\Controllers\Customer\TransferController::class, 'own_account_transfer'])->name('transfer.own_account_transfer');
                 Route::match(['get', 'post'], 'transfer/other_account_transfer', [App\Http\Controllers\Customer\TransferController::class, 'other_account_transfer'])->name('transfer.other_account_transfer');

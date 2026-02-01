@@ -99,11 +99,13 @@
 @section('js-script')
 @php
 	$loansData = $loans->map(function($loan) {
+		$currencyName = $loan->currency ? $loan->currency->name : '';
 		return [
 			'id' => $loan->id,
 			'loan_id' => $loan->loan_id,
 			'loan_product' => $loan->loan_product ? $loan->loan_product->name : null,
-			'currency' => $loan->currency ? $loan->currency->name : null,
+			'currency' => $currencyName,
+			'amount_formatted' => decimalPlace($loan->applied_amount ?? 0, currency($currencyName)),
 			'approvals' => $loan->approvals->map(function($approval) {
 				return [
 					'approval_level' => $approval->approval_level,
@@ -138,6 +140,7 @@ $(document).ready(function() {
 			html += '<div class="col-md-12">';
 			html += '<h6><strong>' + (loanData.loan_id || 'N/A') + '</strong></h6>';
 			html += '<p class="text-muted mb-0">' + (loanData.loan_product || 'N/A') + ' - ' + (loanData.currency || 'N/A') + '</p>';
+			html += '<p class="mb-0 mt-1"><strong>{{ _lang("Loan Amount") }}:</strong> ' + (loanData.amount_formatted || '-') + '</p>';
 			html += '</div>';
 			html += '</div>';
 			

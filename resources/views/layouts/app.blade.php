@@ -258,6 +258,7 @@
 										</h4>
 										<div class="dropdown-menu">
 											@if(auth()->user()->user_type == 'customer')
+											<a class="dropdown-item" href="{{ route('my_wallet.index') }}"><i class="fas fa-wallet text-muted mr-2"></i>{{ _lang('My Wallet') }}</a>
 											<a class="dropdown-item" href="{{ route('profile.membership_details') }}"><i class="ti-user text-muted mr-2"></i>{{ _lang('Membership Details') }}</a>
 											@endif
 

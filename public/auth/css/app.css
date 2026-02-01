@@ -46,7 +46,8 @@ body::after {
 }
 
 .logo {
-    max-width: 150px;
+    max-width: 300px;
+    max-height: 100px;
     border-radius: 15px;
     transform: translateX(-50%);
     margin-left: 50%;

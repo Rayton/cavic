@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>{{ !isset($page_title) ? get_option('site_title', config('app.name')) : $page_title }}</title>
+        {{-- <title>{{ !isset($page_title) ? get_option('site_title', config('app.name')) : $page_title }}</title> --}}
         <!-- Favicon-->
         <link rel="icon" type="image/png" href="{{ get_favicon() }}" />
 
