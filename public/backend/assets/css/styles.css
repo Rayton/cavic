@@ -602,25 +602,6 @@ h5,
     box-shadow: 0 0 0 4px rgba(99, 96, 96, 0.03);
 }
 
-.nav-btn span:nth-child(2) {
-    opacity: 0;
-}
-
-.nav-btn span:first-child {
-    -webkit-transform: rotate(45deg) translate(5px, 5px);
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.nav-btn span:last-child {
-    -webkit-transform: rotate(-45deg) translate(3px, -3px);
-    transform: rotate(-45deg) translate(3px, -3px);
-}
-
-.sbar_collapsed .nav-btn span {
-    transform: none;
-    opacity: 1;
-}
-
 .search-box form {
     position: relative;
 }
