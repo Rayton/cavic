@@ -12,6 +12,10 @@ $upcomming_repayments = request_count('upcomming_repayments', true);
 </li>
 
 <li>
+	<a href="{{ route('wallets.index') }}"><i class="fas fa-wallet"></i><span>{{ _lang('Wallets') }}</span></a>
+</li>
+
+<li>
 	<a href="{{ route('branches.index') }}"><i class="fas fa-building"></i><span>{{ _lang('Branches') }}</span></a>
 </li>
 

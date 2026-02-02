@@ -135,6 +135,9 @@ $permissions = permission_list();
 		@if (in_array('transactions.index',$permissions))
 		<li class="nav-item"><a class="nav-link" href="{{ route('transactions.index') }}">{{ _lang('Transaction History') }}</a></li>
 		@endif
+		@if (in_array('wallets.index',$permissions))
+		<li class="nav-item"><a class="nav-link" href="{{ route('wallets.index') }}">{{ _lang('Wallets') }}</a></li>
+		@endif
 	</ul>
 </li>
 

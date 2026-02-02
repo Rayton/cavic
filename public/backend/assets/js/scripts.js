@@ -26,14 +26,22 @@
 	/*================================
     Active Sidebar Menu
     ==================================*/
+    var currentPath = window.location.pathname;
     $("#menu li a").each(function () {
-        var path = window.location.href;
-        if ($(this).attr("href") == path) {
+        var href = $(this).attr("href");
+        if (!href || href === "#" || href.indexOf("javascript:") === 0) return;
+        var linkPath;
+        try {
+            linkPath = href.indexOf("http") === 0 ? new URL(href).pathname : (href.split("?")[0] || "");
+        } catch (e) {
+            linkPath = href.split("?")[0] || "";
+        }
+        if (currentPath === linkPath) {
             $("#menu li").removeClass("active-nav");
             $(this).parent().addClass("active-nav");
 
             // Add 'active' class to all parent menu items to keep them expanded
-            $(this).parents('li').addClass("active");
+            $(this).parents("li").addClass("active");
 
             // Also add 'in' class to parent ul elements to keep submenus visible
             $(this).parent().parent().addClass("in");

@@ -48,6 +48,7 @@ use App\Http\Controllers\SuperAdmin\PostController;
 use App\Http\Controllers\SuperAdmin\TeamController;
 use App\Http\Controllers\Website\WebsiteController;
 use App\Http\Controllers\WithdrawRequestController;
+use App\Http\Controllers\AdminWalletController;
 use App\Http\Controllers\SuperAdmin\BackupController;
 use App\Http\Controllers\SuperAdmin\TenantController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -432,6 +433,9 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 //Bank Transaction
                 Route::get('bank_transactions/get_table_data', [BankTransactionController::class, 'get_table_data']);
                 Route::resource('bank_transactions', BankTransactionController::class)->middleware("demo:PUT|PATCH|DELETE");
+
+                //Admin Wallets (monthly member wallet summary)
+                Route::get('wallets', [AdminWalletController::class, 'index'])->name('wallets.index');
 
                 //Report Controller
                 Route::match(['get', 'post'], 'reports/account_statement', [ReportController::class, 'account_statement'])->name('reports.account_statement');
