@@ -10,15 +10,15 @@
 			</div>
 
 			<div class="card-body">
-				<table id="loans_table" class="table table-bordered data-table">
+				<table id="loans_table" class="table table-bordered data-table table-export">
 					<thead>
 						<tr>
-                            <th>{{ _lang('Loan ID') }}</th>
+                            <th data-total-label="{{ _lang('Total') }}">{{ _lang('Loan ID') }}</th>
                             <th>{{ _lang('Loan Product') }}</th>
                             <th>{{ _lang('Currency') }}</th>
-                            <th class="text-right">{{ _lang('Applied Amount') }}</th>
-                            <th class="text-right">{{ _lang('Amount Paid') }}</th>
-                            <th class="text-right">{{ _lang('Due Amount') }}</th>
+                            <th class="text-right" data-sum="1">{{ _lang('Applied Amount') }}</th>
+                            <th class="text-right" data-sum="1">{{ _lang('Amount Paid') }}</th>
+                            <th class="text-right" data-sum="1">{{ _lang('Due Amount') }}</th>
                             <th>{{ _lang('Release Date') }}</th>
                             <th>{{ _lang('Status') }}</th>
 						</tr>
@@ -49,6 +49,7 @@
                         </tr>
                         @endforeach
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
@@ -126,16 +127,16 @@
 <script>
 $(document).ready(function() {
 	var loansData = @json($loansData);
-	
+
 	$('.approval-status-link').on('click', function(e) {
 		e.preventDefault();
 		var loanId = $(this).data('loan-id');
 		var loanData = loansData[loanId];
-		
+
 		if (loanData) {
 			var approvals = loanData.approvals || [];
 			var html = '<div class="approval-status-container">';
-			
+
 			html += '<div class="row mb-3">';
 			html += '<div class="col-md-12">';
 			html += '<h6><strong>' + (loanData.loan_id || 'N/A') + '</strong></h6>';
@@ -143,7 +144,7 @@ $(document).ready(function() {
 			html += '<p class="mb-0 mt-1"><strong>{{ _lang("Loan Amount") }}:</strong> ' + (loanData.amount_formatted || '-') + '</p>';
 			html += '</div>';
 			html += '</div>';
-			
+
 			html += '<table class="table table-bordered">';
 			html += '<thead>';
 			html += '<tr>';
@@ -155,7 +156,7 @@ $(document).ready(function() {
 			html += '</tr>';
 			html += '</thead>';
 			html += '<tbody>';
-			
+
 			// Define approval levels
 			var levels = [
 				{ level: 1, name: '{{ _lang("Trustee 1") }}' },
@@ -163,19 +164,19 @@ $(document).ready(function() {
 				{ level: 3, name: '{{ _lang("Secretary") }}' },
 				{ level: 4, name: '{{ _lang("Chairman") }}' }
 			];
-			
+
 			levels.forEach(function(levelInfo) {
 				var approval = approvals.find(function(a) { return a.approval_level == levelInfo.level; });
-				
+
 				html += '<tr>';
 				html += '<td><strong>' + levelInfo.name + '</strong></td>';
-				
+
 				if (approval && approval.approver) {
 					html += '<td>' + (approval.approver.name || 'N/A') + ' (' + (approval.approver.member_no || 'N/A') + ')</td>';
 				} else {
 					html += '<td class="text-muted">{{ _lang("Not Assigned") }}</td>';
 				}
-				
+
 				if (approval) {
 					if (approval.status == 1) {
 						html += '<td><span class="badge badge-success">{{ _lang("Approved") }}</span></td>';
@@ -184,31 +185,31 @@ $(document).ready(function() {
 					} else {
 						html += '<td><span class="badge badge-warning">{{ _lang("Pending") }}</span></td>';
 					}
-					
+
 					if (approval.approved_at) {
 						html += '<td>' + approval.approved_at + '</td>';
 					} else {
 						html += '<td class="text-muted">-</td>';
 					}
-					
+
 					html += '<td>' + (approval.remarks || '<span class="text-muted">-</span>') + '</td>';
 				} else {
 					html += '<td><span class="badge badge-secondary">{{ _lang("Not Started") }}</span></td>';
 					html += '<td class="text-muted">-</td>';
 					html += '<td class="text-muted">-</td>';
 				}
-				
+
 				html += '</tr>';
 			});
-			
+
 			html += '</tbody>';
 			html += '</table>';
-			
+
 			// Show progress bar
 			var approvedCount = approvals.filter(function(a) { return a.status == 1; }).length;
 			var totalCount = 4;
 			var percentage = (approvedCount / totalCount) * 100;
-			
+
 			html += '<div class="mt-3">';
 			html += '<h6>{{ _lang("Approval Progress") }}</h6>';
 			html += '<div class="progress" style="height: 30px;">';
@@ -217,9 +218,9 @@ $(document).ready(function() {
 			html += '</div>';
 			html += '</div>';
 			html += '</div>';
-			
+
 			html += '</div>';
-			
+
 			$('#approvalStatusContent').html(html);
 		}
 	});

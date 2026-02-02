@@ -111,13 +111,13 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered">
+					<table class="table table-bordered table-export">
 						<thead>
 							<tr>
-								<th class="text-nowrap pl-4">{{ _lang('Currency') }}</th>
-								<th class="text-nowrap">{{ _lang('Applied Amount') }}</th>
-								<th class="text-nowrap">{{ _lang('Paid Amount') }}</th>
-								<th class="text-nowrap">{{ _lang('Due Amount') }}</th>
+								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-4">{{ _lang('Currency') }}</th>
+								<th class="text-nowrap" data-sum="1">{{ _lang('Applied Amount') }}</th>
+								<th class="text-nowrap" data-sum="1">{{ _lang('Paid Amount') }}</th>
+								<th class="text-nowrap" data-sum="1">{{ _lang('Due Amount') }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -133,8 +133,9 @@
 								<td>{{ decimalPlace($loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
 								<td>{{ decimalPlace($loan_balance->total_amount - $loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
 							</tr>
-							@endforeach	
+							@endforeach
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td></tr></tfoot>
 					</table>
 				</div>
 			</div>
@@ -151,15 +152,15 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered">
+					<table class="table table-bordered table-export">
 						<thead>
 							<tr>
-								<th class="text-nowrap pl-4">{{ _lang('Loan ID') }}</th>
+								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-4">{{ _lang('Loan ID') }}</th>
 								<th class="text-nowrap">{{ _lang('Member No') }}</th>
 								<th class="text-nowrap">{{ _lang('Member') }}</th>
 								<th class="text-nowrap">{{ _lang('Last Payment Date') }}</th>
 								<th class="text-nowrap">{{ _lang('Due Repayments') }}</th>
-								<th class="text-nowrap text-right pr-4">{{ _lang('Total Due') }}</th>
+								<th class="text-nowrap text-right pr-4" data-sum="1">{{ _lang('Total Due') }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -180,6 +181,7 @@
 							</tr>
 							@endforeach
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td class="text-right"></td></tr></tfoot>
 					</table>
 				</div>
 			</div>
@@ -195,13 +197,13 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered">
+					<table class="table table-bordered table-export">
 					<thead>
 					    <tr>
-						    <th class="pl-4">{{ _lang('Date') }}</th>
+						    <th data-total-label="{{ _lang('Total') }}" class="pl-4">{{ _lang('Date') }}</th>
 							<th>{{ _lang('Member') }}</th>
 							<th class="text-nowrap">{{ _lang('Account Number') }}</th>
-							<th>{{ _lang('Amount') }}</th>
+							<th data-sum="1">{{ _lang('Amount') }}</th>
 							<th class="text-nowrap">{{ _lang('Debit/Credit') }}</th>
 							<th>{{ _lang('Type') }}</th>
 							<th>{{ _lang('Status') }}</th>
@@ -231,6 +233,7 @@
 						</tr>
 					@endforeach
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>
 					</table>
 				</div>
 			</div>

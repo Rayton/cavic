@@ -4,24 +4,25 @@
 
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card no-export">
+		<div class="card">
 		    <div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Expenses') }}</span>
 				<a class="btn btn-primary btn-xs ml-auto ajax-modal" data-title="{{ _lang('Add New Expense') }}" href="{{ route('expenses.create') }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add New') }}</a>
 			</div>
 			<div class="card-body">
-				<table id="expenses_table" class="table table-bordered">
+				<table id="expenses_table" class="table table-bordered table-export">
 					<thead>
 					    <tr>
-						    <th>{{ _lang('Date') }}</th>
+						    <th data-total-label="{{ _lang('Total') }}">{{ _lang('Date') }}</th>
 							<th>{{ _lang('Expense Category') }}</th>
-							<th>{{ _lang('Amount') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
 							<th>{{ _lang('Reference') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 					    </tr>
 					</thead>
 					<tbody>
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
@@ -73,8 +74,18 @@
 		},
 		drawCallback: function () {
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+			if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
 		},
-
+		footerCallback: function (row, data, start, end, display) {
+			var api = this.api();
+			var colAmount = 2;
+			var total = api.column(colAmount, { search: 'applied', page: 'current' }).data().reduce(function (a, b) {
+				var n = parseFloat(String(b).replace(/[^\d.-]/g, '')) || 0;
+				return a + n;
+			}, 0);
+			$(api.column(colAmount).footer()).html('<strong>' + (total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })) + '</strong>');
+			$(api.column(0).footer()).html('<strong>{{ _lang("Total") }}</strong>');
+		}
 	});
 })(jQuery);
 </script>

@@ -3,7 +3,7 @@
 @section('content')
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card no-export">
+		<div class="card">
 		    <div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Member List') }}</span>
 
@@ -13,20 +13,21 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<table id="members_table" class="table table-bordered">
+				<table id="members_table" class="table table-bordered table-export">
 					<thead>
 					    <tr>
-							<th class="text-center">{{ _lang('Photo') }}</th>
+							<th data-total-label="{{ _lang('Total') }}" class="text-center">{{ _lang('Photo') }}</th>
 							<th>{{ _lang('Member No') }}</th>
 						    <th>{{ _lang('First Name') }}</th>
 							<th>{{ _lang('Last Name') }}</th>
 							<th>{{ _lang('Email') }}</th>
 							<th>{{ _lang('Branch') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 					    </tr>
 					</thead>
 					<tbody>
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
@@ -78,6 +79,7 @@
 		},
 		drawCallback: function () {
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+			if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
 		}
 	});
 

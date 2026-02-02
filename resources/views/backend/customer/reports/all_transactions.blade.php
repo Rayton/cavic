@@ -88,16 +88,18 @@
 				   <p>{{ isset($date1) ? date($date_format, strtotime($date1)).' '._lang('to').' '.date($date_format, strtotime($date2)) : '----------  '._lang('to').'  ----------' }}</p>
 				</div>
 
-				<table class="table table-bordered report-table">
+				<table class="table table-bordered report-table table-export">
 					<thead>
-                        <th>{{ _lang('Date') }}</th>
-                        <th>{{ _lang('Member') }}</th>
-                        <th>{{ _lang('AC Number') }}</th>
-                        <th class="text-right">{{ _lang('Amount') }}</th>
-                        <th>{{ _lang('DR/CR') }}</th>
-                        <th>{{ _lang('Type') }}</th>
-                        <th>{{ _lang('Status') }}</th>
-                        <th class="text-center">{{ _lang('Details') }}</th>
+						<tr>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Date') }}</th>
+							<th>{{ _lang('Member') }}</th>
+							<th>{{ _lang('AC Number') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
+							<th>{{ _lang('DR/CR') }}</th>
+							<th>{{ _lang('Type') }}</th>
+							<th>{{ _lang('Status') }}</th>
+							<th class="text-center">{{ _lang('Details') }}</th>
+						</tr>
 					</thead>
 					<tbody>
 					@if(isset($report_data))
@@ -119,6 +121,7 @@
 						@endforeach
 					@endif
 				    </tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td class="text-right"></td><td></td><td></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>

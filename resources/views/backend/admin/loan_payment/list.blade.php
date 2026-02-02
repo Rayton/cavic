@@ -9,20 +9,21 @@
 				<a class="btn btn-primary btn-xs float-right" href="{{ route('loan_payments.create') }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add Repayment') }}</a>
 			</div>
 			<div class="card-body">
-				<table id="loan_payments_table" class="table table-bordered">
+				<table id="loan_payments_table" class="table table-bordered table-export">
 					<thead>
 						<tr>
-							<th>{{ _lang('Loan ID') }}</th>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Loan ID') }}</th>
 							<th>{{ _lang('Payment Date') }}</th>
-							<th>{{ _lang('Principal Amount') }}</th>
-							<th>{{ _lang('Interest') }}</th>
-							<th>{{ _lang('Late Penalties') }}</th>
-							<th>{{ _lang('Total Amount') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Principal Amount') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Interest') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Late Penalties') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Total Amount') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 						</tr>
 					</thead>
 					<tbody>
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
@@ -74,6 +75,19 @@ $(function() {
 		},
 		drawCallback: function () {
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+			if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
+		},
+		footerCallback: function (row, data, start, end, display) {
+			var api = this.api();
+			var cols = [2, 3, 4, 5];
+			$(api.column(0).footer()).html('<strong>{{ _lang("Total") }}</strong>');
+			cols.forEach(function (colIdx) {
+				var total = api.column(colIdx, { search: 'applied', page: 'current' }).data().reduce(function (a, b) {
+					var n = parseFloat(String(b).replace(/[^\d.-]/g, '')) || 0;
+					return a + n;
+				}, 0);
+				$(api.column(colIdx).footer()).html('<strong>' + (total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })) + '</strong>');
+			});
 		}
 	});
 });

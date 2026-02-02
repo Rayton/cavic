@@ -3,25 +3,26 @@
 @section('content')
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card no-export">
+		<div class="card">
 		    <div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Member Accounts') }}</span>
 				<a class="btn btn-primary btn-xs ml-auto ajax-modal" data-title="{{ _lang('Add New Account') }}" href="{{ route('savings_accounts.create') }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add New') }}</a>
 			</div>
 			<div class="card-body">
-				<table id="savings_accounts_table" class="table table-bordered">
+				<table id="savings_accounts_table" class="table table-bordered table-export">
 					<thead>
 					    <tr>
-						    <th>{{ _lang('Account Number') }}</th>
+						    <th data-total-label="{{ _lang('Total') }}">{{ _lang('Account Number') }}</th>
 							<th>{{ _lang('Member') }}</th>
 							<th>{{ _lang('Account Type') }}</th>
 							<th>{{ _lang('Currency') }}</th>
 							<th>{{ _lang('Status') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 					    </tr>
 					</thead>
 					<tbody>
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
@@ -73,6 +74,7 @@
 		},
 		drawCallback: function () {
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+			if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
 		}
 	});
 

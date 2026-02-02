@@ -62,6 +62,17 @@
     },
     drawCallback: function () {
       $(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+      if (typeof TableExportTotals !== "undefined") TableExportTotals.computeTotals();
+    },
+    footerCallback: function (row, data, start, end, display) {
+      var api = this.api();
+      var colAmount = 5;
+      var total = api.column(colAmount, { search: "applied", page: "current" }).data().reduce(function (a, b) {
+        var n = parseFloat(String(b).replace(/[^\d.-]/g, "")) || 0;
+        return a + n;
+      }, 0);
+      $(api.column(colAmount).footer()).html("<strong>" + (total.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })) + "</strong>");
+      $(api.column(0).footer()).html("<strong>" + (typeof _lang !== "undefined" ? _lang("Total") : "Total") + "</strong>");
     },
   });
 

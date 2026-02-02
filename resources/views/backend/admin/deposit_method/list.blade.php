@@ -9,14 +9,14 @@
 				<a class="btn btn-primary btn-xs ml-auto" href="{{ route('deposit_methods.create') }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add New') }}</a>
 			</div>
 			<div class="card-body">
-				<table id="deposit_methods_table" class="table table-bordered data-table">
+				<table id="deposit_methods_table" class="table table-bordered data-table table-export">
 					<thead>
 					    <tr>
-							<th>{{ _lang('Image') }}</th>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Image') }}</th>
 						    <th>{{ _lang('Name') }}</th>
 							<th>{{ _lang('Currency') }}</th>
 							<th>{{ _lang('Status') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 					    </tr>
 					</thead>
 					<tbody>
@@ -31,7 +31,7 @@
 								<span class="dropdown">
 								  <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								  {{ _lang('Action') }}
-								  
+
 								  </button>
 								  <form action="{{ route('deposit_methods.destroy', $depositmethod['id']) }}" method="post">
 									@csrf
@@ -47,6 +47,7 @@
 					    </tr>
 					    @endforeach
 					</tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td></tr></tfoot>
 				</table>
 			</div>
 		</div>

@@ -128,7 +128,7 @@
 						</nav>
 					</div>
 				</div>
-				
+
 				<!-- Tenant Switcher -->
 				@if(auth()->check() && (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'customer'))
 					@php
@@ -268,7 +268,7 @@
 											@php $isAadminRoute = auth()->user()->user_type == 'superadmin' ? 'admin.' : ''; @endphp
 											<a class="dropdown-item" href="{{ route($isAadminRoute.'profile.edit') }}"><i class="ti-pencil text-muted mr-2"></i>{{ _lang('Profile Settings') }}</a>
 											<a class="dropdown-item" href="{{ route($isAadminRoute.'profile.change_password') }}"><i class="ti-exchange-vertical text-muted mr-2"></i></i>{{ _lang('Change Password') }}</a>
-											
+
 											@if(auth()->user()->uses_two_factor_auth == 1)
 											<a class="dropdown-item" href="{{ route($isAadminRoute.'profile.disable_2fa') }}"><i class="fas fa-key text-muted mr-2"></i>{{ _lang('Disable 2FA') }}</a>
 											@else
@@ -386,6 +386,7 @@
 
         <!-- App js -->
         <script src="{{ asset('public/backend/assets/js/scripts.js'). '?v=' . filemtime(public_path('backend/assets/js/scripts.js')) }}"></script>
+        <script src="{{ asset('public/backend/assets/js/table-export-totals.js') }}"></script>
 
 		@include('layouts.others.alert')
 

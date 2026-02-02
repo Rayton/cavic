@@ -61,10 +61,12 @@
 				   <img src="{{ get_logo() }}" class="logo"/>
 				</div>
 
-				<table class="table table-bordered report-table">
+				<table class="table table-bordered report-table table-export">
 					<thead>
-						<th>{{ _lang('Revenue Type') }}</th>
-						<th class="text-right">{{ _lang('Amount') }}</th>
+						<tr>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Revenue Type') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
+						</tr>
 					</thead>
 					<tbody>
 					@if(isset($report_data))
@@ -79,12 +81,9 @@
 							</tr>
 							@php $total += $revenue->amount; @endphp
 						@endforeach
-							<tr>
-								<td><b>{{ _lang('Total Revenue') }}</b></td>
-								<td class="text-right"><b>{{ decimalPlace($total, $currency) }}</b></td>
-							</tr>
 					@endif
 				    </tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td class="text-right"></td></tr></tfoot>
 				</table>
 			</div>
 		</div>

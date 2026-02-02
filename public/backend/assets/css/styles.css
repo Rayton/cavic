@@ -5417,3 +5417,8 @@ Payment Gateway
 .local-notification h3{font-size: 16px; font-weight: bold; color: #333333; margin-bottom: 15px;}
 .local-notification h4{font-size: 14px; font-weight: bold; color: #333333; margin-bottom: 15px;}
 .local-notification p{font-size: 14px; line-height: 1.5em; margin-bottom: 15px;}
+
+/* Table export toolbar & footer totals */
+.table-export-toolbar { gap: 0.5rem; }
+.table-totals-row td { font-weight: 600; background: #f8f9fa !important; border-top: 2px solid #dee2e6 !important; }
+.table-totals-row td.text-right { text-align: right !important; }

@@ -257,11 +257,11 @@
 
 				<h6 class="mb-1 font-weight-bold" style="font-size: 0.875rem; color: #343a40;">{{ _lang('Latest account types') }}</h6>
 				<div class="table-responsive">
-					<table class="table table-bordered last-contrib-table">
+					<table class="table table-bordered last-contrib-table table-export">
 						<thead>
 							<tr>
-								<th>{{ _lang('Account Type') }}</th>
-								<th class="text-right">{{ _lang('Balance') }}</th>
+								<th data-total-label="{{ _lang('Total') }}">{{ _lang('Account Type') }}</th>
+								<th class="text-right" data-sum="1">{{ _lang('Balance') }}</th>
 								<th class="text-nowrap">{{ _lang('Last Contribution') }}</th>
 							</tr>
 						</thead>
@@ -278,6 +278,7 @@
 								</tr>
 							@endforelse
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td class="text-right"></td><td></td></tr></tfoot>
 					</table>
 				</div>
 			</div>
@@ -296,13 +297,13 @@
 				@endif
 				<h6 class="mt-3 mb-1 font-weight-bold" style="color: #343a40; font-size: 0.875rem;">{{ _lang('Upcoming Loan Payment') }}</h6>
 				<div class="table-responsive">
-					<table class="table table-bordered upcoming-payment-table">
+					<table class="table table-bordered upcoming-payment-table table-export">
 						<thead>
 							<tr>
-								<th class="text-nowrap">{{ _lang('Loan ID') }}</th>
+								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap">{{ _lang('Loan ID') }}</th>
 								<th class="text-nowrap">{{ _lang('Next Payment Date') }}</th>
 								<th>{{ _lang('Status') }}</th>
-								<th class="text-nowrap text-right">{{ _lang('Amount to Pay') }}</th>
+								<th class="text-nowrap text-right" data-sum="1">{{ _lang('Amount to Pay') }}</th>
 								<th class="text-center">{{ _lang('Action') }}</th>
 							</tr>
 						</thead>
@@ -329,6 +330,7 @@
 								@endforeach
 							@endif
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td class="text-right"></td><td></td></tr></tfoot>
 					</table>
 				</div>
 			</div>
@@ -441,15 +443,15 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered">
+					<table class="table table-bordered table-export">
 						<thead>
 							<tr>
-								<th class="text-nowrap pl-4">{{ _lang('Account Number') }}</th>
+								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-4">{{ _lang('Account Number') }}</th>
 								<th class="text-nowrap">{{ _lang('Account Type') }}</th>
 								<th>{{ _lang('Currency') }}</th>
-								<th class="text-right">{{ _lang('Balance') }}</th>
-								<th class="text-nowrap text-right">{{ _lang('Loan Guarantee') }}</th>
-								<th class="text-nowrap text-right pr-4">{{ _lang('Current Balance') }}</th>
+								<th class="text-right" data-sum="1">{{ _lang('Balance') }}</th>
+								<th class="text-nowrap text-right" data-sum="1">{{ _lang('Loan Guarantee') }}</th>
+								<th class="text-nowrap text-right pr-4" data-sum="1">{{ _lang('Current Balance') }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -464,6 +466,7 @@
 							</tr>
 							@endforeach
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td></tr></tfoot>
 					</table>
 				</div>
 			</div>
@@ -479,12 +482,12 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered">
+					<table class="table table-bordered table-export">
 						<thead>
 							<tr>
-								<th class="pl-4">{{ _lang('Date') }}</th>
+								<th data-total-label="{{ _lang('Total') }}" class="pl-4">{{ _lang('Date') }}</th>
 								<th>{{ _lang('AC Number') }}</th>
-								<th class="text-right">{{ _lang('Amount') }}</th>
+								<th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
 								<th>{{ _lang('Type') }}</th>
 								<th>{{ _lang('Status') }}</th>
 								<th class="text-center">{{ _lang('Details') }}</th>
@@ -511,6 +514,7 @@
 							</tr>
 							@endforeach
 						</tbody>
+						<tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td></td><td></td><td></td></tr></tfoot>
 					</table>
 				</div>
 			</div>

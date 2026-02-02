@@ -71,12 +71,14 @@
 				   <h5>{{ isset($date1) ? date($date_format, strtotime($date1)).' '._lang('to').' '.date($date_format, strtotime($date2)) : '----------  '._lang('to').'  ----------' }}</h5>
 				</div>
 
-				<table class="table table-bordered report-table">
+				<table class="table table-bordered report-table table-export">
 					<thead>
-                        <th>{{ _lang('Date') }}</th>
-						<th>{{ _lang('Reference') }}</th>
-                        <th>{{ _lang('Expense Type') }}</th>
-                        <th class="text-right">{{ _lang('Amount') }}</th>
+						<tr>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Date') }}</th>
+							<th>{{ _lang('Reference') }}</th>
+							<th>{{ _lang('Expense Type') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
+						</tr>
 					</thead>
 					<tbody>
 					@if(isset($report_data))
@@ -88,16 +90,9 @@
 								<td class="text-right">{{ decimalPlace($expense->amount, $currency) }}</td>
 							</tr>
 						@endforeach
-						@if(count($report_data) > 0)
-							<tr>
-								<td>{{ $expense->expense_date }}</td>
-								<td></td>
-								<td><b>{{ _lang('Total Expenses') }}</b></td>
-								<td class="text-right"><b>{{ decimalPlace($report_data->sum('amount'), $currency) }}</b></td>
-							</tr>
-						@endif
 					@endif
 				    </tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td class="text-right"></td></tr></tfoot>
 				</table>
 			</div>
 		</div>

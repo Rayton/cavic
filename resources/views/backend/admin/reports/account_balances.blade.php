@@ -30,7 +30,7 @@
 							<div class="col-xl-3 col-lg-4">
 								<div class="form-group">
 									<label class="control-label">{{ _lang('Member') }}</label>
-									<select class="form-control select2-ajax" data-table="members" data-value="id" data-display="first_name" data-display2="last_name" 
+									<select class="form-control select2-ajax" data-table="members" data-value="id" data-display="first_name" data-display2="last_name"
 										name="member_id" data-where="3" data-placeholder="{{ _lang('All Member') }}">
 										@if(isset($member_id) && $member_id != '')
 											<option value="{{ $member_id }}">{{ \App\Models\Member::find($member_id)->name ?? _lang('All Member') }}</option>
@@ -56,13 +56,15 @@
 				   <h5>{{ _lang('Date').': '. date($date_format) }}</h5>
 				</div>
 
-				<table class="table table-bordered report-table">
+				<table class="table table-bordered report-table table-export">
 					<thead>
-						<th>{{ _lang('Member') }}</th>
-						<th>{{ _lang('Account Number') }}</th>
-						<th class="text-right">{{ _lang('Balance') }}</th>
-						<th class="text-right">{{ _lang('Loan Guarantee') }}</th>
-						<th class="text-right">{{ _lang('Current Balance') }}</th>
+						<tr>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Member') }}</th>
+							<th>{{ _lang('Account Number') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Balance') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Loan Guarantee') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Current Balance') }}</th>
+						</tr>
 					</thead>
 					<tbody>
 						@if(isset($accounts))
@@ -70,13 +72,14 @@
 							<tr>
 								<td>{{ $account->member->name }}</td>
 								<td>{{ $account->account_number }} - {{ $account->savings_type->name }} ({{ $account->savings_type->currency->name }})</td>
-								<td class="text-right">{{ decimalPlace($account->balance, currency($account->savings_type->currency->name)) }}</td>						
-								<td class="text-right">{{ decimalPlace($account->blocked_amount, currency($account->savings_type->currency->name)) }}</td>						
-								<td class="text-right">{{ decimalPlace($account->balance - $account->blocked_amount, currency($account->savings_type->currency->name)) }}</td>						
+								<td class="text-right">{{ decimalPlace($account->balance, currency($account->savings_type->currency->name)) }}</td>
+								<td class="text-right">{{ decimalPlace($account->blocked_amount, currency($account->savings_type->currency->name)) }}</td>
+								<td class="text-right">{{ decimalPlace($account->balance - $account->blocked_amount, currency($account->savings_type->currency->name)) }}</td>
 							</tr>
 						@endforeach
 						@endif
 				    </tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td></tr></tfoot>
 				</table>
 			</div>
 		</div>

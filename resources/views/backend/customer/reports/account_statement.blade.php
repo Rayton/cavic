@@ -59,13 +59,15 @@
 				   <p>{{ isset($date1) ? date($date_format, strtotime($date1)).' '._lang('to').' '.date($date_format, strtotime($date2)) : '----------  '._lang('to').'  ----------' }}</p>
 				</div>
 
-				<table class="table table-bordered report-table">
+				<table class="table table-bordered report-table table-export">
 					<thead>
-                        <th>{{ _lang('Date') }}</th>
-                        <th>{{ _lang('Description') }}</th>
-                        <th class="text-right">{{ _lang('DEBIT') }}</th>
-                        <th class="text-right">{{ _lang('CREDIT') }}</th>
-                        <th class="text-right">{{ _lang('Balance') }}</th>
+						<tr>
+							<th data-total-label="{{ _lang('Total') }}">{{ _lang('Date') }}</th>
+							<th>{{ _lang('Description') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('DEBIT') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('CREDIT') }}</th>
+							<th class="text-right" data-sum="1">{{ _lang('Balance') }}</th>
+						</tr>
 					</thead>
 					<tbody>
 					@if(isset($report_data))
@@ -76,11 +78,12 @@
 								<td>{{ $transaction->description }}</td>
 								<td class="text-right">{{ decimalPlace($transaction->debit, currency($account->savings_type->currency->name)) }}</td>
 								<td class="text-right">{{ decimalPlace($transaction->credit, currency($account->savings_type->currency->name)) }}</td>
-								<td class="text-right">{{ decimalPlace($transaction->balance, currency($account->savings_type->currency->name)) }}</td>							
+								<td class="text-right">{{ decimalPlace($transaction->balance, currency($account->savings_type->currency->name)) }}</td>
 							</tr>
 						@endforeach
 					@endif
 				    </tbody>
+					<tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td></tr></tfoot>
 				</table>
 			</div>
 		</div>
