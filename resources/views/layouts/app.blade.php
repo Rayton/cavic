@@ -307,7 +307,11 @@
 
 								<div class="d-flex align-items-center gap-2">
 									@if(auth()->user()->user_type == 'customer')
+									@if(Request::is('*dashboard*'))
+									<button type="button" class="btn btn-primary btn-sm btn-deposit-header" data-toggle="modal" data-target="#depositManualModal">{{ _lang('Deposit') }}</button>
+									@else
 									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm btn-deposit-header">{{ _lang('Deposit') }}</a>
+									@endif
 									@endif
 									<!--Branch Switcher-->
 									@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)

@@ -1,11 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\DepositMethod;
 use App\Models\Expense;
 use App\Models\Loan;
 use App\Models\LoanPayment;
 use App\Models\LoanRepayment;
 use App\Models\Member;
+use App\Models\SavingsAccount;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -151,6 +153,12 @@ class DashboardController extends Controller {
             $data['interest_paid_pct'] = $totalInterestPayable > 0
                 ? round(($totalInterestPaid / $totalInterestPayable) * 100, 1)
                 : 0;
+
+            // For deposit modal: manual methods (with charge limits) and member's savings accounts (match manual_deposit form)
+            $data['deposit_methods']   = DepositMethod::with('currency', 'chargeLimits')->where('status', 1)->get();
+            $data['deposit_accounts']  = SavingsAccount::with('savings_type', 'savings_type.currency')
+                ->where('member_id', $memberId)
+                ->get();
 
             return view("backend.customer.dashboard-$user_type", $data);
         } else {
