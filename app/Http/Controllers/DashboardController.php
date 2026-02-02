@@ -181,6 +181,24 @@ class DashboardController extends Controller {
 
             $data['total_customer'] = Member::count();
 
+            // Interest analysis (system-wide): total interest payable vs paid for all active loans
+            $activeLoans = Loan::where('status', 1)->get();
+            $totalInterestPayable = 0;
+            foreach ($activeLoans as $loan) {
+                $totalPayable = (float) ($loan->total_payable ?? $loan->applied_amount ?? 0);
+                $principal = (float) ($loan->applied_amount ?? 0);
+                $totalInterestPayable += max(0, $totalPayable - $principal);
+            }
+            $activeLoanIds = $activeLoans->pluck('id')->toArray();
+            $data['total_interest_payable'] = $totalInterestPayable;
+            $data['total_interest_paid'] = $activeLoanIds
+                ? (float) LoanPayment::withoutGlobalScopes()->whereIn('loan_id', $activeLoanIds)->sum('interest')
+                : 0;
+            $data['interest_paid_pct'] = $totalInterestPayable > 0
+                ? round(($data['total_interest_paid'] / $totalInterestPayable) * 100, 1)
+                : 0;
+            $data['admin_interest_currency'] = optional(optional($data['loan_balances']->first())->currency)->name ?? '';
+
             return view("backend.admin.dashboard-$user_type", $data);
         }
     }
