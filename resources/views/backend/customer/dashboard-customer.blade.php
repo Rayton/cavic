@@ -175,6 +175,18 @@
 						</div>
 						<div id="deposit_requirements_container" class="row mt-2"></div>
 						<div class="row mt-2">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label">{{ _lang('Transaction ID') }} <span class="text-danger">*</span></label>
+									<input type="text" class="form-control" name="user_transaction_id" id="deposit_user_transaction_id" placeholder="{{ _lang('Transaction ID') }}" required>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label">{{ _lang('Reference') }} <span class="text-danger">*</span></label>
+									<input type="text" class="form-control" name="user_reference" id="deposit_user_reference" placeholder="{{ _lang('Reference') }}" required>
+								</div>
+							</div>
 							<div class="col-md-12">
 								<div class="form-group">
 									<label class="control-label">{{ _lang('Description') }}</label>
@@ -235,7 +247,7 @@
 			<div class="card-body">
 				<div class="row">
 					<div class="col-6">
-						<h5 class="card-title">{{ _lang('Your last deduction') }}</h5>
+						<h5 class="card-title">{{ _lang('Your last loan deduction') }}</h5>
 						<div class="card-value">{{ decimalPlace($last_deduction_total ?? 0, currency($card_currency), 0) }}</div>
 						@if($last_deduction_date ?? null)
 							<p class="card-meta mb-0">{{ _lang('Posted and applied on') }} {{ \Carbon\Carbon::parse($last_deduction_date)->format(get_date_format()) }}</p>
@@ -246,7 +258,7 @@
 					<div class="col-6">
 						<h5 class="card-title">{{ _lang('Your last Contributions') }}</h5>
 						<div class="card-value">{{ decimalPlace($last_contributions_total ?? 0, currency($card_currency), 0) }}</div>
-						<p class="card-meta mb-0">{{ _lang('Type') }}: {{ _lang('Deposit') }}</p>
+						<p class="card-meta mb-0">{{ _lang('Type') }}: {{ _lang('Hisa amana') }}</p>
 						@if($last_contribution_date ?? null)
 							<p class="card-meta mb-0">{{ _lang('Latest') }}: {{ \Carbon\Carbon::parse($last_contribution_date)->format(get_date_format()) }}</p>
 						@endif
@@ -257,11 +269,11 @@
 
 				<h6 class="mb-1 font-weight-bold" style="font-size: 0.875rem; color: #343a40;">{{ _lang('Latest account types') }}</h6>
 				<div class="table-responsive">
-					<table class="table table-bordered last-contrib-table table-export">
+					<table class="table table-bordered last-contrib-table">
 						<thead>
 							<tr>
 								<th data-total-label="{{ _lang('Total') }}">{{ _lang('Account Type') }}</th>
-								<th class="text-right" data-sum="1">{{ _lang('Balance') }}</th>
+								<th class="text-right" data-sum="1">{{ _lang('Latest Amount') }}</th>
 								<th class="text-nowrap">{{ _lang('Last Contribution') }}</th>
 							</tr>
 						</thead>
@@ -269,7 +281,7 @@
 							@forelse($account_types_latest ?? [] as $row)
 								<tr>
 									<td>{{ $row['name'] }}</td>
-									<td class="text-right">{{ decimalPlace($row['balance'], currency($row['currency']), 0) }}</td>
+									<td class="text-right">{{ decimalPlace($row['latest_amount'], currency($row['currency']), 0) }}</td>
 									<td class="text-nowrap">{{ $row['last_contribution_date'] ? \Carbon\Carbon::parse($row['last_contribution_date'])->format(get_date_format()) : '-' }}</td>
 								</tr>
 							@empty
@@ -297,7 +309,7 @@
 				@endif
 				<h6 class="mt-3 mb-1 font-weight-bold" style="color: #343a40; font-size: 0.875rem;">{{ _lang('Upcoming Loan Payment') }}</h6>
 				<div class="table-responsive">
-					<table class="table table-bordered upcoming-payment-table table-export">
+					<table class="table table-bordered upcoming-payment-table">
 						<thead>
 							<tr>
 								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap">{{ _lang('Loan ID') }}</th>
@@ -443,7 +455,7 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered table-export">
+					<table class="table table-bordered">
 						<thead>
 							<tr>
 								<th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-4">{{ _lang('Account Number') }}</th>
@@ -482,7 +494,7 @@
 			</div>
 			<div class="card-body px-0 pt-0">
 				<div class="table-responsive">
-					<table class="table table-bordered table-export">
+					<table class="table table-bordered">
 						<thead>
 							<tr>
 								<th data-total-label="{{ _lang('Total') }}" class="pl-4">{{ _lang('Date') }}</th>
@@ -672,13 +684,16 @@
 	function buildRequirementsContainer(requirements) {
 		var container = $('#deposit_requirements_container');
 		container.empty();
+		var skipLabels = ['transaction id', 'transactionid', 'reference'];
 		if (requirements && (Array.isArray(requirements) ? requirements.length : Object.keys(requirements).length)) {
 			var reqs = Array.isArray(requirements) ? requirements : (typeof requirements === 'object' ? Object.values(requirements) : []);
 			reqs.forEach(function(label) {
+				var normalized = String(label).toLowerCase().replace(/\s+/g, ' ').trim();
+				if (skipLabels.indexOf(normalized) !== -1) return;
 				var key = String(label).replace(/\s+/g, '_');
 				container.append(
 					'<div class="col-md-6"><div class="form-group">' +
-					'<label class="control-label">' + (label || key) + '</label>' +
+					'<label class="control-label">' + (label || key) + ' <span class="text-danger">*</span></label>' +
 					'<input type="text" class="form-control" name="requirements[' + key + ']" data-requirement-key="' + key + '" required></div></div>'
 				);
 			});
@@ -827,6 +842,7 @@
 		var calculatedTotal = 0;
 		$('#deposit_form_wrapper .deposit-account-row').each(function() {
 			var row = $(this);
+			if (row.hasClass('deposit-row-removed')) return;
 			var accountId = row.data('account-id');
 			var amount = parseFloat(row.find('.row-deposit-amount').val()) || 0;
 			var converted = parseFloat(row.find('.row-converted-amount').val()) || 0;
@@ -849,6 +865,16 @@
 			if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Alert") }}', '{{ _lang("Entered total amount must equal the calculated total.") }} ({{ _lang("Calculated") }}: ' + parseFloat(calculatedTotal).toFixed(2) + ' ' + (currentMethodCurrency || '') + ')', 'warning');
 			return;
 		}
+		var userTransactionId = ($('#deposit_user_transaction_id').val() || '').trim();
+		var userReference = ($('#deposit_user_reference').val() || '').trim();
+		if (!userTransactionId) {
+			if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Alert") }}', '{{ _lang("Transaction ID is required.") }}', 'warning');
+			return;
+		}
+		if (!userReference) {
+			if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Alert") }}', '{{ _lang("Reference is required.") }}', 'warning');
+			return;
+		}
 		var requirements = {};
 		$('#deposit_requirements_container input[name^="requirements["]').each(function() {
 			var name = $(this).attr('name');
@@ -856,23 +882,34 @@
 			if (match) requirements[match[1]] = $(this).val();
 		});
 		var description = $('#deposit_description').val() || '';
-		var attachmentInput = document.getElementById('deposit_attachment');
-		var attachmentFile = attachmentInput && attachmentInput.files && attachmentInput.files[0] ? attachmentInput.files[0] : null;
-		var totalConverted = 0;
-		$('#deposit_form_wrapper .row-converted-amount').each(function() { totalConverted += parseFloat($(this).val()) || 0; });
 		var submitBtn = $('#deposit_manual_submit_btn');
 		submitBtn.prop('disabled', true);
 		var url = depositManualDepositUrl.replace('__ID__', methodId);
-		var doneCount = 0;
-		var hasError = false;
-		function onRowDone(err) {
-			doneCount++;
-			if (err) hasError = true;
-			if (doneCount >= rows.length) {
+		var fd = new FormData();
+		fd.append('_token', csrfToken);
+		fd.append('user_transaction_id', userTransactionId);
+		fd.append('user_reference', userReference);
+		fd.append('description', description);
+		rows.forEach(function(r, i) {
+			fd.append('rows[' + i + '][credit_account]', r.credit_account);
+			fd.append('rows[' + i + '][amount]', r.amount);
+		});
+		Object.keys(requirements).forEach(function(k) { fd.append('requirements[' + k + ']', requirements[k]); });
+		var attachmentInput = document.getElementById('deposit_attachment');
+		if (attachmentInput && attachmentInput.files && attachmentInput.files[0]) {
+			fd.append('attachment', attachmentInput.files[0]);
+		}
+		$.ajax({
+			url: url,
+			method: 'POST',
+			data: fd,
+			processData: false,
+			contentType: false,
+			headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			success: function(data) {
 				submitBtn.prop('disabled', false);
-				if (hasError) {
-					if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Error") }}', '{{ _lang("One or more deposit requests failed.") }}', 'error');
-				} else {
+				var res = typeof data === 'string' ? (function(){ try { return JSON.parse(data); } catch(e) { return data; } })() : data;
+				if (res && res.result === 'success') {
 					if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Success") }}', '{{ _lang("Deposit Request submited successfully") }}', 'success').then(function() {
 						$('#depositManualModal').modal('hide');
 						$('#deposit_method_select').val('');
@@ -880,35 +917,16 @@
 						$('#deposit_manual_form')[0].reset();
 						location.reload();
 					});
+				} else {
+					if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Error") }}', Array.isArray(res && res.message) ? res.message.join(' ') : (res && res.message ? res.message : 'Error'), 'error');
 				}
+			},
+			error: function(xhr) {
+				submitBtn.prop('disabled', false);
+				var msg = 'Request failed';
+				if (xhr.responseJSON && xhr.responseJSON.message) msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(' ') : xhr.responseJSON.message;
+				if (typeof Swal !== 'undefined') Swal.fire('{{ _lang("Error") }}', msg, 'error');
 			}
-		}
-		rows.forEach(function(r) {
-			var fd = new FormData();
-			fd.append('_token', csrfToken);
-			fd.append('credit_account', r.credit_account);
-			fd.append('amount', r.amount);
-			fd.append('description', description);
-			Object.keys(requirements).forEach(function(k) { fd.append('requirements[' + k + ']', requirements[k]); });
-			if (attachmentFile) fd.append('attachment', attachmentFile);
-			$.ajax({
-				url: url,
-				method: 'POST',
-				data: fd,
-				processData: false,
-				contentType: false,
-				headers: { 'X-Requested-With': 'XMLHttpRequest' },
-				success: function(data) {
-					var res = typeof data === 'string' ? (function(){ try { return JSON.parse(data); } catch(e) { return data; } })() : data;
-					if (res && res.result === 'success') onRowDone(null);
-					else onRowDone(res && res.message ? res.message : 'Error');
-				},
-				error: function(xhr) {
-					var msg = 'Request failed';
-					if (xhr.responseJSON && xhr.responseJSON.message) msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(' ') : xhr.responseJSON.message;
-					onRowDone(msg);
-				}
-			});
 		});
 	});
 

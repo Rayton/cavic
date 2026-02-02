@@ -388,6 +388,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 //Deposit Requests
                 Route::post('deposit_requests/get_table_data', [DepositRequestController::class, 'get_table_data']);
                 Route::get('deposit_requests/approve/{id}', [DepositRequestController::class, 'approve'])->name('deposit_requests.approve');
+                Route::get('deposit_requests/approve_group/{groupId}', [DepositRequestController::class, 'approveGroup'])->name('deposit_requests.approve_group');
                 Route::get('deposit_requests/reject/{id}', [DepositRequestController::class, 'reject'])->name('deposit_requests.reject');
                 Route::delete('deposit_requests/{id}', [DepositRequestController::class, 'destroy'])->name('deposit_requests.destroy');
                 Route::get('deposit_requests/{id}', [DepositRequestController::class, 'show'])->name('deposit_requests.show');

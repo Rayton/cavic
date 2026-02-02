@@ -69,7 +69,15 @@ class DepositRequestController extends Controller {
             
                 // Approve Button (if status is not 2)
                 if ($deposit_request->status != 2) {
-                    $actions .= '<a href="' . route('deposit_requests.approve', $deposit_request['id']) . '" class="dropdown-item"><i class="fas fa-check-circle text-success mr-1"></i>' . _lang('Approve') . '</a>';
+                    $actions .= '<a href="' . route('deposit_requests.approve', $deposit_request['id']) . '" class="dropdown-item"><i class="fas fa-check-circle text-success mr-1"></i>' . _lang('Approve') . ' ' . _lang('this') . '</a>';
+                }
+            
+                // Approve group (if this request is in a group and group has pending)
+                if ($deposit_request->deposit_request_group_id) {
+                    $pendingInGroup = DepositRequest::where('deposit_request_group_id', $deposit_request->deposit_request_group_id)->where('status', '!=', 2)->count();
+                    if ($pendingInGroup > 0) {
+                        $actions .= '<a href="' . route('deposit_requests.approve_group', $deposit_request->deposit_request_group_id) . '" class="dropdown-item"><i class="fas fa-check-double text-success mr-1"></i>' . _lang('Approve all in group') . '</a>';
+                    }
                 }
             
                 // Reject Button (if status is not 1)
@@ -115,11 +123,42 @@ class DepositRequestController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function approve($tenant, $id) {
-        DB::beginTransaction();
-
         $depositRequest = DepositRequest::find($id);
+        if (! $depositRequest || $depositRequest->status == 2) {
+            return redirect()->route('deposit_requests.index')->with('error', _lang('Request not found or already approved'));
+        }
+        DB::beginTransaction();
+        $this->performApproval($depositRequest);
+        DB::commit();
+        return redirect()->route('deposit_requests.index')->with('success', _lang('Request Approved'));
+    }
 
-        //Create Transaction
+    /**
+     * Approve all deposit requests in the same group (one submission).
+     *
+     * @param  string  $groupId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function approveGroup($tenant, $groupId) {
+        $requests = DepositRequest::where('deposit_request_group_id', $groupId)->where('status', '!=', 2)->get();
+        if ($requests->isEmpty()) {
+            return redirect()->route('deposit_requests.index')->with('info', _lang('No pending requests in this group'));
+        }
+        DB::beginTransaction();
+        foreach ($requests as $depositRequest) {
+            $this->performApproval($depositRequest);
+        }
+        DB::commit();
+        return redirect()->route('deposit_requests.index')->with('success', _lang('All requests in group approved'));
+    }
+
+    /**
+     * Perform approval for one deposit request (create transaction, update status).
+     *
+     * @param  DepositRequest  $depositRequest
+     * @return void
+     */
+    protected function performApproval(DepositRequest $depositRequest) {
         $transaction                     = new Transaction();
         $transaction->trans_date         = now();
         $transaction->member_id          = $depositRequest->member_id;
@@ -133,26 +172,18 @@ class DepositRequestController extends Controller {
         $transaction->description        = _lang('Deposit Via') . ' ' . $depositRequest->method->name;
         $transaction->created_user_id    = auth()->id();
         $transaction->branch_id          = auth()->user()->branch_id;
-
         $transaction->save();
 
         $depositRequest->status         = 2;
         $depositRequest->transaction_id = $transaction->id;
         $depositRequest->save();
 
-        // Reload transaction with relationships for email notification
         $transaction->load(['member', 'account.savings_type.currency']);
-
-        // Send email notification to member
         try {
             $transaction->member->notify(new ApprovedDepositRequest($transaction));
         } catch (\Exception $e) {
-            // Log error but don't fail the approval
             \Log::error('Failed to send deposit approval notification: ' . $e->getMessage());
         }
-
-        DB::commit();
-        return redirect()->route('deposit_requests.index')->with('success', _lang('Request Approved'));
     }
 
     /**

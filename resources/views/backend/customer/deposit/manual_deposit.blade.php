@@ -76,9 +76,10 @@
 
                         @if($deposit_method->requirements)
                             @foreach($deposit_method->requirements as $requirement)
+                            @php $reqNorm = strtolower(trim(str_replace(' ', '', $requirement))); if (in_array($reqNorm, ['transactionid', 'reference'])) continue; @endphp
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label">{{ $requirement }}</label>
+                                    <label class="control-label">{{ $requirement }} <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="requirements[{{ str_replace(' ','_',$requirement) }}]" value="{{ old('requirements.'.str_replace(' ', '_', $requirement)) }}" required>
                                 </div>
                             </div>
@@ -94,6 +95,18 @@
                         </div>
                         @endif
 
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">{{ _lang('Transaction ID') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="user_transaction_id" value="{{ old('user_transaction_id') }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">{{ _lang('Reference') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="user_reference" value="{{ old('user_reference') }}" required>
+                            </div>
+                        </div>
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="control-label">{{ _lang('Description') }}</label>

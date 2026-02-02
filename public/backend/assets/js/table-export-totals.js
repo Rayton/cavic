@@ -139,9 +139,9 @@
 			if ($table.data('export-toolbar')) return;
 			var id = $table.attr('id') || ('tbl-' + Math.random().toString(36).slice(2));
 			if (!$table.attr('id')) $table.attr('id', id);
-			// Use only the table title (e.g. .panel-title), not the whole card header (which may include "Add New" button text)
-			var title = $table.closest('.card').find('.panel-title').first().text().trim() || $table.closest('.card').find('.header-title').first().text().trim() || 'Table';
-			var filename = title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'export';
+			// Filename: data-export-filename on table, or card title (panel-title/header-title), else 'Table'
+			var title = $table.attr('data-export-filename') || $table.closest('.card').find('.panel-title').first().text().trim() || $table.closest('.card').find('.header-title').first().text().trim() || 'Table';
+			var filename = (typeof title === 'string' ? title : 'Table').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'export';
 			var $wrap = $table.closest('.table-responsive').length ? $table.closest('.table-responsive') : $table.parent();
 			var $toolbar = $('<div class="table-export-toolbar mb-2 d-flex align-items-center flex-wrap"></div>');
 			$toolbar.append(

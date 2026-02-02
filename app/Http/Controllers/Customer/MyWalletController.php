@@ -39,19 +39,27 @@ class MyWalletController extends Controller
 
         $accounts = get_account_details($member->id);
 
-        // Group accounts by savings type (Hisa, Jamii, etc.) - one tab per type (exclude "Loans" - loans are shown in Loans tab)
-        $accountTypesAndAccounts = $accounts->groupBy('savings_product_id')->map(function ($accountsOfType, $productId) {
+        // Group accounts by savings type (Hisa, Jamii, etc.) - one tab per type; each tab lists transactions by date and amount (no balance)
+        $excludeTypes = ['loans', 'mkopo', 'mikopo'];
+        $accountTypesAndAccounts = $accounts->groupBy('savings_product_id')->map(function ($accountsOfType, $productId) use ($member, $excludeTypes) {
             $first = $accountsOfType->first();
             $typeName = $first && $first->savings_type ? $first->savings_type->name : _lang('Account');
+            if (in_array(strtolower(trim($typeName)), $excludeTypes)) {
+                return null;
+            }
+            $accountIds = $accountsOfType->pluck('id')->toArray();
+            $transactions = Transaction::where('member_id', $member->id)
+                ->whereIn('savings_account_id', $accountIds)
+                ->with(['account.savings_type.currency'])
+                ->orderBy('trans_date', 'desc')
+                ->get();
             return [
-                'id'   => 'account-' . $productId,
-                'name' => $typeName,
-                'accounts' => $accountsOfType,
+                'id'          => 'account-' . $productId,
+                'name'        => $typeName,
+                'accounts'    => $accountsOfType,
+                'transactions' => $transactions,
             ];
-        })->filter(function ($item) {
-            // Do not show "Loans" as its own account tab - loans are implemented independently
-            return strtolower($item['name']) !== 'loans';
-        })->values()->all();
+        })->filter()->values()->all();
 
         $transactions = Transaction::where('member_id', $member->id)
             ->with(['account.savings_type.currency'])

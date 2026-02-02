@@ -64,15 +64,30 @@ class DepositController extends Controller {
             return view('backend.customer.deposit.manual_deposit', compact('deposit_method', 'accounts', 'alert_col'));
         } else if ($request->isMethod('post')) {
             $deposit_method = DepositMethod::find($methodId);
-            $account        = SavingsAccount::where('id', $request->credit_account)
+            $isBatch        = $request->has('rows') && is_array($request->rows) && count($request->rows) > 0;
+
+            if ($isBatch) {
+                return $this->manual_deposit_batch($request, $methodId, $deposit_method);
+            }
+
+            // Single-row submission (existing flow)
+            $account = SavingsAccount::where('id', $request->credit_account)
                 ->where('member_id', auth()->user()->member->id)
                 ->first();
+            if (! $account) {
+                if ($request->ajax()) {
+                    return response()->json(['result' => 'error', 'message' => [_lang('Invalid account')]]);
+                }
+                return back()->with('error', _lang('Invalid account'))->withInput();
+            }
             $accountType = $account->savings_type;
 
             $validator = Validator::make($request->all(), [
                 'requirements.*' => 'required',
                 'credit_account' => 'required',
                 'amount'         => "required|numeric",
+                'user_transaction_id' => 'required|string|max:255',
+                'user_reference'      => 'required|string|max:255',
                 'attachment'     => 'nullable|mimes:jpeg,JPEG,png,PNG,jpg,doc,pdf,docx|max:4096',
             ]);
 
@@ -102,12 +117,7 @@ class DepositController extends Controller {
                 return back()->with('error', _lang('Deposit limit') . ' ' . $minimumAmount . ' ' . $accountType->currency->name . ' -- ' . $maximumAmount . ' ' . $accountType->currency->name)->withInput();
             }
 
-            $attachment = "";
-            if ($request->hasfile('attachment')) {
-                $file       = $request->file('attachment');
-                $attachment = time() . $file->getClientOriginalName();
-                $file->move(public_path() . "/uploads/media/", $attachment);
-            }
+            $attachment = $this->upload_deposit_attachment($request);
 
             $depositRequest                    = new DepositRequest();
             $depositRequest->member_id         = auth()->user()->member->id;
@@ -117,8 +127,10 @@ class DepositController extends Controller {
             $depositRequest->converted_amount  = $convertedAdmount + $charge;
             $depositRequest->charge            = $charge;
             $depositRequest->description       = $request->description;
-            $depositRequest->requirements      = json_encode($request->requirements);
+            $depositRequest->requirements      = json_encode($request->requirements ?? []);
             $depositRequest->attachment        = $attachment;
+            $depositRequest->user_transaction_id = $request->user_transaction_id;
+            $depositRequest->user_reference     = $request->user_reference;
             $depositRequest->save();
 
             // Reload deposit request with relationships for email notification
@@ -128,7 +140,6 @@ class DepositController extends Controller {
             try {
                 $depositRequest->member->notify(new NewDepositRequest($depositRequest));
             } catch (\Exception $e) {
-                // Log error but don't fail the request
                 \Log::error('Failed to send deposit request notification: ' . $e->getMessage());
             }
 
@@ -138,6 +149,110 @@ class DepositController extends Controller {
                 return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Deposit Request submited successfully'), 'data' => $depositRequest, 'table' => '#unknown_table']);
             }
         }
+    }
+
+    /**
+     * Batch manual deposit: multiple account rows, one attachment, one Transaction ID / Reference.
+     */
+    protected function manual_deposit_batch(Request $request, $methodId, $deposit_method) {
+        $validator = Validator::make($request->all(), [
+            'rows'                  => 'required|array',
+            'rows.*.credit_account' => 'required|exists:savings_accounts,id',
+            'rows.*.amount'        => 'required|numeric|min:0.01',
+            'user_transaction_id'   => 'required|string|max:255',
+            'user_reference'        => 'required|string|max:255',
+            'requirements.*'       => 'nullable',
+            'attachment'           => 'nullable|mimes:jpeg,JPEG,png,PNG,jpg,doc,pdf,docx|max:4096',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['result' => 'error', 'message' => $validator->errors()->all()]);
+        }
+
+        $memberId = auth()->user()->member->id;
+        $rows     = $request->rows;
+        $accounts = SavingsAccount::with('savings_type')
+            ->whereIn('id', array_column($rows, 'credit_account'))
+            ->where('member_id', $memberId)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($rows as $row) {
+            $acc = $accounts->get($row['credit_account'] ?? null);
+            if (! $acc) {
+                return response()->json(['result' => 'error', 'message' => [_lang('Invalid account in rows')]]);
+            }
+        }
+
+        $attachment = $this->upload_deposit_attachment($request);
+        $groupId    = \Illuminate\Support\Str::uuid()->toString();
+        $description = $request->description ?? '';
+        $requirements = json_encode($request->requirements ?? []);
+
+        $created = [];
+        foreach ($rows as $row) {
+            $account     = $accounts->get($row['credit_account']);
+            $accountType = $account->savings_type;
+            $amount      = (float) $row['amount'];
+
+            $convertedAmount = convert_currency($accountType->currency->name, $deposit_method->currency->name, $amount);
+            $chargeLimit     = $deposit_method->chargeLimits()->where('minimum_amount', '<=', $convertedAmount)->where('maximum_amount', '>=', $convertedAmount)->first();
+
+            if ($chargeLimit) {
+                $fixedCharge      = $chargeLimit->fixed_charge;
+                $percentageCharge = ($convertedAmount * $chargeLimit->charge_in_percentage) / 100;
+                $charge           = $fixedCharge + $percentageCharge;
+            } else {
+                $minimumAmount = convert_currency($deposit_method->currency->name, $accountType->currency->name, $deposit_method->chargeLimits()->min('minimum_amount'));
+                $maximumAmount = convert_currency($deposit_method->currency->name, $accountType->currency->name, $deposit_method->chargeLimits()->max('maximum_amount'));
+                return response()->json(['result' => 'error', 'message' => [_lang('Deposit limit') . ' ' . $minimumAmount . ' - ' . $maximumAmount . ' ' . $accountType->currency->name]]);
+            }
+
+            $dr = new DepositRequest();
+            $dr->member_id              = $memberId;
+            $dr->method_id              = $methodId;
+            $dr->credit_account_id      = $row['credit_account'];
+            $dr->amount                 = $amount;
+            $dr->converted_amount       = $convertedAmount + $charge;
+            $dr->charge                 = $charge;
+            $dr->description            = $description;
+            $dr->requirements           = $requirements;
+            $dr->attachment             = $attachment;
+            $dr->user_transaction_id    = $request->user_transaction_id;
+            $dr->user_reference         = $request->user_reference;
+            $dr->deposit_request_group_id = $groupId;
+            $dr->save();
+            $created[] = $dr;
+        }
+
+        $first = $created[0];
+        $first->load(['member', 'method.currency', 'account.savings_type.currency']);
+        try {
+            $first->member->notify(new NewDepositRequest($first));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send deposit request notification: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'result'  => 'success',
+            'action'  => 'store',
+            'message' => _lang('Deposit Request submited successfully'),
+            'data'    => $first,
+            'table'   => '#unknown_table',
+        ]);
+    }
+
+    /**
+     * Upload attachment for manual deposit; returns filename or empty string.
+     */
+    protected function upload_deposit_attachment(Request $request) {
+        $attachment = '';
+        if ($request->hasFile('attachment')) {
+            $file       = $request->file('attachment');
+            $attachment = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $file->move(public_path('uploads/media'), $attachment);
+        }
+        return $attachment;
     }
 
     public function automatic_deposit(Request $request, $teant, $methodId) {

@@ -65,27 +65,26 @@ class DashboardController extends Controller {
             $data['next_deduction_total'] = $nextTotal;
             $data['next_deduction_date'] = $nextDate;
 
-            // Your last deduction: sum of all loan repayment transactions for the member
+            // Your last loan deduction: single most recent loan repayment (deduction)
             $lastRepayment = Transaction::where('member_id', $memberId)
                 ->where('type', 'Loan_Repayment')
                 ->orderBy('trans_date', 'desc')
                 ->first();
-            $data['last_deduction_total'] = (float) Transaction::where('member_id', $memberId)
-                ->where('type', 'Loan_Repayment')
-                ->sum('amount');
+            $data['last_deduction_total'] = $lastRepayment ? (float) $lastRepayment->amount : 0;
             $data['last_deduction_date'] = $lastRepayment ? $lastRepayment->getRawOriginal('trans_date') : null;
 
-            // Your last Contributions: sum of deposit (cr) transactions, excluding Loans/Mkopo/Mikopo accounts
-            $contributionsQuery = Transaction::where('member_id', $memberId)
+            // Your last Contributions: most recent hisa amana (credit to Hisa-type account only)
+            $latestHisaContribution = Transaction::where('member_id', $memberId)
                 ->where('dr_cr', 'cr')
                 ->whereHas('account.savings_type', function ($q) {
-                    $q->whereRaw('LOWER(name) NOT IN (?, ?, ?)', ['loans', 'mkopo', 'mikopo']);
-                });
-            $data['last_contributions_total'] = (float) (clone $contributionsQuery)->sum('amount');
-            $latestContribution = (clone $contributionsQuery)->orderBy('trans_date', 'desc')->first();
-            $data['last_contribution_date'] = $latestContribution ? $latestContribution->getRawOriginal('trans_date') : null;
+                    $q->whereRaw('LOWER(name) LIKE ?', ['%hisa%']);
+                })
+                ->orderBy('trans_date', 'desc')
+                ->first();
+            $data['last_contributions_total'] = $latestHisaContribution ? (float) $latestHisaContribution->amount : 0;
+            $data['last_contribution_date'] = $latestHisaContribution ? $latestHisaContribution->getRawOriginal('trans_date') : null;
 
-            // Account types (Jamii, Hisa, etc.) for card table: exclude Loans/Mkopo/Mikopo
+            // Account types (Jamii, Hisa, etc.) – one row per account (individual), exclude Loans/Mkopo/Mikopo
             $accounts = get_account_details($memberId);
             $excludeTypes = ['loans', 'mkopo', 'mikopo'];
             $accountsFiltered = $accounts->filter(function ($a) use ($excludeTypes) {
@@ -93,22 +92,17 @@ class DashboardController extends Controller {
                 return ! in_array($name, $excludeTypes);
             });
             $data['account_types_latest'] = [];
-            foreach ($accountsFiltered->groupBy('savings_product_id') as $productId => $group) {
-                $first = $group->first();
-                $typeName = $first->savings_type ? $first->savings_type->name : _lang('Account');
-                $currencyName = $first->savings_type && $first->savings_type->currency ? $first->savings_type->currency->name : '';
-                $balance = $group->sum(function ($a) {
-                    return (float) ($a->balance ?? 0);
-                });
-                $accountIds = $group->pluck('id')->toArray();
+            foreach ($accountsFiltered as $account) {
+                $typeName = $account->savings_type ? $account->savings_type->name : _lang('Account');
+                $currencyName = $account->savings_type && $account->savings_type->currency ? $account->savings_type->currency->name : '';
                 $lastDeposit = Transaction::where('member_id', $memberId)
                     ->where('dr_cr', 'cr')
-                    ->whereIn('savings_account_id', $accountIds)
+                    ->where('savings_account_id', $account->id)
                     ->orderBy('trans_date', 'desc')
                     ->first();
                 $data['account_types_latest'][] = [
-                    'name' => $typeName,
-                    'balance' => $balance,
+                    'name' => $typeName . ' - ' . $account->account_number,
+                    'latest_amount' => $lastDeposit ? (float) $lastDeposit->amount : 0,
                     'currency' => $currencyName,
                     'last_contribution_date' => $lastDeposit ? $lastDeposit->getRawOriginal('trans_date') : null,
                 ];
@@ -331,20 +325,15 @@ class DashboardController extends Controller {
         $totalByMonth  = array_fill_keys($monthKeys, 0);
         $tenantId      = auth()->user()->tenant_id ?? null;
 
-        foreach ($accountsFiltered->groupBy('savings_product_id') as $productId => $group) {
-            $first   = $group->first();
-            $typeName = $first->savings_type ? $first->savings_type->name : _lang('Account');
-            $accountIds = $group->pluck('id')->toArray();
+        // One dataset per account (individual), not summed by type
+        foreach ($accountsFiltered as $account) {
+            $typeName = $account->savings_type ? $account->savings_type->name : _lang('Account');
+            $label = $typeName . ' - ' . $account->account_number;
 
-            if (empty($accountIds)) {
-                continue;
-            }
-
-            // Direct DB query: no Eloquent scopes, same filters as balance (dr_cr=cr, optional tenant_id)
             $baseQuery = DB::table('transactions')
                 ->where('member_id', $memberId)
                 ->where('dr_cr', 'cr')
-                ->whereIn('savings_account_id', $accountIds)
+                ->where('savings_account_id', $account->id)
                 ->whereBetween(DB::raw('DATE(trans_date)'), [$fromDate->format('Y-m-d'), $toDate->format('Y-m-d')]);
             if ($tenantId) {
                 $baseQuery->where('tenant_id', $tenantId);
@@ -354,14 +343,11 @@ class DashboardController extends Controller {
                 ->groupBy(DB::raw('DATE_FORMAT(trans_date, "%Y-%m")'))
                 ->get();
             $txns = $rows->keyBy('month_key');
-            // Fallback: if grouped query returns nothing, fetch raw rows and sum by month in PHP (handles strict SQL mode)
             if ($txns->isEmpty()) {
                 $rawRows = (clone $baseQuery)->select('trans_date', 'amount')->get();
                 $byMonth = [];
                 foreach ($rawRows as $r) {
-                    if (empty($r->trans_date)) {
-                        continue;
-                    }
+                    if (empty($r->trans_date)) continue;
                     $mk = Carbon::parse($r->trans_date)->format('Y-m');
                     $byMonth[$mk] = ($byMonth[$mk] ?? 0) + (float) $r->amount;
                 }
@@ -378,7 +364,7 @@ class DashboardController extends Controller {
                 $totalByMonth[$mk] += $val;
             }
             $color = $barColors[count($datasetsBar) % count($barColors)];
-            $datasetsBar[] = ['label' => $typeName, 'data' => $data, 'backgroundColor' => $color];
+            $datasetsBar[] = ['label' => $label, 'data' => $data, 'backgroundColor' => $color];
         }
 
         $totalData = [];

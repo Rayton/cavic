@@ -35,6 +35,7 @@
 								<thead>
 									<tr>
 										<th>{{ _lang('ID') }}</th>
+										<th>{{ _lang('Loan Product') }}</th>
 										<th>{{ _lang('Customer') }}</th>
 										<th class="text-right">{{ _lang('Amount') }}</th>
 										<th class="text-right">{{ _lang('Interest') }}</th>
@@ -58,6 +59,7 @@
 									@endphp
 									<tr>
 										<td>{{ $loan->loan_id }}</td>
+										<td>{{ $loan->loan_product ? $loan->loan_product->name : '-' }}</td>
 										<td>{{ $loan->borrower ? $loan->borrower->first_name . ' ' . $loan->borrower->last_name : '-' }}</td>
 										<td class="text-right">{{ decimalPlace($loan->applied_amount, currency($loan->currency ? $loan->currency->name : '')) }}</td>
 										<td class="text-right">{{ $interestRate }}%</td>
@@ -91,7 +93,7 @@
 						</div>
 					</div>
 
-					{{-- Account type tabs (Hisa, Jamii, etc.) - one tab per type --}}
+					{{-- Account type tabs (Hisa, Jamii, etc.): list by date and amount, no balance --}}
 					@foreach($accountTypesAndAccounts as $accountType)
 					<div class="tab-pane fade" id="tab-{{ $accountType['id'] }}" role="tabpanel">
 						<div class="table-responsive">
@@ -101,22 +103,25 @@
 										<th>{{ _lang('SN') }}</th>
 										<th>{{ _lang('Date') }}</th>
 										<th>{{ _lang('Account Number') }}</th>
-										<th>{{ _lang('Currency') }}</th>
-										<th class="text-right">{{ _lang('Balance') }}</th>
-										<th class="text-right">{{ _lang('Loan Guarantee') }}</th>
-										<th class="text-right">{{ _lang('Available Balance') }}</th>
+										<th>{{ _lang('Description') }}</th>
+										<th>{{ _lang('DR/CR') }}</th>
+										<th class="text-right">{{ _lang('Amount') }}</th>
 									</tr>
 								</thead>
 								<tbody>
-									@foreach($accountType['accounts'] as $account)
+									@foreach($accountType['transactions'] ?? [] as $txn)
+									@php
+										$symbol = $txn->dr_cr == 'dr' ? '-' : '';
+										$class  = $txn->dr_cr == 'dr' ? 'text-danger' : 'text-success';
+										$currencyName = $txn->account && $txn->account->savings_type && $txn->account->savings_type->currency ? $txn->account->savings_type->currency->name : '';
+									@endphp
 									<tr>
 										<td>{{ $loop->iteration }}</td>
-										<td>{{ $account->created_at ?? '-' }}</td>
-										<td>{{ $account->account_number }}</td>
-										<td>{{ $account->savings_type && $account->savings_type->currency ? $account->savings_type->currency->name : '-' }}</td>
-										<td class="text-right">{{ decimalPlace($account->balance ?? 0, currency($account->savings_type && $account->savings_type->currency ? $account->savings_type->currency->name : '')) }}</td>
-										<td class="text-right">{{ decimalPlace($account->blocked_amount ?? 0, currency($account->savings_type && $account->savings_type->currency ? $account->savings_type->currency->name : '')) }}</td>
-										<td class="text-right">{{ decimalPlace(($account->balance ?? 0) - ($account->blocked_amount ?? 0), currency($account->savings_type && $account->savings_type->currency ? $account->savings_type->currency->name : '')) }}</td>
+										<td>{{ $txn->trans_date ? \Carbon\Carbon::parse($txn->trans_date)->format(get_date_format()) : '-' }}</td>
+										<td>{{ $txn->account ? $txn->account->account_number : '-' }}</td>
+										<td>{{ $txn->description ?? '-' }}</td>
+										<td>{{ strtoupper($txn->dr_cr ?? '') }}</td>
+										<td class="text-right"><span class="{{ $class }}">{{ $symbol }}{{ $symbol ? ' ' : '' }}{{ decimalPlace($txn->amount, currency($currencyName)) }}</span></td>
 									</tr>
 									@endforeach
 								</tbody>
