@@ -408,6 +408,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 //Loan Controller
                 Route::get('loans/upcoming_loan_repayments', [LoanController::class, 'upcoming_loan_repayments'])->name('loans.upcoming_loan_repayments');
                 Route::post('loans/get_table_data', [LoanController::class, 'get_table_data']);
+                Route::get('loans/{id}/approval-data', [LoanController::class, 'get_approval_data'])->name('loans.approval-data');
                 Route::get('loans/calculator', [LoanController::class, 'calculator'])->name('loans.admin_calculator');
                 Route::post('loans/calculator/calculate', [LoanController::class, 'calculate'])->name('loans.calculate');
                 Route::match(['get', 'post'], 'loans/approve/{id}', [LoanController::class, 'approve'])->name('loans.approve');
