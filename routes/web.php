@@ -390,6 +390,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 Route::get('deposit_requests/approve/{id}', [DepositRequestController::class, 'approve'])->name('deposit_requests.approve');
                 Route::get('deposit_requests/approve_group/{groupId}', [DepositRequestController::class, 'approveGroup'])->name('deposit_requests.approve_group');
                 Route::get('deposit_requests/reject/{id}', [DepositRequestController::class, 'reject'])->name('deposit_requests.reject');
+                Route::get('deposit_requests/{id}/download_attachment', [DepositRequestController::class, 'downloadAttachment'])->name('deposit_requests.download_attachment');
                 Route::delete('deposit_requests/{id}', [DepositRequestController::class, 'destroy'])->name('deposit_requests.destroy');
                 Route::get('deposit_requests/{id}', [DepositRequestController::class, 'show'])->name('deposit_requests.show');
                 Route::get('deposit_requests', [DepositRequestController::class, 'index'])->name('deposit_requests.index');
@@ -438,6 +439,8 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
 
                 //Admin Wallets (monthly member wallet summary)
                 Route::get('wallets', [AdminWalletController::class, 'index'])->name('wallets.index');
+                Route::get('wallets/download-template', [AdminWalletController::class, 'downloadTemplate'])->name('wallets.template');
+                Route::post('wallets/import', [AdminWalletController::class, 'import'])->name('wallets.import');
 
                 //Report Controller
                 Route::match(['get', 'post'], 'reports/account_statement', [ReportController::class, 'account_statement'])->name('reports.account_statement');

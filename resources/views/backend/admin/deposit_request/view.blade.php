@@ -25,7 +25,12 @@
                     <tr>
                         <td>{{ _lang('Attachment') }}</td>
                         <td>
-                            {!! $depositrequest->attachment == "" ? '-' : '<a href="'. asset('public/uploads/media/'.$depositrequest->attachment) .'" target="_blank">'._lang('View Attachment').'</a>' !!}
+                            @if(!empty($depositrequest->attachment))
+                                <a href="{{ asset('public/uploads/media/'.$depositrequest->attachment) }}" target="_blank" class="btn btn-outline-primary btn-sm mr-1">{{ _lang('View Attachment') }}</a>
+                                <a href="{{ route('deposit_requests.download_attachment', $depositrequest->id) }}" class="btn btn-outline-secondary btn-sm"><i class="ti-download mr-1"></i>{{ _lang('Download Attachment') }}</a>
+                            @else
+                                -
+                            @endif
                         </td>
                     </tr>
                     <tr><td>{{ _lang('Status') }}</td><td>{!! xss_clean(transaction_status($depositrequest->status)) !!}</td></tr>

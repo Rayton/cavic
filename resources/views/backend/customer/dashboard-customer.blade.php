@@ -55,6 +55,7 @@
 #depositManualModal .deposit-attachment-wrap .deposit-attachment-label { cursor: pointer; margin: 0; display: flex; align-items: center; gap: 0.5rem; min-height: 2.5rem; }
 #depositManualModal .deposit-attachment-wrap .deposit-attachment-icon { font-size: 1.5rem; color: #1A8E8F; }
 #depositManualModal .deposit-attachment-wrap .deposit-attachment-hint { font-size: 0.75rem; color: #6c757d; margin-top: 0.25rem; }
+.deposit-method-quick-btn.active { background: #1A8E8F !important; border-color: #1A8E8F !important; color: #fff !important; }
 </style>
 {{-- Deposit modal: Manual Deposit (portal/deposit/manual_deposit/2 flow) --}}
 <div class="modal fade" id="depositManualModal" tabindex="-1" role="dialog" aria-labelledby="depositManualModalLabel" aria-hidden="true">
@@ -67,6 +68,11 @@
 			<div class="modal-body">
 				<div class="form-group">
 					<label class="control-label">{{ _lang('Select Manual Deposit Method') }}</label>
+					<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+						@foreach($deposit_methods ?? [] as $dm)
+						<button type="button" class="btn btn-outline-primary btn-sm deposit-method-quick-btn" data-method-id="{{ $dm->id }}" title="{{ _lang('Deposit via') }} {{ $dm->name }}">{{ $dm->name }}</button>
+						@endforeach
+					</div>
 					<select class="form-control" id="deposit_method_select" data-selected="">
 						<option value="">{{ _lang('Select One') }}</option>
 						@foreach($deposit_methods ?? [] as $dm)
@@ -739,9 +745,20 @@
 		});
 	}
 
+	$(document).on('click', '.deposit-method-quick-btn', function() {
+		var methodId = $(this).data('method-id');
+		if (methodId) {
+			$('#deposit_method_select').val(methodId).trigger('change');
+			$('.deposit-method-quick-btn').removeClass('active');
+			$(this).addClass('active');
+		}
+	});
+
 	$(document).on('change', '#deposit_method_select', function() {
 		var opt = $(this).find('option:selected');
 		var methodId = opt.val();
+		$('.deposit-method-quick-btn').removeClass('active');
+		$('.deposit-method-quick-btn[data-method-id="' + (methodId || '') + '"]').addClass('active');
 		if (!methodId) {
 			$('#deposit_method_id').val('');
 			$('.deposit-charge-limits-panel, .deposit-instructions-panel').hide();
@@ -932,6 +949,7 @@
 
 	$('#depositManualModal').on('hidden.bs.modal', function() {
 		$('#deposit_method_select').val('');
+		$('.deposit-method-quick-btn').removeClass('active');
 		showDepositFormPanel(false);
 		currentMethodId = null;
 		currentMethodCurrency = null;

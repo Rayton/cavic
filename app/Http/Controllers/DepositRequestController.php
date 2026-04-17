@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\DepositRequest;
+use App\Models\Loan;
+use App\Models\LoanPayment;
+use App\Models\LoanRepayment;
 use App\Models\Transaction;
 use App\Notifications\ApprovedDepositRequest;
+use App\Notifications\LoanPaymentReceived;
 use App\Notifications\RejectDepositRequest;
+use App\Utilities\LoanCalculator as Calculator;
 use DataTables;
 use DB;
+use Exception;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DepositRequestController extends Controller {
 
@@ -66,6 +73,9 @@ class DepositRequestController extends Controller {
             
                 // Details Button
                 $actions .= '<a href="' . route('deposit_requests.show', $deposit_request['id']) . '" class="dropdown-item"><i class="fas fa-eye mr-1"></i>' . _lang('Details') . '</a>';
+                if (! empty($deposit_request->attachment)) {
+                    $actions .= '<a href="' . route('deposit_requests.download_attachment', $deposit_request['id']) . '" class="dropdown-item"><i class="ti-download mr-1"></i>' . _lang('Download Attachment') . '</a>';
+                }
             
                 // Approve Button (if status is not 2)
                 if ($deposit_request->status != 2) {
@@ -117,6 +127,25 @@ class DepositRequestController extends Controller {
     }
 
     /**
+     * Download deposit request attachment.
+     *
+     * @param  string  $tenant
+     * @param  int  $id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\RedirectResponse
+     */
+    public function downloadAttachment($tenant, $id): BinaryFileResponse|\Illuminate\Http\RedirectResponse {
+        $depositRequest = DepositRequest::find($id);
+        if (! $depositRequest || empty($depositRequest->attachment)) {
+            return redirect()->route('deposit_requests.index')->with('error', _lang('Attachment not found'));
+        }
+        $path = public_path('uploads/media/' . $depositRequest->attachment);
+        if (! is_file($path)) {
+            return redirect()->route('deposit_requests.index')->with('error', _lang('File not found'));
+        }
+        return response()->download($path, $depositRequest->attachment);
+    }
+
+    /**
      * Approve Wire Transfer
      *
      * @param  int  $id
@@ -154,6 +183,7 @@ class DepositRequestController extends Controller {
 
     /**
      * Perform approval for one deposit request (create transaction, update status).
+     * If credit account is loans/mkopo/mikopo, apply deposited amount to member's loans (first loan first, then second, etc.) without exceeding deposit.
      *
      * @param  DepositRequest  $depositRequest
      * @return void
@@ -178,12 +208,196 @@ class DepositRequestController extends Controller {
         $depositRequest->transaction_id = $transaction->id;
         $depositRequest->save();
 
+        // If deposit is to loans/mkopo/mikopo account, apply payment to member's loans (first loan first, then second; do not exceed deposited amount)
+        $accountTypeName = strtolower(trim($depositRequest->account->savings_type->name ?? ''));
+        if (in_array($accountTypeName, ['loans', 'mkopo', 'mikopo'])) {
+            $this->applyLoanPaymentsFromDeposit($depositRequest, $depositRequest->credit_account_id);
+        }
+
         $transaction->load(['member', 'account.savings_type.currency']);
         try {
             $transaction->member->notify(new ApprovedDepositRequest($transaction));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Log::error('Failed to send deposit approval notification: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Apply deposited amount to member's loans: pay first loan (clear it if enough), then second, etc. Total applied does not exceed deposit amount.
+     * Uses same logic as portal/loans/payment (Transaction debit, LoanPayment, update Loan/LoanRepayment/schedule).
+     *
+     * @param  DepositRequest  $depositRequest
+     * @param  int  $loanAccountId  Savings account (loans/mkopo) to debit from (already credited by deposit)
+     * @return void
+     */
+    protected function applyLoanPaymentsFromDeposit(DepositRequest $depositRequest, int $loanAccountId): void {
+        $memberId     = $depositRequest->member_id;
+        $depositAmount = (float) $depositRequest->amount;
+        $remaining     = $depositAmount;
+        $accountCurrencyId = $depositRequest->account->savings_type->currency_id ?? null;
+
+        $loansQuery = Loan::withoutGlobalScopes()
+            ->where('borrower_id', $memberId)
+            ->where('status', 1)
+            ->whereRaw('total_paid < applied_amount')
+            ->with(['loan_product', 'borrower', 'currency'])
+            ->orderBy('id');
+        if ($accountCurrencyId) {
+            $loansQuery->where('currency_id', $accountCurrencyId);
+        }
+        $loans = $loansQuery->get();
+
+        foreach ($loans as $loan) {
+            if ($remaining <= 0) {
+                break;
+            }
+            while ($remaining > 0) {
+                $repayment = LoanRepayment::withoutGlobalScopes()
+                    ->where('loan_id', $loan->id)
+                    ->where('status', 0)
+                    ->orderBy('id')
+                    ->first();
+                if (! $repayment) {
+                    break;
+                }
+                $amountUsed = $this->applyOneLoanRepayment($loan, $repayment, $loanAccountId, $remaining);
+                if ($amountUsed <= 0) {
+                    break;
+                }
+                $remaining -= $amountUsed;
+                $loan->refresh();
+            }
+        }
+    }
+
+    /**
+     * Apply one loan repayment (same logic as Customer\LoanController::loan_payment). Returns amount debited; 0 if not applied (e.g. insufficient remaining).
+     *
+     * @param  Loan  $loan
+     * @param  LoanRepayment  $repayment
+     * @param  int  $sourceAccountId
+     * @param  float  $maxAmount  Do not debit more than this (deposit remaining)
+     * @return float  Amount debited
+     */
+    protected function applyOneLoanRepayment(Loan $loan, LoanRepayment $repayment, int $sourceAccountId, float $maxAmount): float {
+        $today        = \Carbon\Carbon::today();
+        $repaymentDate = \Carbon\Carbon::parse($repayment->getRawOriginal('repayment_date'));
+        $overdueDays  = $today->gt($repaymentDate) ? $repaymentDate->diffInDays($today) : 0;
+        $penaltyPerDay = (float) ($repayment->penalty ?? 0);
+        $penalty       = max(0, $overdueDays * $penaltyPerDay);
+        $principalAmount = (float) $repayment->principal_amount;
+        $interest        = (float) $repayment->interest;
+        $amountNeeded    = $principalAmount + $interest + $penalty;
+
+        if ($maxAmount < $amountNeeded) {
+            return 0;
+        }
+        if (get_account_balance($sourceAccountId, $loan->borrower_id) < $amountNeeded) {
+            return 0;
+        }
+
+        $existingPrincipal = (float) $repayment->principal_amount;
+
+        $debit = new Transaction();
+        $debit->trans_date         = now();
+        $debit->member_id          = $loan->borrower_id;
+        $debit->savings_account_id = $sourceAccountId;
+        $debit->amount             = $amountNeeded;
+        $debit->dr_cr              = 'dr';
+        $debit->type               = 'Loan_Repayment';
+        $debit->method             = 'Deposit Approval';
+        $debit->status             = 2;
+        $debit->note               = _lang('Loan Repayment');
+        $debit->description        = _lang('Loan Repayment');
+        $debit->created_user_id    = auth()->id();
+        $debit->branch_id          = $loan->borrower->branch_id;
+        $debit->loan_id            = $loan->id;
+        $debit->save();
+
+        $loanpayment = new LoanPayment();
+        $loanpayment->loan_id          = $loan->id;
+        $loanpayment->paid_at          = date('Y-m-d');
+        $loanpayment->late_penalties   = $penalty;
+        $loanpayment->interest         = $interest;
+        $loanpayment->repayment_amount = $principalAmount + $interest;
+        $loanpayment->total_amount    = $loanpayment->repayment_amount + $penalty;
+        $loanpayment->remarks          = _lang('Deposit approval');
+        $loanpayment->transaction_id   = $debit->id;
+        $loanpayment->repayment_id     = $repayment->id;
+        $loanpayment->member_id        = $loan->borrower_id;
+        $loanpayment->save();
+
+        $loan->total_paid = $loan->total_paid + $principalAmount;
+        if ($loan->total_paid >= $loan->applied_amount) {
+            $loan->status = 2;
+        }
+        $loan->save();
+
+        $repayment->principal_amount = $principalAmount;
+        $repayment->amount_to_pay    = $principalAmount + $interest;
+        $repayment->balance          = $loan->applied_amount - $loan->total_paid;
+        $repayment->status           = 1;
+        $repayment->save();
+
+        if ($loan->total_paid >= $loan->applied_amount) {
+            LoanRepayment::withoutGlobalScopes()->where('loan_id', $loan->id)->where('status', 0)->delete();
+        } else {
+            if ($repayment->getRawOriginal('principal_amount') != $existingPrincipal) {
+                $upcomingRepayments = LoanRepayment::withoutGlobalScopes()
+                    ->where('loan_id', $loan->id)
+                    ->where('status', 0)
+                    ->orderBy('id')
+                    ->get();
+                if ($upcomingRepayments->isNotEmpty()) {
+                    $interestType = $loan->loan_product->interest_type ?? 'flat_rate';
+                    $calculator   = new Calculator(
+                        $loan->applied_amount - $loan->total_paid,
+                        $upcomingRepayments[0]->getRawOriginal('repayment_date'),
+                        $loan->loan_product->interest_rate ?? 0,
+                        $upcomingRepayments->count(),
+                        $loan->loan_product->term_period ?? '+1 month',
+                        $loan->late_payment_penalties ?? 0,
+                        $loan->applied_amount
+                    );
+                    if ($interestType == 'flat_rate') {
+                        $newRepayments = $calculator->get_flat_rate();
+                    } elseif ($interestType == 'fixed_rate') {
+                        $newRepayments = $calculator->get_fixed_rate();
+                    } elseif ($interestType == 'mortgage') {
+                        $newRepayments = $calculator->get_mortgage();
+                    } elseif ($interestType == 'one_time') {
+                        $newRepayments = $calculator->get_one_time();
+                    } elseif ($interestType == 'reducing_amount') {
+                        $newRepayments = $calculator->get_reducing_amount();
+                    } else {
+                        $newRepayments = $calculator->get_flat_rate();
+                    }
+                    $index = 0;
+                    foreach ($newRepayments as $newRepayment) {
+                        if (! isset($upcomingRepayments[$index])) {
+                            break;
+                        }
+                        $up = $upcomingRepayments[$index];
+                        $up->amount_to_pay    = $newRepayment['amount_to_pay'];
+                        $up->penalty          = $newRepayment['penalty'];
+                        $up->principal_amount = $newRepayment['principal_amount'];
+                        $up->interest         = $newRepayment['interest'];
+                        $up->balance          = $newRepayment['balance'];
+                        $up->save();
+                        $index++;
+                    }
+                }
+            }
+        }
+
+        try {
+            $loanpayment->load('member');
+            $loanpayment->member->notify(new LoanPaymentReceived($loanpayment));
+        } catch (Exception $e) {
+            // ignore
+        }
+
+        return $amountNeeded;
     }
 
     /**

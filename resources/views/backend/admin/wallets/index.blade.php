@@ -5,6 +5,64 @@
 .wallets-month-table { font-size: 0.875rem; }
 .wallets-month-table th, .wallets-month-table td { vertical-align: middle !important; }
 #custom-date-fields { display: none; }
+.wallets-import-tools {
+	gap: 10px;
+	padding: 10px 12px;
+	margin-bottom: 12px;
+	border: 1px solid #e4e9f2;
+	border-radius: 10px;
+	background: linear-gradient(180deg, #fbfcff 0%, #f4f7fc 100%);
+}
+.wallets-template-btn {
+	border-color: #546ea7;
+	color: #334f88;
+	background: #ffffff;
+	font-weight: 500;
+}
+.wallets-template-btn:hover {
+	background: #eef3ff;
+	border-color: #4b63a0;
+	color: #2f467a;
+}
+.wallets-import-form {
+	gap: 8px;
+}
+.wallets-file-wrap {
+	position: relative;
+	min-width: 280px;
+	max-width: 420px;
+	flex: 1 1 280px;
+}
+.wallets-import-form .wallets-file-input {
+	height: 38px;
+	padding: 0 12px;
+	border: 1px dashed #9cb0d8;
+	border-radius: 8px;
+	background: #fff;
+	color: #5b6780;
+	font-size: 13px;
+}
+.wallets-import-form .wallets-file-input:focus {
+	border-color: #5a7cc4;
+	box-shadow: 0 0 0 0.12rem rgba(90, 124, 196, 0.22);
+}
+.wallets-import-form .wallets-import-btn {
+	height: 38px;
+	padding: 0 14px;
+	font-weight: 500;
+}
+@media (max-width: 767px) {
+	.wallets-file-wrap {
+		min-width: 100%;
+		max-width: 100%;
+	}
+	.wallets-import-form {
+		width: 100%;
+	}
+	.wallets-import-form .wallets-import-btn {
+		width: 100%;
+	}
+}
 </style>
 <div class="row">
 	<div class="col-12">
@@ -69,6 +127,19 @@
 				<div class="tab-content">
 					{{-- Loans Tab (monthly = loan repayments per member) --}}
 					<div class="tab-pane fade show active" id="tab-loans" role="tabpanel">
+						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
+							<a href="{{ route('wallets.template', ['tab' => 'loans']) }}" class="btn btn-xs wallets-template-btn">
+								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+							</a>
+							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
+								@csrf
+								<input type="hidden" name="tab" value="loans">
+								<div class="wallets-file-wrap">
+									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
+								</div>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+							</form>
+						</div>
 						<div class="table-responsive">
 							<table id="wallets_table_loans" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Loans">
 								<thead>
@@ -106,6 +177,20 @@
 					{{-- Account type tabs (monthly credits per member per product) --}}
 					@foreach($accountTypesAndAccounts as $accountType)
 					<div class="tab-pane fade" id="tab-{{ $accountType['id'] }}" role="tabpanel">
+						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
+							<a href="{{ route('wallets.template', ['tab' => 'account', 'product_id' => $accountType['product_id']]) }}" class="btn btn-xs wallets-template-btn">
+								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+							</a>
+							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
+								@csrf
+								<input type="hidden" name="tab" value="account">
+								<input type="hidden" name="product_id" value="{{ $accountType['product_id'] }}">
+								<div class="wallets-file-wrap">
+									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
+								</div>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+							</form>
+						</div>
 						<div class="table-responsive">
 							<table id="wallets_table_{{ $accountType['id'] }}" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_{{ preg_replace('/[^a-zA-Z0-9_-]/', '_', $accountType['name']) }}">
 								<thead>
@@ -144,6 +229,19 @@
 
 					{{-- Transactions Tab (net movement per member per month) --}}
 					<div class="tab-pane fade" id="tab-transactions" role="tabpanel">
+						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
+							<a href="{{ route('wallets.template', ['tab' => 'transactions']) }}" class="btn btn-xs wallets-template-btn">
+								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+							</a>
+							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
+								@csrf
+								<input type="hidden" name="tab" value="transactions">
+								<div class="wallets-file-wrap">
+									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
+								</div>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+							</form>
+						</div>
 						<div class="table-responsive">
 							<table id="wallets_table_transactions" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Transactions">
 								<thead>
@@ -180,6 +278,19 @@
 
 					{{-- Monthly Contributions/Deductions: one row per member, trans types as columns for the selected period --}}
 					<div class="tab-pane fade" id="tab-contributions" role="tabpanel">
+						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
+							<a href="{{ route('wallets.template', ['tab' => 'contributions']) }}" class="btn btn-xs wallets-template-btn">
+								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+							</a>
+							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
+								@csrf
+								<input type="hidden" name="tab" value="contributions">
+								<div class="wallets-file-wrap">
+									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
+								</div>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+							</form>
+						</div>
 						<div class="table-responsive">
 							<table id="wallets_table_contributions" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Monthly_Contributions_Deductions">
 								<thead>
