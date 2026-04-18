@@ -77,6 +77,11 @@
         e.stopPropagation();
     });
 
+    $('.admin-dashboard-top-tab').on('click', function() {
+        $('.admin-dashboard-top-tab').removeClass('active');
+        $(this).addClass('active');
+    });
+
 	/*================================
     Hide Empty Menu
     ==================================*/

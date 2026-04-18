@@ -910,6 +910,10 @@
         min-height: 38px;
         padding: 0 14px;
     }
+
+    .admin-shell-v2 .admin-dashboard-top-tabs {
+        gap: 16px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -954,6 +958,25 @@
 
     .admin-shell-v2 .admin-header-left-cluster {
         gap: 10px;
+    }
+
+    .admin-shell-v2 .admin-dashboard-top-tabs-wrap {
+        align-items: flex-start !important;
+    }
+
+    .admin-shell-v2 .admin-dashboard-top-tabs {
+        width: 100%;
+        gap: 12px;
+        padding-bottom: 4px;
+    }
+
+    .admin-shell-v2 .admin-dashboard-branch-switcher {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .admin-shell-v2 .admin-dashboard-branch-switcher .btn {
+        width: 100%;
     }
 
     .admin-shell-v2 .admin-sidebar-note {

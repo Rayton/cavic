@@ -5892,6 +5892,61 @@ Payment Gateway
     font-weight: 600;
 }
 
+.admin-shell-v2 .admin-dashboard-top-row {
+    min-height: 46px;
+}
+
+.admin-shell-v2 .admin-dashboard-top-tabs-wrap {
+    min-height: 46px;
+}
+
+.admin-shell-v2 .admin-dashboard-top-tabs {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: -1px;
+    overflow-x: auto;
+}
+
+.admin-shell-v2 .admin-dashboard-top-tab {
+    display: inline-flex;
+    align-items: center;
+    min-height: 46px;
+    padding: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--cavic-text-soft);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-shell-v2 .admin-dashboard-top-tab:hover {
+    color: var(--cavic-text);
+}
+
+.admin-shell-v2 .admin-dashboard-top-tab.active {
+    color: var(--cavic-primary);
+    border-bottom-color: var(--cavic-primary);
+}
+
+.admin-shell-v2 .admin-dashboard-branch-switcher {
+    margin-left: auto;
+}
+
+.admin-shell-v2 .admin-dashboard-branch-switcher .btn {
+    min-height: 34px;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    border-radius: 10px;
+    background: var(--cavic-surface-muted);
+    border-color: var(--cavic-border);
+    color: var(--cavic-text);
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
 .admin-shell-v2 .main-content-inner.admin-main-content-inner {
     padding: 28px 28px 42px;
     overflow-y: auto;

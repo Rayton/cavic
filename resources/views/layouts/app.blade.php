@@ -323,8 +323,33 @@
 				<!-- Page title area start -->
 				@if(Request::is('dashboard') || Request::is('*/dashboard'))
 				<div class="page-title-area {{ $isAdminWorkspace ? 'admin-page-title-v2' : '' }}">
-					<div class="row align-items-center py-3">
+					<div class="row align-items-center {{ $isAdminWorkspace ? 'admin-dashboard-top-row' : 'py-3' }}">
 						<div class="col-sm-12">
+							@if($isAdminWorkspace)
+							<div class="admin-dashboard-top-tabs-wrap d-flex align-items-center justify-content-between flex-wrap gap-2">
+								<div class="admin-dashboard-top-tabs nav" role="navigation" aria-label="{{ _lang('Dashboard Sections') }}">
+									<a class="admin-dashboard-top-tab active" href="#dashboard-overview">{{ _lang('Overview') }}</a>
+									<a class="admin-dashboard-top-tab" href="#portfolio-health">{{ _lang('Portfolio Health') }}</a>
+									<a class="admin-dashboard-top-tab" href="#collections-snapshot">{{ _lang('Collections Snapshot') }}</a>
+									<a class="admin-dashboard-top-tab" href="#branch-performance">{{ _lang('Branch Performance') }}</a>
+								</div>
+
+								@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+								<div class="dropdown admin-dashboard-branch-switcher">
+									<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="dashboardBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
+									</a>
+									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dashboardBranchSwitcher">
+										<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
+										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
+										@foreach( \App\Models\Branch::all() as $branch )
+										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
+										@endforeach
+									</div>
+								</div>
+								@endif
+							</div>
+							@else
 							<div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
 								<h6 class="mb-0">
 									<span id="dashboard-greeting" data-morning="{{ _lang('Good morning') }}" data-afternoon="{{ _lang('Good afternoon') }}" data-evening="{{ _lang('Good evening') }}" data-night="{{ _lang('Good night') }}"></span>{{ auth()->user()->user_type == 'customer' && auth()->user()->member ? ', ' . auth()->user()->member->first_name . ' ' . auth()->user()->member->last_name : (auth()->user()->name ? ', ' . auth()->user()->name : '') }}
@@ -338,7 +363,6 @@
 									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm btn-deposit-header">{{ _lang('Deposit') }}</a>
 									@endif
 									@endif
-									<!--Branch Switcher-->
 									@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
 									<div class="dropdown">
 										<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -355,6 +379,7 @@
 									@endif
 								</div>
 							</div>
+							@endif
 						</div>
 					</div>
 				</div><!-- page title area end -->

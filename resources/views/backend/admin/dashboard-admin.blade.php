@@ -327,17 +327,6 @@
     ],
 ])
 
-@include('backend.admin.partials.module-tabs', [
-    'class' => 'mb-4',
-    'role' => 'navigation',
-    'tabs' => [
-        ['label' => _lang('Overview'), 'url' => '#dashboard-overview', 'active' => true, 'toggle' => false],
-        ['label' => _lang('Portfolio Health'), 'url' => '#portfolio-health', 'toggle' => false],
-        ['label' => _lang('Collections Snapshot'), 'url' => '#collections-snapshot', 'toggle' => false],
-        ['label' => _lang('Branch Performance'), 'url' => '#branch-performance', 'toggle' => false],
-    ],
-])
-
 @include('backend.admin.partials.quick-actions', [
     'title' => _lang('Operational Quick Actions'),
     'subtitle' => _lang('Keep common admin actions near the dashboard instead of adding more sidebar clutter.'),
