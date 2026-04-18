@@ -1,21 +1,25 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Member Details'), 'target' => '#member_details', 'active' => true],
+        ['label' => _lang('Account Overview'), 'target' => '#account_overview'],
+        ['label' => _lang('Transactions'), 'target' => '#transaction-history'],
+        ['label' => _lang('Loans'), 'target' => '#member_loans'],
+        ['label' => _lang('KYC Documents'), 'target' => '#kyc_documents'],
+        ['label' => _lang('Send Email'), 'target' => '#email'],
+        ['label' => _lang('Send SMS'), 'target' => '#sms'],
+        ['label' => _lang('Edit Member Details'), 'url' => route('members.edit', $member->id)],
+    ],
+])
+@endsection
+
 @section('content')
 <div class="row">
-	<div class="col-md-4 col-lg-3">
-		<ul class="nav flex-column nav-tabs settings-tab" role="tablist">
-			 <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#member_details"><i class="ti-user"></i>&nbsp;{{ _lang('Member Details') }}</a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#account_overview"><i class="ti-credit-card"></i>&nbsp;{{ _lang('Account Overview') }}</a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#transaction-history"><i class="ti-view-list-alt"></i>{{ _lang('Transactions') }}</a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#member_loans"><i class="ti-agenda"></i>&nbsp;{{ _lang('Loans') }}</a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kyc_documents"><i class="ti-files"></i>&nbsp;{{ _lang('KYC Documents') }}</a></li>
-             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#email"><i class="ti-email"></i>&nbsp;{{ _lang('Send Email') }}</a></li>
-             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sms"><i class="ti-comment-alt"></i>&nbsp;{{ _lang('Send SMS') }}</a></li>
-             <li class="nav-item"><a class="nav-link" href="{{ route('members.edit', $member->id) }}"><i class="ti-pencil-alt"></i>&nbsp;{{ _lang('Edit Member Details') }}</a></li>
-		</ul>
-	</div>
-
-	<div class="col-md-8 col-lg-9">
+	<div class="col-lg-12">
 		<div class="tab-content">
 			<div id="member_details" class="tab-pane active">
 				<div class="card">
@@ -352,16 +356,6 @@
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
 		}
 	});
-
-    $('.nav-tabs a').on('shown.bs.tab', function(event){
-   		var tab = $(event.target).attr("href");
-   		var url = "{{ route('members.show',$member->id) }}";
-   	    history.pushState({}, null, url + "?tab=" + tab.substring(1));
-   	});
-
-   	@if(isset($_GET['tab']))
-   	   $('.nav-tabs a[href="#{{ $_GET['tab'] }}"]').tab('show');
-   	@endif
 
     $("a[data-toggle=\"tab\"]").on("shown.bs.tab", function (e) {
         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();

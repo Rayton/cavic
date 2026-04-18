@@ -1,5 +1,18 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Overview'), 'url' => '#dashboard-overview', 'active' => true, 'toggle' => false],
+        ['label' => _lang('Portfolio Health'), 'url' => '#portfolio-health', 'toggle' => false],
+        ['label' => _lang('Collections Snapshot'), 'url' => '#collections-snapshot', 'toggle' => false],
+        ['label' => _lang('Branch Performance'), 'url' => '#branch-performance', 'toggle' => false],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $card_currency = $admin_interest_currency ?? '';

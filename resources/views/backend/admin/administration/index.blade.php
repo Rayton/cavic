@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Users'), 'target' => '#users', 'active' => true],
+        ['label' => _lang('Roles & Permissions'), 'target' => '#roles'],
+        ['label' => _lang('Settings'), 'target' => '#settings'],
+        ['label' => _lang('Currency'), 'target' => '#currency'],
+        ['label' => _lang('Templates'), 'target' => '#templates'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $userCount = $adminCounts['users'] ?? 0;
@@ -30,17 +44,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('Users'), 'target' => '#users', 'active' => true],
-                ['label' => _lang('Roles & Permissions'), 'target' => '#roles'],
-                ['label' => _lang('Settings'), 'target' => '#settings'],
-                ['label' => _lang('Currency'), 'target' => '#currency'],
-                ['label' => _lang('Templates'), 'target' => '#templates'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="users">
             <div class="table-responsive mb-3">

@@ -321,18 +321,14 @@
 				</div><!-- header area end -->
 
 				<!-- Page title area start -->
-				@if(Request::is('dashboard') || Request::is('*/dashboard'))
+				@php $hasWorkspaceTopTabs = trim($__env->yieldContent('workspace_top_tabs')) !== ''; @endphp
+				@if(Request::is('dashboard') || Request::is('*/dashboard') || $hasWorkspaceTopTabs)
 				<div class="page-title-area {{ $isAdminWorkspace ? 'admin-page-title-v2' : '' }}">
 					<div class="row align-items-center {{ $isAdminWorkspace ? 'admin-dashboard-top-row' : 'py-3' }}">
 						<div class="col-sm-12">
-							@if($isAdminWorkspace)
+							@if($isAdminWorkspace && $hasWorkspaceTopTabs)
 							<div class="admin-dashboard-top-tabs-wrap d-flex align-items-center justify-content-between flex-wrap gap-2">
-								<div class="admin-dashboard-top-tabs nav" role="navigation" aria-label="{{ _lang('Dashboard Sections') }}">
-									<a class="admin-dashboard-top-tab active" href="#dashboard-overview">{{ _lang('Overview') }}</a>
-									<a class="admin-dashboard-top-tab" href="#portfolio-health">{{ _lang('Portfolio Health') }}</a>
-									<a class="admin-dashboard-top-tab" href="#collections-snapshot">{{ _lang('Collections Snapshot') }}</a>
-									<a class="admin-dashboard-top-tab" href="#branch-performance">{{ _lang('Branch Performance') }}</a>
-								</div>
+								@yield('workspace_top_tabs')
 
 								@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
 								<div class="dropdown admin-dashboard-branch-switcher">

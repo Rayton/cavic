@@ -83,6 +83,8 @@
 - [ ] Standardize reusable page header usage
 - [ ] Prefer explicit breadcrumb arrays in workspace pages
 - [ ] Preserve segment-based fallback behavior for older pages
+- [ ] Standardize major admin workspace tabs in the top strip directly below the navbar, matching Dashboard
+- [ ] Keep contextual selectors like branch selection on the right side of that same top strip when needed
 
 ---
 
@@ -94,6 +96,7 @@
 - [x] Create/standardize quick actions partial
 - [x] Create/standardize empty state partial
 - [ ] Keep styling reusable instead of page-specific
+- [ ] Use the dashboard-style top underline tabs as the default tab pattern for major admin workspaces
 
 Primary files:
 - `resources/views/layouts/others/page-header.blade.php` or current shared header partial in use

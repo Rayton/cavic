@@ -1,5 +1,20 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Pipeline'), 'target' => '#pipeline', 'active' => true],
+        ['label' => _lang('Disbursements'), 'target' => '#disbursements'],
+        ['label' => _lang('Repayments'), 'target' => '#repayments'],
+        ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
+        ['label' => _lang('Collections'), 'target' => '#collections'],
+        ['label' => _lang('Products & Tools'), 'target' => '#products'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $pendingLoansCount = $loanStats['pending'] ?? 0;
@@ -51,18 +66,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('Pipeline'), 'target' => '#pipeline', 'active' => true],
-                ['label' => _lang('Disbursements'), 'target' => '#disbursements'],
-                ['label' => _lang('Repayments'), 'target' => '#repayments'],
-                ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
-                ['label' => _lang('Collections'), 'target' => '#collections'],
-                ['label' => _lang('Products & Tools'), 'target' => '#products'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="pipeline">
             <div class="table-responsive">

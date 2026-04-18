@@ -77,10 +77,87 @@
         e.stopPropagation();
     });
 
-    $('.admin-dashboard-top-tab').on('click', function() {
+    function syncTopStripTabs(target) {
+        if (!target) return;
         $('.admin-dashboard-top-tab').removeClass('active');
-        $(this).addClass('active');
+        $('.admin-dashboard-top-tab[href="' + target + '"]').addClass('active');
+    }
+
+    function getTabTargetFromUrl() {
+        var hash = window.location.hash || '';
+        if (hash) return hash;
+
+        try {
+            var params = new URLSearchParams(window.location.search);
+            var queryTab = params.get('tab');
+            return queryTab ? ('#' + queryTab) : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function buildTabUrl(target) {
+        var nextUrl = window.location.pathname;
+
+        try {
+            var params = new URLSearchParams(window.location.search);
+            params.delete('tab');
+            var query = params.toString();
+            nextUrl += query ? ('?' + query) : '';
+        } catch (e) {
+            nextUrl += window.location.search;
+        }
+
+        return nextUrl + target;
+    }
+
+    function updateTabUrl(target) {
+        if (!target || target.charAt(0) !== '#') return;
+
+        var nextUrl = buildTabUrl(target);
+        var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+        if (currentUrl === nextUrl) return;
+
+        if (window.history && window.history.pushState) {
+            window.history.pushState({}, '', nextUrl);
+        } else {
+            window.location.hash = target;
+        }
+    }
+
+    function activateTabFromLocation() {
+        var target = getTabTargetFromUrl();
+        if (!target) return;
+
+        var $trigger = $('a[data-toggle="tab"][href="' + target + '"]').first();
+        if ($trigger.length) {
+            if (!$trigger.hasClass('active')) {
+                $trigger.tab('show');
+            } else {
+                syncTopStripTabs(target);
+            }
+        } else {
+            syncTopStripTabs(target);
+        }
+    }
+
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
+        var target = $(e.target).attr('href');
+        syncTopStripTabs(target);
+        updateTabUrl(target);
     });
+
+    $(document).on('click', '.admin-dashboard-top-tab:not([data-toggle="tab"])', function() {
+        var target = $(this).attr('href');
+        syncTopStripTabs(target);
+        updateTabUrl(target);
+    });
+
+    $(window).on('popstate hashchange', function() {
+        activateTabFromLocation();
+    });
+
+    activateTabFromLocation();
 
 	/*================================
     Hide Empty Menu

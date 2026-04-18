@@ -270,10 +270,18 @@ This aligns with the planned reusable header partial:
 ## 5.4 Workspace tabs
 Instead of many sidebar items, use tabs inside each workspace.
 
+### Placement rule
+All major admin workspace tabs should be placed in the same top strip pattern now used on the Dashboard:
+- tabs sit in the row directly below the navbar
+- this replaces greeting/salutation-style content in admin workspace pages
+- contextual selectors such as branch selection should sit on the right side of that same row when needed
+- avoid placing primary workspace tabs lower in the page body when the page is a major admin workspace
+
 ### Visual treatment
-- horizontal tab pills or underline tabs
+- horizontal underline tabs, matching the Dashboard pattern
 - quiet default state
-- teal active state
+- active tab uses the CAVIC brand teal
+- compact spacing and a clean baseline underline
 - wrap on smaller screens or collapse into a dropdown when necessary
 
 ### CAVIC workspace tabs

@@ -1,18 +1,24 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('General Settings'), 'target' => '#general_settings', 'active' => true],
+        ['label' => _lang('System Settings'), 'target' => '#system_settings'],
+        ['label' => _lang('Currency Settings'), 'target' => '#currency_settings'],
+        ['label' => _lang('Transaction Fee'), 'target' => '#transaction_fee'],
+        ['label' => _lang('Email Settings'), 'target' => '#email'],
+        ['label' => _lang('SMS Settings'), 'target' => '#sms_gateway'],
+        ['label' => _lang('Logo'), 'target' => '#logo'],
+    ],
+])
+@endsection
+
 @section('content')
 <div class="row">
 	<div class="{{ $alert_col }}">
-		<ul class="nav nav-tabs business-settings-tabs" role="tablist">
-			 <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#general_settings"><i class="fas fa-cog mr-2"></i><span>{{ _lang('General Settings') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#system_settings"><i class="fas fa-tools mr-2"></i><span>{{ _lang('System Settings') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#currency_settings"><i class="fas fa-pound-sign mr-2"></i><span>{{ _lang('Currency Settings') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#transaction_fee"><i class="fas fa-dollar-sign mr-2"></i><span>{{ _lang('Transaction Fee') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#email"><i class="fas fa-at mr-2"></i><span>{{ _lang('Email Settings') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sms_gateway"><i class="fas fa-sms mr-2"></i><span>{{ _lang('SMS Settings') }}</span></a></li>
-			 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#logo"><i class="fas fa-camera mr-2"></i><span>{{ _lang('Logo') }}</span></a></li>
-		</ul>
-
 		<div class="tab-content settings-tab-content">
 			<div id="general_settings" class="tab-pane active">
 				<div class="card">

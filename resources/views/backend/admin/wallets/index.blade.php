@@ -1,5 +1,24 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => array_merge(
+        [
+            ['label' => _lang('Loans'), 'target' => '#tab-loans', 'active' => true],
+        ],
+        collect($accountTypesAndAccounts)->map(function ($accountType) {
+            return ['label' => $accountType['name'], 'target' => '#tab-' . $accountType['id']];
+        })->all(),
+        [
+            ['label' => _lang('Transactions'), 'target' => '#tab-transactions'],
+            ['label' => _lang('Monthly Contributions/Deductions'), 'target' => '#tab-contributions'],
+        ]
+    ),
+])
+@endsection
+
 @section('content')
 <style>
 .wallets-month-table { font-size: 0.875rem; }
@@ -107,22 +126,6 @@
 					</div>
 				</form>
 
-				<ul class="nav nav-tabs nav-tabs-highlight mb-3" role="tablist">
-					<li class="nav-item">
-						<a class="nav-link active" data-toggle="tab" href="#tab-loans" role="tab">{{ _lang('Loans') }}</a>
-					</li>
-					@foreach($accountTypesAndAccounts as $accountType)
-					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#tab-{{ $accountType['id'] }}" role="tab">{{ $accountType['name'] }}</a>
-					</li>
-					@endforeach
-					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#tab-transactions" role="tab">{{ _lang('Transactions') }}</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#tab-contributions" role="tab">{{ _lang('Monthly Contributions/Deductions') }}</a>
-					</li>
-				</ul>
 
 				<div class="tab-content">
 					{{-- Loans Tab (monthly = loan repayments per member) --}}

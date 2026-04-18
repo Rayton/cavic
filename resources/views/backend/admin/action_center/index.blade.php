@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Member Requests'), 'target' => '#member-requests', 'active' => true],
+        ['label' => _lang('Pending Loans'), 'target' => '#pending-loans'],
+        ['label' => _lang('Finance Requests'), 'target' => '#finance-requests'],
+        ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
+        ['label' => _lang('Exceptions'), 'target' => '#exceptions'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $memberRequestsCount = $actionStats['member_requests'] ?? request_count('member_requests');
@@ -66,17 +80,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('Member Requests'), 'target' => '#member-requests', 'active' => true],
-                ['label' => _lang('Pending Loans'), 'target' => '#pending-loans'],
-                ['label' => _lang('Finance Requests'), 'target' => '#finance-requests'],
-                ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
-                ['label' => _lang('Exceptions'), 'target' => '#exceptions'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="member-requests">
             <div class="table-responsive">

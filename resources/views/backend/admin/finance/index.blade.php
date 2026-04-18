@@ -1,5 +1,22 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Wallets'), 'target' => '#wallets', 'active' => true],
+        ['label' => _lang('Savings Accounts'), 'target' => '#accounts'],
+        ['label' => _lang('Cash Transactions'), 'target' => '#cash-ops'],
+        ['label' => _lang('Requests'), 'target' => '#requests'],
+        ['label' => _lang('Exceptions & Reconciliation'), 'target' => '#exceptions'],
+        ['label' => _lang('Expenses'), 'target' => '#expenses'],
+        ['label' => _lang('Banking'), 'target' => '#banking'],
+        ['label' => _lang('Methods & Interest'), 'target' => '#methods'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $depositRequests = $financeStats['deposit_requests'] ?? 0;
@@ -42,20 +59,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('Wallets'), 'target' => '#wallets', 'active' => true],
-                ['label' => _lang('Savings Accounts'), 'target' => '#accounts'],
-                ['label' => _lang('Cash Transactions'), 'target' => '#cash-ops'],
-                ['label' => _lang('Requests'), 'target' => '#requests'],
-                ['label' => _lang('Exceptions & Reconciliation'), 'target' => '#exceptions'],
-                ['label' => _lang('Expenses'), 'target' => '#expenses'],
-                ['label' => _lang('Banking'), 'target' => '#banking'],
-                ['label' => _lang('Methods & Interest'), 'target' => '#methods'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="wallets">
             <div class="row mb-4">

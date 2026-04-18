@@ -1,5 +1,20 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('All Members'), 'target' => '#all-members', 'active' => true],
+        ['label' => _lang('Onboarding / Requests'), 'target' => '#onboarding'],
+        ['label' => _lang('KYC & Documents'), 'target' => '#kyc'],
+        ['label' => _lang('Branches'), 'target' => '#branches'],
+        ['label' => _lang('Leaders'), 'target' => '#leaders'],
+        ['label' => _lang('Import & Setup'), 'target' => '#setup'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $memberRequests = $memberStats['pending'] ?? 0;
@@ -35,18 +50,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('All Members'), 'target' => '#all-members', 'active' => true],
-                ['label' => _lang('Onboarding / Requests'), 'target' => '#onboarding'],
-                ['label' => _lang('KYC & Documents'), 'target' => '#kyc'],
-                ['label' => _lang('Branches'), 'target' => '#branches'],
-                ['label' => _lang('Leaders'), 'target' => '#leaders'],
-                ['label' => _lang('Import & Setup'), 'target' => '#setup'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="all-members">
             <div class="table-responsive">

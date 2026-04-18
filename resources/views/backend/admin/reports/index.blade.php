@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => true],
+        ['label' => _lang('Portfolio & Loans'), 'target' => '#portfolio'],
+        ['label' => _lang('Accounts'), 'target' => '#accounts'],
+        ['label' => _lang('Transactions & Expenses'), 'target' => '#transactions'],
+        ['label' => _lang('Banking & Revenue'), 'target' => '#banking'],
+    ],
+])
+@endsection
+
 @section('content')
 @php
     $reportCounts = [
@@ -95,17 +109,6 @@
 </div>
 
 <div class="card workspace-section-card">
-    <div class="card-header">
-        @include('backend.admin.partials.module-tabs', [
-            'tabs' => [
-                ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => true],
-                ['label' => _lang('Portfolio & Loans'), 'target' => '#portfolio'],
-                ['label' => _lang('Accounts'), 'target' => '#accounts'],
-                ['label' => _lang('Transactions & Expenses'), 'target' => '#transactions'],
-                ['label' => _lang('Banking & Revenue'), 'target' => '#banking'],
-            ],
-        ])
-    </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="executive">
             <p class="text-muted">{{ _lang('Use these reports for management-level visibility into cash and high-level financial performance.') }}</p>

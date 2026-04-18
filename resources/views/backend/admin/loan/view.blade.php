@@ -1,5 +1,20 @@
 @extends('layouts.app')
 
+@section('workspace_top_tabs')
+@include('backend.admin.partials.module-tabs', [
+    'variant' => 'top-strip',
+    'role' => 'navigation',
+    'tabs' => [
+        ['label' => _lang('Loan Details'), 'target' => '#loan_details', 'active' => true],
+        ['label' => _lang('Guarantor'), 'target' => '#guarantor'],
+        ['label' => _lang('Collateral'), 'target' => '#collateral'],
+        ['label' => _lang('Repayments Schedule'), 'target' => '#schedule'],
+        ['label' => _lang('Repayments'), 'target' => '#repayments'],
+        ['label' => _lang('Edit'), 'url' => route('loans.edit', $loan['id'])],
+    ],
+])
+@endsection
+
 @section('content')
 <div class="row">
     <div class="col-lg-12">
@@ -32,28 +47,6 @@
                 @endif
             </div>
             <div class="card-body">
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#loan_details">{{ _lang("Loan Details") }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#guarantor">{{ _lang("Guarantor") }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#collateral">{{ _lang("Collateral") }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#schedule">{{ _lang("Repayments Schedule") }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#repayments">{{ _lang("Repayments") }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('loans.edit', $loan['id']) }}">{{ _lang("Edit") }}</a>
-                    </li>
-                </ul>
-                <!-- Tab panes -->
                 <div class="tab-content">
                     <div class="tab-pane active" id="loan_details">
                         @if($loan->status == 0)
@@ -434,22 +427,4 @@
         </div>
     </div>
 </div>
-@endsection
-@section('js-script')
-<script>
-   (function($) {
-       "use strict";
-   
-   	$('.nav-tabs a').on('shown.bs.tab', function(event){
-   		var tab = $(event.target).attr("href");
-   		var url = "{{ route('loans.show',$loan->id) }}";
-   	    history.pushState({}, null, url + "?tab=" + tab.substring(1));
-   	});
-   
-   	@if(isset($_GET['tab']))
-   	   $('.nav-tabs a[href="#{{ $_GET['tab'] }}"]').tab('show');
-   	@endif
-   
-   })(jQuery);
-</script>
 @endsection
