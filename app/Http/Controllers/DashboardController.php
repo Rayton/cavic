@@ -1,7 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\BankTransaction;
+use App\Models\Branch;
 use App\Models\DepositMethod;
+use App\Models\DepositRequest;
 use App\Models\Expense;
 use App\Models\Loan;
 use App\Models\LoanPayment;
@@ -9,10 +12,13 @@ use App\Models\LoanRepayment;
 use App\Models\Member;
 use App\Models\SavingsAccount;
 use App\Models\Transaction;
+use App\Models\WithdrawRequest;
+use App\Services\CollectionFollowUpInsightsService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller {
     /**
@@ -29,7 +35,7 @@ class DashboardController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index() {
+    public function index(Request $request) {
         $user           = auth()->user();
         $user_type      = $user->user_type;
         $date           = date('Y-m-d');
@@ -174,6 +180,263 @@ class DashboardController extends Controller {
                 ->get();
 
             $data['total_customer'] = Member::count();
+            $data['active_borrowers_count'] = Loan::where('status', 1)->distinct('borrower_id')->count('borrower_id');
+            $data['pending_deposit_requests_count'] = DepositRequest::where('status', 0)->count();
+            $data['pending_withdraw_requests_count'] = WithdrawRequest::where('status', 0)->count();
+            $data['pending_finance_requests_count'] = $data['pending_deposit_requests_count'] + $data['pending_withdraw_requests_count'];
+            $data['pending_cash_transactions_count'] = Transaction::where('status', 0)->count();
+            $data['pending_bank_transactions_count'] = BankTransaction::where('status', 0)->count();
+            $data['finance_exception_count'] = $data['pending_finance_requests_count'] + $data['pending_cash_transactions_count'] + $data['pending_bank_transactions_count'];
+            $data['today_due_count'] = LoanRepayment::whereDate('repayment_date', $date)
+                ->where('status', 0)
+                ->count();
+            $data['due_this_week_count'] = LoanRepayment::whereBetween('repayment_date', [Carbon::today()->addDay()->toDateString(), Carbon::today()->addDays(7)->toDateString()])
+                ->where('status', 0)
+                ->count();
+            $data['overdue_repayments_count'] = LoanRepayment::whereDate('repayment_date', '<', $date)
+                ->where('status', 0)
+                ->count();
+            $data['today_transactions_count'] = Transaction::whereDate('trans_date', $date)->count();
+            $data['today_expenses_count'] = Expense::whereDate('expense_date', $date)->count();
+            $data['ready_for_disbursement_count'] = Loan::where('status', 1)
+                ->whereDoesntHave('disburseTransaction')
+                ->whereHas('approvals', function ($query) {
+                    $query->where('status', 1);
+                }, '>=', 4)
+                ->count();
+
+            $followUpsEnabled = Schema::hasTable('loan_collection_follow_ups');
+            $followUpInsights = app(CollectionFollowUpInsightsService::class);
+            $collectionDateRange = $followUpInsights->resolveRange($request->get('from_date'), $request->get('to_date'), Carbon::today());
+            $followUpOverview = $followUpInsights->overview($collectionDateRange['start'], $collectionDateRange['end'], 6, 5, 6);
+            $data['collection_execution_stats'] = $followUpOverview['stats'];
+            $data['promise_follow_up_queue'] = $followUpOverview['promiseFollowUpQueue'];
+            $data['recent_resolved_cases'] = $followUpOverview['recentResolvedCases'];
+            $data['branch_follow_up_performance'] = $followUpOverview['branchPerformance'];
+            $data['collector_follow_up_performance'] = $followUpOverview['collectorPerformance'];
+            $data['collection_date_range'] = $collectionDateRange;
+
+            $data['exception_cards'] = [
+                [
+                    'label' => _lang('Overdue Repayments'),
+                    'value' => $data['overdue_repayments_count'],
+                    'route' => route('loans.workspace'),
+                    'icon' => 'fas fa-exclamation-triangle',
+                    'theme' => 'danger',
+                ],
+                [
+                    'label' => _lang('Due Today'),
+                    'value' => $data['today_due_count'],
+                    'route' => route('loans.workspace'),
+                    'icon' => 'fas fa-calendar-day',
+                    'theme' => 'warning',
+                ],
+                [
+                    'label' => _lang('Ready for Disbursement'),
+                    'value' => $data['ready_for_disbursement_count'],
+                    'route' => route('loans.workspace'),
+                    'icon' => 'fas fa-check-circle',
+                    'theme' => 'success',
+                ],
+                [
+                    'label' => _lang('Finance Exceptions'),
+                    'value' => $data['finance_exception_count'],
+                    'route' => route('finance.index'),
+                    'icon' => 'fas fa-balance-scale',
+                    'theme' => 'primary',
+                ],
+            ];
+
+            $repaymentRelations = ['loan.borrower.branch', 'loan.currency'];
+            if ($followUpsEnabled) {
+                $repaymentRelations[] = 'latestFollowUp.createdBy';
+            }
+
+            $overdueRepaymentsForBuckets = LoanRepayment::with($repaymentRelations)
+                ->whereDate('repayment_date', '<', $date)
+                ->where('status', 0)
+                ->get();
+
+            $todayCarbon = Carbon::today();
+            $data['collection_buckets'] = [
+                [
+                    'label' => _lang('1-7 Days Late'),
+                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
+                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
+                        return $daysLate >= 1 && $daysLate <= 7;
+                    })->count(),
+                ],
+                [
+                    'label' => _lang('8-30 Days Late'),
+                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
+                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
+                        return $daysLate >= 8 && $daysLate <= 30;
+                    })->count(),
+                ],
+                [
+                    'label' => _lang('31+ Days Late'),
+                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
+                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
+                        return $daysLate >= 31;
+                    })->count(),
+                ],
+            ];
+
+            $data['collection_priority_queue'] = $overdueRepaymentsForBuckets->map(function ($repayment) use ($todayCarbon, $followUpsEnabled) {
+                $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
+                $latestFollowUp = $followUpsEnabled ? $repayment->latestFollowUp : null;
+
+                return (object) [
+                    'repayment_id' => $repayment->id,
+                    'loan_id' => $repayment->loan->loan_id,
+                    'loan_route_id' => $repayment->loan_id,
+                    'borrower_name' => $repayment->loan->borrower->name,
+                    'branch_name' => optional($repayment->loan->borrower->branch)->name,
+                    'contact_phone' => trim(($repayment->loan->borrower->country_code ?? '') . ' ' . ($repayment->loan->borrower->mobile ?? '')),
+                    'days_late' => $daysLate,
+                    'amount' => decimalPlace($repayment->amount_to_pay, optional($repayment->loan->currency)->name),
+                    'last_outcome_label' => optional($latestFollowUp)->outcome_text,
+                    'last_outcome_theme' => optional($latestFollowUp)->outcome_theme,
+                    'action_label' => $daysLate >= 31 ? _lang('Escalate now') : ($daysLate >= 8 ? _lang('Branch follow-up') : _lang('Contact today')),
+                    'action_theme' => $daysLate >= 31 ? 'critical' : ($daysLate >= 8 ? 'overdue' : 'review'),
+                ];
+            })->sortByDesc('days_late')->take(6)->values();
+
+            $dueTodayRepayments = LoanRepayment::with($repaymentRelations)
+                ->whereDate('repayment_date', $date)
+                ->where('status', 0)
+                ->get();
+
+            $upcomingRepayments = LoanRepayment::with($repaymentRelations)
+                ->whereBetween('repayment_date', [Carbon::today()->addDay()->toDateString(), Carbon::today()->addDays(7)->toDateString()])
+                ->where('status', 0)
+                ->get();
+
+            $data['collection_queue_counts'] = [
+                'call_today' => $dueTodayRepayments->count() + $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
+                    return Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon) <= 7;
+                })->count(),
+                'upcoming_reminders' => $upcomingRepayments->count(),
+                'critical' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
+                    return Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon) >= 31;
+                })->count(),
+            ];
+
+            $data['collector_call_list'] = collect($dueTodayRepayments->map(function ($repayment) use ($followUpsEnabled) {
+                $latestFollowUp = $followUpsEnabled ? $repayment->latestFollowUp : null;
+                return (object) [
+                    'repayment_id' => $repayment->id,
+                    'loan_id' => $repayment->loan->loan_id,
+                    'loan_route_id' => $repayment->loan_id,
+                    'borrower_name' => $repayment->loan->borrower->name,
+                    'branch_name' => optional($repayment->loan->borrower->branch)->name,
+                    'contact_phone' => trim(($repayment->loan->borrower->country_code ?? '') . ' ' . ($repayment->loan->borrower->mobile ?? '')),
+                    'queue_label' => _lang('Due Today'),
+                    'queue_theme' => 'today',
+                    'last_outcome_label' => optional($latestFollowUp)->outcome_text,
+                    'last_outcome_theme' => optional($latestFollowUp)->outcome_theme,
+                    'next_action' => _lang('Call before close of day'),
+                    'priority_score' => 200 + (float) $repayment->amount_to_pay,
+                ];
+            })->all())->merge(
+                $overdueRepaymentsForBuckets->map(function ($repayment) use ($todayCarbon, $followUpsEnabled) {
+                    $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
+                    $latestFollowUp = $followUpsEnabled ? $repayment->latestFollowUp : null;
+
+                    return (object) [
+                        'repayment_id' => $repayment->id,
+                        'loan_id' => $repayment->loan->loan_id,
+                        'loan_route_id' => $repayment->loan_id,
+                        'borrower_name' => $repayment->loan->borrower->name,
+                        'branch_name' => optional($repayment->loan->borrower->branch)->name,
+                        'contact_phone' => trim(($repayment->loan->borrower->country_code ?? '') . ' ' . ($repayment->loan->borrower->mobile ?? '')),
+                        'queue_label' => $daysLate >= 31 ? _lang('Critical') : _lang('Overdue'),
+                        'queue_theme' => $daysLate >= 31 ? 'critical' : 'overdue',
+                        'last_outcome_label' => optional($latestFollowUp)->outcome_text,
+                        'last_outcome_theme' => optional($latestFollowUp)->outcome_theme,
+                        'next_action' => $daysLate >= 31 ? _lang('Escalate to branch leadership') : _lang('Call borrower and confirm recovery plan'),
+                        'priority_score' => ($daysLate >= 31 ? 400 : 300) + (float) $repayment->amount_to_pay,
+                    ];
+                })->all()
+            )->sortByDesc('priority_score')->take(6)->values();
+
+            $data['upcoming_reminder_queue'] = $upcomingRepayments->map(function ($repayment) use ($followUpsEnabled) {
+                $daysUntil = Carbon::today()->diffInDays(Carbon::parse($repayment->getRawOriginal('repayment_date')));
+                $latestFollowUp = $followUpsEnabled ? $repayment->latestFollowUp : null;
+
+                return (object) [
+                    'repayment_id' => $repayment->id,
+                    'loan_id' => $repayment->loan->loan_id,
+                    'borrower_name' => $repayment->loan->borrower->name,
+                    'branch_name' => optional($repayment->loan->borrower->branch)->name,
+                    'days_until' => $daysUntil,
+                    'last_outcome_label' => optional($latestFollowUp)->outcome_text,
+                    'last_outcome_theme' => optional($latestFollowUp)->outcome_theme,
+                    'reminder_label' => $daysUntil <= 2 ? _lang('Reminder today') : _lang('Schedule reminder'),
+                    'reminder_theme' => $daysUntil <= 2 ? 'today' : 'upcoming',
+                ];
+            })->sortBy('days_until')->take(6)->values();
+
+            $data['branch_collections_pressure'] = Branch::get()->map(function ($branch) use ($date) {
+                $dueTodayCount = LoanRepayment::whereDate('repayment_date', $date)
+                    ->where('status', 0)
+                    ->whereHas('loan', function ($query) use ($branch) {
+                        $query->where('branch_id', $branch->id);
+                    })->count();
+
+                $overdueCount = LoanRepayment::whereDate('repayment_date', '<', $date)
+                    ->where('status', 0)
+                    ->whereHas('loan', function ($query) use ($branch) {
+                        $query->where('branch_id', $branch->id);
+                    })->count();
+
+                $criticalCount = LoanRepayment::whereDate('repayment_date', '<', Carbon::today()->subDays(30)->toDateString())
+                    ->where('status', 0)
+                    ->whereHas('loan', function ($query) use ($branch) {
+                        $query->where('branch_id', $branch->id);
+                    })->count();
+
+                return (object) [
+                    'name' => $branch->name,
+                    'due_today' => $dueTodayCount,
+                    'overdue' => $overdueCount,
+                    'critical' => $criticalCount,
+                    'pressure_score' => $dueTodayCount + $overdueCount + ($criticalCount * 2),
+                ];
+            })->sortByDesc('pressure_score')->take(5)->values();
+
+            $data['branch_performance'] = Branch::get()->map(function ($branch) use ($date) {
+                $activeMembers = Member::withoutGlobalScopes(['status'])
+                    ->where('branch_id', $branch->id)
+                    ->where('status', 1)
+                    ->count();
+
+                $pendingMembers = Member::withoutGlobalScopes(['status'])
+                    ->where('branch_id', $branch->id)
+                    ->where('status', 0)
+                    ->count();
+
+                $activeLoans = Loan::withoutGlobalScopes(['borrower_id'])
+                    ->where('branch_id', $branch->id)
+                    ->where('status', 1)
+                    ->count();
+
+                $overdueLoans = LoanRepayment::withoutGlobalScopes(['borrower_id'])
+                    ->whereDate('repayment_date', '<', $date)
+                    ->where('status', 0)
+                    ->whereHas('loan', function ($query) use ($branch) {
+                        $query->where('branch_id', $branch->id);
+                    })->count();
+
+                return (object) [
+                    'name' => $branch->name,
+                    'active_members' => $activeMembers,
+                    'pending_members' => $pendingMembers,
+                    'active_loans' => $activeLoans,
+                    'overdue_repayments' => $overdueLoans,
+                    'pressure_score' => $pendingMembers + $overdueLoans,
+                ];
+            })->sortByDesc('pressure_score')->take(5)->values();
 
             // Interest analysis (system-wide): total interest payable vs paid for all active loans
             $activeLoans = Loan::where('status', 1)->get();

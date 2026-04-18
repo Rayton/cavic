@@ -44,6 +44,21 @@ class LoanRepayment extends Model {
         return $this->belongsTo('App\Models\Loan', 'loan_id')->withDefault();
     }
 
+    public function followUps()
+    {
+        return $this->hasMany(LoanCollectionFollowUp::class, 'loan_repayment_id');
+    }
+
+    public function latestFollowUp()
+    {
+        return $this->hasOne(LoanCollectionFollowUp::class, 'loan_repayment_id')->latestOfMany();
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(LoanPayment::class, 'repayment_id')->latestOfMany();
+    }
+
     public function getRepaymentDateAttribute($value) {
         $date_format = get_date_format();
         return \Carbon\Carbon::parse($value)->format("$date_format");

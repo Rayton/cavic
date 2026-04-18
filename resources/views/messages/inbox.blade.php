@@ -31,7 +31,7 @@
                                         <td class="{{ $readStatus }}">{{ $message->created_at->format('M d, Y h:i A') }}</td>
                                         <td class="{{ $readStatus }}">{{ isset($message->lastReplies()->status) ? ucfirst($message->lastReplies()->status) : ucfirst($message->status) }}</td>
                                         <td class="text-center">
-                                            <a class="btn btn-primary btn-xs" href="{{ route('messages.show', $message->uuid) }}">
+                                            <a class="btn btn-primary btn-xs ajax-modal" data-title="{{ _lang('Message Details') }}" href="{{ route('messages.show', $message->uuid) }}">
                                                 {{ _lang('View Message') }}
                                             </a>
                                         </td>

@@ -72,7 +72,7 @@ class DepositRequestController extends Controller {
                 $actions .= '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton' . $deposit_request['id'] . '">';
             
                 // Details Button
-                $actions .= '<a href="' . route('deposit_requests.show', $deposit_request['id']) . '" class="dropdown-item"><i class="fas fa-eye mr-1"></i>' . _lang('Details') . '</a>';
+                $actions .= '<a href="' . route('deposit_requests.show', $deposit_request['id']) . '" class="dropdown-item ajax-modal" data-title="' . _lang('Deposit Request Details') . '"><i class="fas fa-eye mr-1"></i>' . _lang('Details') . '</a>';
                 if (! empty($deposit_request->attachment)) {
                     $actions .= '<a href="' . route('deposit_requests.download_attachment', $deposit_request['id']) . '" class="dropdown-item"><i class="ti-download mr-1"></i>' . _lang('Download Attachment') . '</a>';
                 }
@@ -122,7 +122,10 @@ class DepositRequestController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, $tenant, $id) {
-        $depositrequest = DepositRequest::find($id);
+        $depositrequest = DepositRequest::with(['member', 'method.currency', 'account.savings_type.currency'])->find($id);
+        if ($request->ajax()) {
+            return view('backend.admin.deposit_request.modal.view', compact('depositrequest', 'id'));
+        }
         return view('backend.admin.deposit_request.view', compact('depositrequest', 'id'));
     }
 

@@ -217,7 +217,7 @@ When in doubt, group by operational job-to-be-done:
 | `loan_approvals.show` | approval detail | Loans | Approvals | Detail Modal / Page | Yes | shared with Action Center |
 | `loan_approvals.approve` | action | Loans | Approvals | Action | Yes | keep |
 | `loan_approvals.reject` | action | Loans | Approvals | Action | Yes | keep |
-| `loan_approver_settings.*` | route audit required | Loans | Approvals | Modal / Page | Audit | confirm actual route definitions |
+| `loan_approver_settings.*` | loan approver configuration | Loans | Approvals | Modal / Page | Yes | restored in `routes/web.php`; can be linked from Loans workspace |
 
 ---
 
@@ -437,7 +437,7 @@ Before cutting over navigation, verify:
 - route references in Blade match actual route definitions
 
 Special attention:
-- `loan_approver_settings.*` route references should be confirmed before relying on them in workspace UX
+- `loan_approver_settings.*` routes have been restored; keep tenant-aware access and modal behavior intact if expanded further
 
 ---
 

@@ -218,7 +218,7 @@ The Loans module should help admins answer:
 - `loan_approvals.*`
 - `loan_collaterals.*`
 - `guarantors.*`
-- `loan_approver_settings.*` (subject to route audit)
+- `loan_approver_settings.*`
 
 ---
 

@@ -84,7 +84,7 @@ class MessageController extends Controller {
         return view('messages.sent', compact('messages', 'alert_col'));
     }
 
-    public function show($tenant, $uuid) {
+    public function show(Request $request, $tenant, $uuid) {
         $alert_col = 'col-lg-8 offset-lg-2';
         $message   = Message::where('uuid', $uuid)
             ->where(function ($query) {
@@ -100,6 +100,10 @@ class MessageController extends Controller {
         $message->replies()->where('recipient_id', auth()->id())
             ->where('status', 'unread')
             ->update(['status' => 'read']);
+
+        if ($request->ajax()) {
+            return view('messages.modal.show', compact('message', 'alert_col'));
+        }
 
         return view('messages.show', compact('message', 'alert_col'));
     }

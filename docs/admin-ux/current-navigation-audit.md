@@ -175,7 +175,7 @@ Primary file:
 - `loan_collaterals.*`
 - `guarantors.*`
 - `loan_approvals.*`
-- `loan_approver_settings.*` (referenced in views, route audit required)
+- `loan_approver_settings.*` (restored in `routes/web.php`; available for loan approval configuration)
 
 ## Finance
 - `wallets.*`

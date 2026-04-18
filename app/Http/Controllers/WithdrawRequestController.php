@@ -63,7 +63,7 @@ class WithdrawRequestController extends Controller {
                 $actions .= '</button>';
                 $actions .= '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton' . $withdraw_request['id'] . '">';
 
-                $actions .= '<a href="' . route('withdraw_requests.show', $withdraw_request['id']) . '" class="dropdown-item"><i class="fas fa-eye mr-1"></i>' . _lang('Details') . '</a>';
+                $actions .= '<a href="' . route('withdraw_requests.show', $withdraw_request['id']) . '" class="dropdown-item ajax-modal" data-title="' . _lang('Withdraw Request Details') . '"><i class="fas fa-eye mr-1"></i>' . _lang('Details') . '</a>';
 
                 if ($withdraw_request->status != 2) {
                     $actions .= '<a href="' . route('withdraw_requests.approve', $withdraw_request['id']) . '" class="dropdown-item"><i class="fas fa-check-circle text-success mr-1"></i>' . _lang('Approve') . '</a>';
@@ -98,7 +98,10 @@ class WithdrawRequestController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, $tenant, $id) {
-        $withdrawRequest = WithdrawRequest::find($id);
+        $withdrawRequest = WithdrawRequest::with(['member', 'method.currency', 'account.savings_type.currency', 'transaction'])->find($id);
+        if ($request->ajax()) {
+            return view('backend.admin.withdraw_request.modal.view', compact('withdrawRequest', 'id'));
+        }
         return view('backend.admin.withdraw_request.view', compact('withdrawRequest', 'id'));
     }
 

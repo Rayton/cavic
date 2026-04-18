@@ -7,7 +7,7 @@
 			<div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Loan Approver Settings') }}</span>
 				<div class="ml-auto">
-					<a class="btn btn-primary btn-xs" href="{{ route('loan_approver_settings.create', ['tenant' => request()->tenant->slug, 'level' => 1]) }}" data-title="{{ _lang('Configure Approvers') }}" class="ajax-modal">
+					<a class="btn btn-primary btn-xs ajax-modal" href="{{ route('loan_approver_settings.create', ['tenant' => request()->tenant->slug, 'level' => 1]) }}" data-title="{{ _lang('Configure Approvers') }}">
 						<i class="ti-plus"></i>&nbsp;{{ _lang('Configure Approvers') }}
 					</a>
 				</div>

@@ -28,7 +28,7 @@
                                         <td>{{ $message->subject }}</td>
                                         <td>{{ $message->created_at->format('M d, Y h:i A') }}</td>
                                         <td>
-                                            <a class="btn btn-primary btn-xs" href="{{ route('messages.show', $message->uuid) }}">
+                                            <a class="btn btn-primary btn-xs ajax-modal" data-title="{{ _lang('Message Details') }}" href="{{ route('messages.show', $message->uuid) }}">
                                                 {{ _lang('View Message') }}
                                             </a>
                                         </td>

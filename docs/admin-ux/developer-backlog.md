@@ -124,9 +124,9 @@ Find Blade references that may not match actual route definitions.
 - `resources/views/backend/admin/**`
 
 ### Areas to audit
-- `loan_approver_settings.*`
 - resource `show` routes referenced from views
 - any AJAX modal links referencing missing routes
+- verify restored `loan_approver_settings.*` flow renders correctly in tenant admin
 
 ### Dependencies
 - UX-001

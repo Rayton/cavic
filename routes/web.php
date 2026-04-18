@@ -17,6 +17,12 @@ use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\InterestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuarantorController;
+use App\Http\Controllers\ActionCenterController;
+use App\Http\Controllers\FinanceHubController;
+use App\Http\Controllers\LoanWorkspaceController;
+use App\Http\Controllers\ReportCenterController;
+use App\Http\Controllers\MemberWorkspaceController;
+use App\Http\Controllers\AdministrationHubController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PermissionController;
@@ -25,6 +31,7 @@ use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\LoanProductController;
+use App\Http\Controllers\LoanApproverSettingController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DepositMethodController;
@@ -33,6 +40,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\DepositRequestController;
 use App\Http\Controllers\Install\UpdateController;
 use App\Http\Controllers\LoanCollateralController;
+use App\Http\Controllers\LoanCollectionFollowUpController;
 use App\Http\Controllers\MemberDocumentController;
 use App\Http\Controllers\SavingsAccountController;
 use App\Http\Controllers\SavingsProductController;
@@ -337,6 +345,14 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
 
             /** Tenant Role based user Routes **/
             Route::middleware('tenant.user')->group(function () {
+                //Admin Workspace Routes
+                Route::get('action-center', [ActionCenterController::class, 'index'])->name('action_center.index');
+                Route::get('members-workspace', [MemberWorkspaceController::class, 'index'])->name('members.workspace');
+                Route::get('loans-workspace', [LoanWorkspaceController::class, 'index'])->name('loans.workspace');
+                Route::get('finance', [FinanceHubController::class, 'index'])->name('finance.index');
+                Route::get('reports', [ReportCenterController::class, 'index'])->name('reports.index');
+                Route::get('administration', [AdministrationHubController::class, 'index'])->name('administration.index');
+
                 //Dashboard Widget
                 Route::get('dashboard/total_customer_widget', [DashboardController::class, 'dashboard_widget'])->name('dashboard.total_customer_widget');
                 Route::get('dashboard/deposit_requests_widget', [DashboardController::class, 'dashboard_widget'])->name('dashboard.deposit_requests_widget');
@@ -429,6 +445,18 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 Route::get('loan_payments/get_repayment_by_loan_id/{loan_id}', [LoanPaymentController::class, 'get_repayment_by_loan_id']);
                 Route::get('loan_payments/get_table_data', [LoanPaymentController::class, 'get_table_data']);
                 Route::resource('loan_payments', LoanPaymentController::class);
+
+                //Loan Approver Settings Controller
+                Route::get('loan_approver_settings', [LoanApproverSettingController::class, 'index'])->name('loan_approver_settings.index');
+                Route::match(['get', 'post'], 'loan_approver_settings/create/{level?}', [LoanApproverSettingController::class, 'create'])->name('loan_approver_settings.create');
+                Route::post('loan_approver_settings', [LoanApproverSettingController::class, 'store'])->name('loan_approver_settings.store');
+                Route::get('loan_approver_settings/{id}/edit', [LoanApproverSettingController::class, 'edit'])->name('loan_approver_settings.edit');
+                Route::match(['put', 'patch'], 'loan_approver_settings/{id}', [LoanApproverSettingController::class, 'update'])->name('loan_approver_settings.update');
+                Route::delete('loan_approver_settings/{id}', [LoanApproverSettingController::class, 'destroy'])->name('loan_approver_settings.destroy');
+
+                //Loan Collection Follow-up Controller
+                Route::get('loan_collection_follow_ups/create/{repayment_id}', [LoanCollectionFollowUpController::class, 'create'])->name('loan_collection_follow_ups.create');
+                Route::post('loan_collection_follow_ups', [LoanCollectionFollowUpController::class, 'store'])->name('loan_collection_follow_ups.store');
 
                 //Bank Accounts
                 Route::resource('bank_accounts', BankAccountController::class)->middleware("demo:PUT|PATCH|DELETE");

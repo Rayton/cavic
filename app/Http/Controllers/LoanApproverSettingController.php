@@ -47,7 +47,7 @@ class LoanApproverSettingController extends Controller
      */
     public function create(Request $request, $tenant, $level = null)
     {
-        if ($request->isMethod('post') && $level) {
+        if ($level) {
             $setting = LoanApproverSetting::where('approval_level', $level)
                 ->where('tenant_id', request()->tenant->id)
                 ->first();
@@ -61,10 +61,15 @@ class LoanApproverSettingController extends Controller
             }
 
             $members = Member::orderBy('first_name', 'asc')->get();
-            return view('backend.admin.loan.modal.approver_setting', compact('setting', 'members', 'level'));
+
+            if ($request->ajax()) {
+                return view('backend.admin.loan.modal.approver_setting', compact('setting', 'members', 'level'));
+            }
+
+            return view('backend.admin.loan.approver_setting_edit', compact('setting', 'members', 'level'));
         }
 
-        return back();
+        return redirect()->route('loan_approver_settings.index', $tenant);
     }
 
     /**
