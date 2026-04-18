@@ -125,12 +125,6 @@
 				<div class="extra-details {{ $isAdminWorkspace ? 'admin-sidebar-brand' : '' }}">
 					<a href="{{ $user_type == 'superadmin' ? route('admin.dashboard.index') : route('dashboard.index') }}" class="{{ $isAdminWorkspace ? 'admin-brand-link' : '' }}">
 						<img class="sidebar-logo" src="{{ get_logo() }}" alt="logo">
-						@if($isAdminWorkspace)
-							<span class="admin-brand-copy">
-								<span class="admin-brand-title">{{ $tenantDisplayName }}</span>
-								<span class="admin-brand-subtitle">{{ _lang('Operations Console') }}</span>
-							</span>
-						@endif
 					</a>
 				</div>
 
@@ -213,10 +207,17 @@
 					<div class="row align-items-center">
 						<!-- nav and search button -->
 						<div class="col-lg-6 col-4 clearfix rtl-2">
-							<div class="nav-btn float-left">
-								<span></span>
-								<span></span>
-								<span></span>
+							<div class="d-flex align-items-center admin-header-left-cluster">
+								<div class="nav-btn float-left">
+									<span></span>
+									<span></span>
+									<span></span>
+								</div>
+								@if($isAdminWorkspace)
+									<div class="admin-navbar-company d-none d-md-flex">
+										<span class="admin-navbar-company-name">{{ $tenantDisplayName }}</span>
+									</div>
+								@endif
 							</div>
 						</div>
 

@@ -5518,45 +5518,30 @@ Payment Gateway
 
 .admin-shell-v2 .sidebar-menu .extra-details.admin-sidebar-brand {
     background: transparent;
-    padding: 24px 20px 16px;
+    min-height: 80px;
+    padding: 10px 20px;
     border-bottom: 1px solid var(--cavic-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .admin-shell-v2 .admin-brand-link {
     display: flex;
     align-items: center;
-    gap: 14px;
-    text-align: left;
+    justify-content: center;
+    text-align: center;
 }
 
 .admin-shell-v2 .sidebar-menu .sidebar-logo {
-    max-height: 54px;
-    max-width: 54px;
-    border-radius: 16px;
-    object-fit: cover;
-    background: #fff;
-}
-
-.admin-shell-v2 .admin-brand-copy {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.admin-shell-v2 .admin-brand-title {
-    color: var(--cavic-text);
-    font-size: 1.1rem;
-    font-weight: 700;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.admin-shell-v2 .admin-brand-subtitle {
-    color: var(--cavic-text-soft);
-    font-size: 0.78rem;
-    margin-top: 0.18rem;
+    max-height: 92px;
+    max-width: 92px;
+    object-fit: contain;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
 }
 
 .admin-shell-v2 .admin-sidebar-intro {
@@ -5714,6 +5699,35 @@ Payment Gateway
 .admin-shell-v2 .header-area.admin-header-v2 .row {
     width: 100%;
     align-items: center;
+}
+
+.admin-shell-v2 .admin-header-left-cluster {
+    gap: 16px;
+}
+
+.admin-shell-v2 .admin-navbar-company {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.admin-shell-v2 .admin-navbar-company-name {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 247, 0.96));
+    border: 1px solid rgba(63, 104, 109, 0.14);
+    box-shadow: 0 8px 20px rgba(31, 41, 55, 0.05);
+    color: var(--cavic-text);
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
 }
 
 .admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {

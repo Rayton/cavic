@@ -904,6 +904,12 @@
     .admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {
         justify-content: flex-end;
     }
+
+    .admin-shell-v2 .admin-navbar-company-name {
+        max-width: 220px;
+        min-height: 38px;
+        padding: 0 14px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -944,6 +950,10 @@
 
     .admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {
         justify-content: flex-end;
+    }
+
+    .admin-shell-v2 .admin-header-left-cluster {
+        gap: 10px;
     }
 
     .admin-shell-v2 .admin-sidebar-note {
