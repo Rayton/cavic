@@ -364,14 +364,6 @@
 					<div class="row">
 						<div class="{{ isset($alert_col) ? $alert_col : 'col-lg-12' }}">
 
-							@if(auth()->user()->user_type == 'admin' && auth()->user()->tenant_owner == 1 && request()->tenant->membership_type == 'trial')
-							<div class="alert alert-warning alert-dismissible" role="alert">
-								<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-									<span aria-hidden="true"><i class="far fa-times-circle"></i></span>
-								</button>
-								<span><i class="fas fa-info-circle mr-2"></i>{{ _lang('Your trial period will end on').' '.request()->tenant->valid_to }}</span>
-							</div>
-							@endif
 
 							<div class="alert alert-success alert-dismissible" id="main_alert" role="alert">
 								<button type="button" id="close_alert" class="close">
