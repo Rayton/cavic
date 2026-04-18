@@ -5495,6 +5495,7 @@ Payment Gateway
     border-radius: var(--cavic-radius-app);
     box-shadow: var(--cavic-shadow-soft);
     min-height: calc(100vh - 32px);
+    height: calc(100vh - 32px);
     overflow: hidden;
 }
 
@@ -5504,6 +5505,11 @@ Payment Gateway
     background: var(--cavic-surface-muted);
     border-right: 1px solid var(--cavic-border);
     box-shadow: none;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: calc(100vh - 32px);
+    overflow: hidden;
 }
 
 .admin-shell-v2 .sbar_collapsed .sidebar-menu.admin-sidebar-v2 {
@@ -5577,6 +5583,9 @@ Payment Gateway
 .admin-shell-v2 .main-menu.admin-menu-scroll {
     padding: 14px 14px 90px 14px;
     height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
 }
 
 .admin-shell-v2 .menu-inner {
@@ -5681,6 +5690,8 @@ Payment Gateway
 
 .admin-shell-v2 .main-content {
     background: transparent;
+    max-height: calc(100vh - 32px);
+    overflow: hidden;
 }
 
 .admin-shell-v2 .header-area.admin-header-v2,
@@ -5691,6 +5702,10 @@ Payment Gateway
 
 .admin-shell-v2 .header-area.admin-header-v2 {
     padding: 14px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, 0.04);
 }
 
 .admin-shell-v2 .nav-btn span {
@@ -5758,6 +5773,9 @@ Payment Gateway
 
 .admin-shell-v2 .main-content-inner.admin-main-content-inner {
     padding: 28px 28px 42px;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
 }
 
 .admin-shell-v2 .card,

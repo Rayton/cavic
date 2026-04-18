@@ -7,6 +7,8 @@
     $collectionDateRange = $collection_date_range ?? [];
     $recentResolvedCases = collect($recent_resolved_cases ?? []);
     $recentTransactionPreview = collect($recent_transactions ?? [])->take(6);
+    $dashboardBaseCurrency = $dashboard_base_currency ?? get_base_currency();
+    $executiveMetrics = collect($dashboard_executive_metrics ?? []);
     $branchHotspots = collect($branch_performance ?? [])->sortByDesc('overdue_repayments')->take(5)->values();
     $branchPressureLeaderboard = collect($branch_collections_pressure ?? [])->take(5)->values();
     $branchPressureMax = max(1, (int) $branchPressureLeaderboard->max('pressure_score'));
@@ -182,6 +184,19 @@
 .dashboard-kpi-value { color: #243036; font-size: 1.7rem; line-height: 1.02; font-weight: 700; }
 .dashboard-kpi-meta { color: #7b858c; font-size: .78rem; margin-top: .45rem; }
 .dashboard-kpi-link { color: #3F686D; font-size: .78rem; font-weight: 600; margin-top: .45rem; }
+.dashboard-kpi-change {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    margin-top: .55rem;
+    padding: .28rem .5rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.dashboard-kpi-change.success { background: #eaf8f0; color: #15803d; }
+.dashboard-kpi-change.danger { background: #fdecee; color: #dc2626; }
+.dashboard-kpi-change.neutral { background: #eef6f5; color: #3F686D; }
 
 .dashboard-chart-card .card-header,
 .dashboard-panel-card .card-header,
@@ -353,24 +368,24 @@
 
                 <div class="dashboard-command-grid">
                     <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Members') }}</div>
-                        <div class="mini-value">{{ number_format($total_customer ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Current member base across the organization') }}</div>
+                        <div class="mini-label">{{ _lang('Call Today Queue') }}</div>
+                        <div class="mini-value">{{ number_format($collection_queue_counts['call_today'] ?? 0) }}</div>
+                        <div class="mini-meta">{{ _lang('Due-today plus near-term overdue cases queued for immediate action') }}</div>
                     </div>
                     <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Active Borrowers') }}</div>
-                        <div class="mini-value">{{ number_format($active_borrowers_count ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Borrowers with current portfolio exposure') }}</div>
+                        <div class="mini-label">{{ _lang('Upcoming Reminders') }}</div>
+                        <div class="mini-value">{{ number_format($collection_queue_counts['upcoming_reminders'] ?? 0) }}</div>
+                        <div class="mini-meta">{{ _lang('Borrowers needing pre-due reminder outreach') }}</div>
                     </div>
                     <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Today\'s Transactions') }}</div>
-                        <div class="mini-value">{{ number_format($today_transactions_count ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Posting activity captured today') }}</div>
+                        <div class="mini-label">{{ _lang('Finance Exceptions') }}</div>
+                        <div class="mini-value">{{ number_format($finance_exception_count ?? 0) }}</div>
+                        <div class="mini-meta">{{ _lang('Pending finance requests, cash postings, and bank exceptions') }}</div>
                     </div>
                     <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Today\'s Expenses') }}</div>
-                        <div class="mini-value">{{ number_format($today_expenses_count ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Expense entries posted during the day') }}</div>
+                        <div class="mini-label">{{ _lang('Ready for Disbursement') }}</div>
+                        <div class="mini-value">{{ number_format($ready_for_disbursement_count ?? 0) }}</div>
+                        <div class="mini-meta">{{ _lang('Approved loans waiting release into member accounts') }}</div>
                     </div>
                 </div>
             </div>
@@ -409,84 +424,29 @@
 </div>
 
 <div class="row mb-4 workspace-anchor-offset" id="portfolio-health">
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('members.workspace') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-users"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Total Members') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($total_customer ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Membership base') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('Open members') }}</div>
+    @foreach($executiveMetrics as $metric)
+        <div class="col-xl-3 col-md-6 mb-3">
+            <a href="{{ $metric['route'] }}" class="text-decoration-none">
+                <div class="card dashboard-kpi-card mb-0">
+                    <div class="card-body">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-icon"><i class="{{ $metric['icon'] }}"></i></span>
+                        </div>
+                        <div class="dashboard-kpi-label">{{ $metric['label'] }}</div>
+                        <div class="dashboard-kpi-value">{{ $metric['formatted_amount'] }}</div>
+                        <div class="dashboard-kpi-meta">{{ $metric['meta'] }}</div>
+                        @if($metric['delta'] !== null)
+                            <div class="dashboard-kpi-change {{ $metric['delta_tone'] }}">
+                                <i class="fas {{ $metric['delta'] > 0 ? 'fa-arrow-up' : ($metric['delta'] < 0 ? 'fa-arrow-down' : 'fa-minus') }}"></i>
+                                <span>{{ number_format(abs($metric['delta']), 1) }}% {{ _lang('vs last month') }}</span>
+                            </div>
+                        @endif
+                        <div class="dashboard-kpi-link">{{ _lang('Open detail') }}</div>
+                    </div>
                 </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('loans.filter', 'active') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-hand-holding-usd"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Active Borrowers') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($active_borrowers_count ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Borrowers with live loans') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('View active loans') }}</div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('action_center.index') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-calendar-day"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Due Today') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($today_due_count ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Repayments requiring action') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('Open today queue') }}</div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('loans.workspace') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-exclamation-triangle"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Overdue') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($overdue_repayments_count ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Missed repayment items') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('Review collections') }}</div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('loans.workspace') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-check-circle"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Ready to Disburse') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($ready_for_disbursement_count ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Approved and waiting release') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('Open disbursement queue') }}</div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-        <a href="{{ route('finance.index') }}" class="text-decoration-none">
-            <div class="card dashboard-kpi-card mb-0">
-                <div class="card-body">
-                    <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="fas fa-balance-scale"></i></span></div>
-                    <div class="dashboard-kpi-label">{{ _lang('Finance Exceptions') }}</div>
-                    <div class="dashboard-kpi-value">{{ number_format($finance_exception_count ?? 0) }}</div>
-                    <div class="dashboard-kpi-meta">{{ _lang('Requests and postings to review') }}</div>
-                    <div class="dashboard-kpi-link">{{ _lang('Open finance queue') }}</div>
-                </div>
-            </div>
-        </a>
-    </div>
+            </a>
+        </div>
+    @endforeach
 </div>
 
 <div class="row mb-4 workspace-anchor-offset" id="collections-snapshot">
@@ -561,7 +521,7 @@
                         <div class="dashboard-leaderboard-top">
                             <div>
                                 <div class="dashboard-leaderboard-branch">{{ $branch->name }}</div>
-                                <div class="dashboard-leaderboard-meta">{{ $branch->due_today }} {{ _lang('due today') }} · {{ $branch->overdue }} {{ _lang('overdue') }} · {{ $branch->critical }} {{ _lang('critical') }}</div>
+                                <div class="dashboard-leaderboard-meta">{{ $branch->due_today }} {{ _lang('due today') }} · {{ $branch->overdue }} {{ _lang('overdue') }} · {{ decimalPlace($branch->overdue_amount_base ?? 0, $dashboardBaseCurrency, 0) }} {{ _lang('overdue value') }}</div>
                             </div>
                             <div class="dashboard-leaderboard-score">{{ $branch->pressure_score }}</div>
                         </div>

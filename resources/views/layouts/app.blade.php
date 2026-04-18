@@ -225,10 +225,10 @@
 							<ul class="notification-area float-right d-flex align-items-center">
 	                            <li class="dropdown d-none d-sm-inline-block">
 									<div class="dropdown">
-									  <a class="dropdown-toggle d-flex align-items-center" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									  <a class="dropdown-toggle d-flex align-items-center admin-utility-pill" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										<img class="avatar avatar-xss avatar-circle mr-1" src="{{ get_language() == 'language' ? asset('public/backend/plugins/flag-icon-css/flags/1x1/us.svg') : asset('public/backend/plugins/flag-icon-css/flags/1x1/'.explode('---', get_language())[1].'.svg') }}">
 										<span class="d-none d-md-inline-block">{{ explode('---', get_language())[0] }}</span>
-										<i class="fa fa-angle-down ml-1"></i>
+										<i class="fas fa-chevron-down ml-2 admin-dropdown-chevron"></i>
 									  </a>
 									  <div class="dropdown-menu" aria-labelledby="selectLanguage">
 										@foreach( get_language_list() as $language )
@@ -278,8 +278,16 @@
 
 								<li>
 									<div class="user-profile">
-										<h4 class="user-name dropdown-toggle" data-toggle="dropdown">
-											<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar"> {{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }} <i class="fa fa-angle-down"></i>
+										<h4 class="user-name dropdown-toggle admin-user-trigger" data-toggle="dropdown">
+											<span class="admin-user-avatar-wrap">
+												<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar">
+												<span class="admin-user-badge-icon"><i class="fas fa-id-badge"></i></span>
+											</span>
+											<span class="admin-user-copy">
+												<span class="admin-user-label">{{ _lang('Account') }}</span>
+												<span class="admin-user-name-text">{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }}</span>
+											</span>
+											<i class="fas fa-chevron-down admin-dropdown-chevron"></i>
 										</h4>
 										<div class="dropdown-menu">
 											@if(auth()->user()->user_type == 'customer')

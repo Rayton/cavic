@@ -866,11 +866,31 @@
     .admin-shell-v2 .page-container.admin-shell-container {
         border-radius: 22px;
         min-height: calc(100vh - 16px);
+        height: auto;
     }
 
     .admin-shell-v2 .sidebar-menu.admin-sidebar-v2 {
         width: 290px;
         max-width: 290px;
+        position: absolute;
+        top: 0;
+        height: 100%;
+    }
+
+    .admin-shell-v2 .main-content {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .admin-shell-v2 .header-area.admin-header-v2 {
+        position: relative;
+        top: auto;
+        box-shadow: none;
+    }
+
+    .admin-shell-v2 .main-content-inner.admin-main-content-inner {
+        overflow: visible;
+        flex: initial;
     }
 
     .admin-shell-v2 .main-content-inner.admin-main-content-inner,
@@ -891,11 +911,19 @@
         border-left: 0;
         border-right: 0;
         min-height: 100vh;
+        height: auto;
     }
 
     .admin-shell-v2 .sidebar-menu.admin-sidebar-v2 {
         width: 280px;
         max-width: 280px;
+        position: absolute;
+        height: 100%;
+    }
+
+    .admin-shell-v2 .main-content {
+        max-height: none;
+        overflow: visible;
     }
 
     .admin-shell-v2 .main-content-inner.admin-main-content-inner,

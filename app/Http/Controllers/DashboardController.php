@@ -198,12 +198,14 @@ class DashboardController extends Controller {
                 ->count();
             $data['today_transactions_count'] = Transaction::whereDate('trans_date', $date)->count();
             $data['today_expenses_count'] = Expense::whereDate('expense_date', $date)->count();
-            $data['ready_for_disbursement_count'] = Loan::where('status', 1)
+            $readyForDisbursementLoans = Loan::with('currency')
+                ->where('status', 1)
                 ->whereDoesntHave('disburseTransaction')
                 ->whereHas('approvals', function ($query) {
                     $query->where('status', 1);
                 }, '>=', 4)
-                ->count();
+                ->get();
+            $data['ready_for_disbursement_count'] = $readyForDisbursementLoans->count();
 
             $followUpsEnabled = Schema::hasTable('loan_collection_follow_ups');
             $followUpInsights = app(CollectionFollowUpInsightsService::class);
@@ -377,35 +379,103 @@ class DashboardController extends Controller {
                 ];
             })->sortBy('days_until')->take(6)->values();
 
-            $data['branch_collections_pressure'] = Branch::get()->map(function ($branch) use ($date) {
-                $dueTodayCount = LoanRepayment::whereDate('repayment_date', $date)
-                    ->where('status', 0)
-                    ->whereHas('loan', function ($query) use ($branch) {
-                        $query->where('branch_id', $branch->id);
-                    })->count();
+            $baseCurrency = get_base_currency();
+            $data['dashboard_base_currency'] = $baseCurrency;
 
-                $overdueCount = LoanRepayment::whereDate('repayment_date', '<', $date)
-                    ->where('status', 0)
-                    ->whereHas('loan', function ($query) use ($branch) {
-                        $query->where('branch_id', $branch->id);
-                    })->count();
+            $activeLoanPortfolio = Loan::with('currency')
+                ->where('status', 1)
+                ->get();
 
-                $criticalCount = LoanRepayment::whereDate('repayment_date', '<', Carbon::today()->subDays(30)->toDateString())
-                    ->where('status', 0)
-                    ->whereHas('loan', function ($query) use ($branch) {
-                        $query->where('branch_id', $branch->id);
-                    })->count();
+            $portfolioOutstandingBase = $activeLoanPortfolio->sum(function ($loan) use ($baseCurrency) {
+                $outstanding = max(0, (float) ($loan->applied_amount ?? 0) - (float) ($loan->total_paid ?? 0));
+                return $this->convertAmountToBaseCurrency($outstanding, optional($loan->currency)->name, $baseCurrency);
+            });
+
+            $overdueExposureBase = $overdueRepaymentsForBuckets->sum(function ($repayment) use ($baseCurrency) {
+                return $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency);
+            });
+
+            $dueTodayAmountBase = $dueTodayRepayments->sum(function ($repayment) use ($baseCurrency) {
+                return $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency);
+            });
+
+            $readyForDisbursementAmountBase = $readyForDisbursementLoans->sum(function ($loan) use ($baseCurrency) {
+                return $this->convertAmountToBaseCurrency((float) ($loan->applied_amount ?? 0), optional($loan->currency)->name, $baseCurrency);
+            });
+
+            $currentMonthStart = Carbon::today()->startOfMonth();
+            $previousMonthStart = $currentMonthStart->copy()->subMonth()->startOfMonth();
+            $previousMonthEnd = $currentMonthStart->copy()->subDay()->endOfDay();
+
+            $currentMonthDeposits = Transaction::with('account.savings_type.currency')
+                ->where('type', 'Deposit')
+                ->where('status', 2)
+                ->whereBetween('trans_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])
+                ->get();
+            $previousMonthDeposits = Transaction::with('account.savings_type.currency')
+                ->where('type', 'Deposit')
+                ->where('status', 2)
+                ->whereBetween('trans_date', [$previousMonthStart->toDateString(), $previousMonthEnd->toDateString()])
+                ->get();
+
+            $currentMonthWithdrawals = Transaction::with('account.savings_type.currency')
+                ->where('type', 'Withdraw')
+                ->where('status', 2)
+                ->whereBetween('trans_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])
+                ->get();
+            $previousMonthWithdrawals = Transaction::with('account.savings_type.currency')
+                ->where('type', 'Withdraw')
+                ->where('status', 2)
+                ->whereBetween('trans_date', [$previousMonthStart->toDateString(), $previousMonthEnd->toDateString()])
+                ->get();
+
+            $currentMonthDepositBase = $this->sumTransactionsInBaseCurrency($currentMonthDeposits, $baseCurrency);
+            $previousMonthDepositBase = $this->sumTransactionsInBaseCurrency($previousMonthDeposits, $baseCurrency);
+            $currentMonthWithdrawBase = $this->sumTransactionsInBaseCurrency($currentMonthWithdrawals, $baseCurrency);
+            $previousMonthWithdrawBase = $this->sumTransactionsInBaseCurrency($previousMonthWithdrawals, $baseCurrency);
+
+            $currentMonthExpenseBase = (float) Expense::whereBetween('expense_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])->sum('amount');
+            $previousMonthExpenseBase = (float) Expense::whereBetween('expense_date', [$previousMonthStart->toDateString(), $previousMonthEnd->toDateString()])->sum('amount');
+            $currentMonthExpenseCount = Expense::whereBetween('expense_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])->count();
+
+            $currentMonthNetFlowBase = $currentMonthDepositBase - $currentMonthWithdrawBase - $currentMonthExpenseBase;
+            $previousMonthNetFlowBase = $previousMonthDepositBase - $previousMonthWithdrawBase - $previousMonthExpenseBase;
+
+            $data['dashboard_executive_metrics'] = [
+                $this->makeDashboardMetric(_lang('Portfolio Outstanding'), $portfolioOutstandingBase, $baseCurrency, route('loans.filter', 'active'), 'fas fa-wallet', number_format($activeLoanPortfolio->count()) . ' ' . _lang('active loans')),
+                $this->makeDashboardMetric(_lang('Overdue Exposure'), $overdueExposureBase, $baseCurrency, route('loans.workspace'), 'fas fa-exclamation-triangle', number_format($data['overdue_repayments_count']) . ' ' . _lang('overdue repayments'), null, false),
+                $this->makeDashboardMetric(_lang('Due Today Value'), $dueTodayAmountBase, $baseCurrency, route('action_center.index'), 'fas fa-calendar-day', number_format($data['today_due_count']) . ' ' . _lang('repayments due today'), null, false),
+                $this->makeDashboardMetric(_lang('Ready to Disburse'), $readyForDisbursementAmountBase, $baseCurrency, route('loans.workspace'), 'fas fa-check-circle', number_format($data['ready_for_disbursement_count']) . ' ' . _lang('approved loans waiting release'), null, true),
+                $this->makeDashboardMetric(_lang('Deposits This Month'), $currentMonthDepositBase, $baseCurrency, route('transactions.index'), 'fas fa-arrow-down', number_format($currentMonthDeposits->count()) . ' ' . _lang('posted deposit transactions'), $this->calculatePercentDelta($currentMonthDepositBase, $previousMonthDepositBase), true),
+                $this->makeDashboardMetric(_lang('Withdrawals This Month'), $currentMonthWithdrawBase, $baseCurrency, route('transactions.index'), 'fas fa-arrow-up', number_format($currentMonthWithdrawals->count()) . ' ' . _lang('posted withdraw transactions'), $this->calculatePercentDelta($currentMonthWithdrawBase, $previousMonthWithdrawBase), false),
+                $this->makeDashboardMetric(_lang('Expenses This Month'), $currentMonthExpenseBase, $baseCurrency, route('expenses.index'), 'fas fa-receipt', number_format($currentMonthExpenseCount) . ' ' . _lang('expense entries this month'), $this->calculatePercentDelta($currentMonthExpenseBase, $previousMonthExpenseBase), false),
+                $this->makeDashboardMetric(_lang('Net Flow This Month'), $currentMonthNetFlowBase, $baseCurrency, route('finance.index'), 'fas fa-chart-line', _lang('Deposits - withdrawals - expenses'), $this->calculatePercentDelta($currentMonthNetFlowBase, $previousMonthNetFlowBase), true),
+            ];
+
+            $data['branch_collections_pressure'] = Branch::get()->map(function ($branch) use ($baseCurrency, $dueTodayRepayments, $overdueRepaymentsForBuckets, $todayCarbon) {
+                $branchDueToday = $dueTodayRepayments->filter(fn ($repayment) => optional($repayment->loan)->branch_id == $branch->id);
+                $branchOverdue = $overdueRepaymentsForBuckets->filter(fn ($repayment) => optional($repayment->loan)->branch_id == $branch->id);
+                $branchCritical = $branchOverdue->filter(function ($repayment) use ($todayCarbon) {
+                    return Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon) >= 31;
+                });
+
+                $dueTodayAmountBase = $branchDueToday->sum(fn ($repayment) => $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency));
+                $overdueAmountBase = $branchOverdue->sum(fn ($repayment) => $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency));
+                $criticalAmountBase = $branchCritical->sum(fn ($repayment) => $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency));
 
                 return (object) [
                     'name' => $branch->name,
-                    'due_today' => $dueTodayCount,
-                    'overdue' => $overdueCount,
-                    'critical' => $criticalCount,
-                    'pressure_score' => $dueTodayCount + $overdueCount + ($criticalCount * 2),
+                    'due_today' => $branchDueToday->count(),
+                    'overdue' => $branchOverdue->count(),
+                    'critical' => $branchCritical->count(),
+                    'due_today_amount_base' => $dueTodayAmountBase,
+                    'overdue_amount_base' => $overdueAmountBase,
+                    'critical_amount_base' => $criticalAmountBase,
+                    'pressure_score' => $branchDueToday->count() + $branchOverdue->count() + ($branchCritical->count() * 2),
                 ];
             })->sortByDesc('pressure_score')->take(5)->values();
 
-            $data['branch_performance'] = Branch::get()->map(function ($branch) use ($date) {
+            $data['branch_performance'] = Branch::get()->map(function ($branch) use ($date, $baseCurrency, $overdueRepaymentsForBuckets) {
                 $activeMembers = Member::withoutGlobalScopes(['status'])
                     ->where('branch_id', $branch->id)
                     ->where('status', 1)
@@ -421,20 +491,17 @@ class DashboardController extends Controller {
                     ->where('status', 1)
                     ->count();
 
-                $overdueLoans = LoanRepayment::withoutGlobalScopes(['borrower_id'])
-                    ->whereDate('repayment_date', '<', $date)
-                    ->where('status', 0)
-                    ->whereHas('loan', function ($query) use ($branch) {
-                        $query->where('branch_id', $branch->id);
-                    })->count();
+                $branchOverdue = $overdueRepaymentsForBuckets->filter(fn ($repayment) => optional($repayment->loan)->branch_id == $branch->id);
+                $overdueAmountBase = $branchOverdue->sum(fn ($repayment) => $this->convertAmountToBaseCurrency((float) ($repayment->amount_to_pay ?? 0), optional($repayment->loan->currency)->name, $baseCurrency));
 
                 return (object) [
                     'name' => $branch->name,
                     'active_members' => $activeMembers,
                     'pending_members' => $pendingMembers,
                     'active_loans' => $activeLoans,
-                    'overdue_repayments' => $overdueLoans,
-                    'pressure_score' => $pendingMembers + $overdueLoans,
+                    'overdue_repayments' => $branchOverdue->count(),
+                    'overdue_amount_base' => $overdueAmountBase,
+                    'pressure_score' => $pendingMembers + $branchOverdue->count(),
                 ];
             })->sortByDesc('pressure_score')->take(5)->values();
 
@@ -458,6 +525,62 @@ class DashboardController extends Controller {
 
             return view("backend.admin.dashboard-$user_type", $data);
         }
+    }
+
+    protected function convertAmountToBaseCurrency(float $amount, ?string $fromCurrency, ?string $baseCurrency): float
+    {
+        if ($amount == 0) {
+            return 0.0;
+        }
+
+        $baseCurrency = $baseCurrency ?: get_base_currency();
+        $fromCurrency = $fromCurrency ?: $baseCurrency;
+
+        try {
+            return (float) convert_currency($fromCurrency, $baseCurrency, $amount);
+        } catch (\Throwable $e) {
+            return (float) $amount;
+        }
+    }
+
+    protected function sumTransactionsInBaseCurrency($transactions, ?string $baseCurrency): float
+    {
+        return collect($transactions)->sum(function ($transaction) use ($baseCurrency) {
+            $fromCurrency = optional(optional(optional($transaction->account)->savings_type)->currency)->name ?: $baseCurrency;
+            return $this->convertAmountToBaseCurrency((float) ($transaction->amount ?? 0), $fromCurrency, $baseCurrency);
+        });
+    }
+
+    protected function calculatePercentDelta(float $current, float $previous): float
+    {
+        if ($previous == 0.0) {
+            return $current > 0 ? 100.0 : 0.0;
+        }
+
+        return round((($current - $previous) / abs($previous)) * 100, 1);
+    }
+
+    protected function makeDashboardMetric(string $label, float $amount, string $baseCurrency, string $route, string $icon, string $meta, ?float $delta = null, bool $positiveIsGood = true): array
+    {
+        $deltaTone = 'neutral';
+        if ($delta !== null && $delta != 0.0) {
+            if ($positiveIsGood) {
+                $deltaTone = $delta > 0 ? 'success' : 'danger';
+            } else {
+                $deltaTone = $delta > 0 ? 'danger' : 'success';
+            }
+        }
+
+        return [
+            'label' => $label,
+            'amount' => $amount,
+            'formatted_amount' => decimalPlace($amount, $baseCurrency, 0),
+            'route' => $route,
+            'icon' => $icon,
+            'meta' => $meta,
+            'delta' => $delta,
+            'delta_tone' => $deltaTone,
+        ];
     }
 
     public function dashboard_widget() {
