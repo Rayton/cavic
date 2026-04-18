@@ -885,6 +885,7 @@
     .admin-shell-v2 .header-area.admin-header-v2 {
         position: relative;
         top: auto;
+        min-height: 80px;
         box-shadow: none;
     }
 
@@ -898,6 +899,10 @@
     .admin-shell-v2 .page-title-area.admin-page-title-v2 {
         padding-left: 20px;
         padding-right: 20px;
+    }
+
+    .admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {
+        justify-content: flex-end;
     }
 }
 
@@ -931,6 +936,14 @@
     .admin-shell-v2 .page-title-area.admin-page-title-v2 {
         padding-left: 16px;
         padding-right: 16px;
+    }
+
+    .admin-shell-v2 .header-area.admin-header-v2 {
+        min-height: 80px;
+    }
+
+    .admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {
+        justify-content: flex-end;
     }
 
     .admin-shell-v2 .admin-sidebar-note {

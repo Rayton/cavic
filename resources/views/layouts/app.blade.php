@@ -277,19 +277,13 @@
 								</li>
 
 								<li>
-									<div class="user-profile">
-										<h4 class="user-name dropdown-toggle admin-user-trigger" data-toggle="dropdown">
-											<span class="admin-user-avatar-wrap">
-												<img class="avatar user-thumb" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar">
-												<span class="admin-user-badge-icon"><i class="fas fa-id-badge"></i></span>
-											</span>
-											<span class="admin-user-copy">
-												<span class="admin-user-label">{{ _lang('Account') }}</span>
-												<span class="admin-user-name-text">{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }}</span>
-											</span>
+									<div class="user-profile dropdown">
+										<a class="user-name dropdown-toggle admin-user-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											<span class="admin-user-name-text">{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }}</span>
+											<img class="avatar user-thumb admin-user-avatar" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar">
 											<i class="fas fa-chevron-down admin-dropdown-chevron"></i>
-										</h4>
-										<div class="dropdown-menu">
+										</a>
+										<div class="dropdown-menu dropdown-menu-right">
 											@if(auth()->user()->user_type == 'customer')
 											<a class="dropdown-item" href="{{ route('my_wallet.index') }}"><i class="fas fa-wallet text-muted mr-2"></i>{{ _lang('My Wallet') }}</a>
 											<a class="dropdown-item" href="{{ route('profile.membership_details') }}"><i class="ti-user text-muted mr-2"></i>{{ _lang('Membership Details') }}</a>

@@ -5701,11 +5701,38 @@ Payment Gateway
 }
 
 .admin-shell-v2 .header-area.admin-header-v2 {
-    padding: 14px 28px;
+    padding: 10px 0 10px 28px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
     position: sticky;
     top: 0;
     z-index: 120;
     box-shadow: 0 8px 24px rgba(31, 41, 55, 0.04);
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 .row {
+    width: 100%;
+    align-items: center;
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 .rtl-1 {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0;
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 .notification-area {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 .notification-area.float-right {
+    float: none !important;
 }
 
 .admin-shell-v2 .nav-btn span {
@@ -5716,7 +5743,12 @@ Payment Gateway
 }
 
 .admin-shell-v2 .notification-area li {
-    margin-left: 14px;
+    margin-left: 12px;
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 .notification-area > li:last-child {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
 }
 
 .admin-shell-v2 .notification-area li > i {
@@ -5737,6 +5769,34 @@ Payment Gateway
     color: var(--cavic-text);
 }
 
+.admin-shell-v2 .admin-utility-pill {
+    background: transparent;
+    border: 1px solid var(--cavic-border);
+    border-radius: 12px;
+    padding: 6px 10px;
+    color: var(--cavic-text);
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.admin-shell-v2 .admin-utility-pill:hover {
+    background: var(--cavic-surface-muted);
+    color: var(--cavic-text);
+}
+
+.admin-shell-v2 .admin-dropdown-chevron {
+    color: var(--cavic-text-muted);
+    font-size: 0.78rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.admin-shell-v2 .dropdown.show > .admin-utility-pill .admin-dropdown-chevron,
+.admin-shell-v2 .user-name.dropdown-toggle.show .admin-dropdown-chevron {
+    color: var(--cavic-primary-dark);
+    transform: rotate(180deg);
+}
+
 .admin-shell-v2 .notify-box,
 .admin-shell-v2 .notification-area .dropdown-menu,
 .admin-shell-v2 .user-profile .dropdown-menu {
@@ -5745,9 +5805,17 @@ Payment Gateway
     box-shadow: var(--cavic-shadow-soft);
 }
 
+.admin-shell-v2 .user-profile .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
 .admin-shell-v2 .user-profile {
-    margin-right: 0;
-    padding: 10px 0 10px 16px;
+    margin-right: 5px !important;
+    margin-left: auto;
+    padding: 4px 0;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .admin-shell-v2 .user-name {
@@ -5756,9 +5824,48 @@ Payment Gateway
     color: var(--cavic-text);
 }
 
+.admin-shell-v2 .admin-user-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--cavic-border);
+    border-radius: 14px;
+    background: transparent;
+}
+
+.admin-shell-v2 .admin-user-trigger:hover {
+    background: var(--cavic-surface-muted);
+}
+
 .admin-shell-v2 .user-profile img.avatar {
-    height: 42px;
+    height: 40px;
+    width: 40px;
+}
+
+.admin-shell-v2 .admin-user-avatar {
     width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1px solid rgba(63, 104, 109, 0.16);
+    background: #f7faf9;
+    box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
+}
+
+.admin-shell-v2 .admin-user-trigger:hover .admin-user-avatar {
+    border-color: rgba(63, 104, 109, 0.28);
+}
+
+.admin-shell-v2 .admin-user-name-text {
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--cavic-text);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 190px;
 }
 
 .admin-shell-v2 .page-title-area.admin-page-title-v2 {

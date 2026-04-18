@@ -60,6 +60,7 @@
     $('.user-name.dropdown-toggle').on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        $(this).toggleClass('show');
         $(this).siblings('.dropdown-menu').toggleClass('show');
     });
 
@@ -67,6 +68,7 @@
     $(document).on('click', function(e) {
         if (!$(e.target).closest('.user-profile').length) {
             $('.user-profile .dropdown-menu').removeClass('show');
+            $('.user-name.dropdown-toggle').removeClass('show');
         }
     });
 
