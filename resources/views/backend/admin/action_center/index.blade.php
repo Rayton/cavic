@@ -67,13 +67,15 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#member-requests">{{ _lang('Member Requests') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#pending-loans">{{ _lang('Pending Loans') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#finance-requests">{{ _lang('Finance Requests') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#due-upcoming">{{ _lang('Due Today & Upcoming') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#exceptions">{{ _lang('Exceptions') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('Member Requests'), 'target' => '#member-requests', 'active' => true],
+                ['label' => _lang('Pending Loans'), 'target' => '#pending-loans'],
+                ['label' => _lang('Finance Requests'), 'target' => '#finance-requests'],
+                ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
+                ['label' => _lang('Exceptions'), 'target' => '#exceptions'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="member-requests">

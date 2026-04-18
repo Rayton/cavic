@@ -52,14 +52,16 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#pipeline">{{ _lang('Pipeline') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#disbursements">{{ _lang('Disbursements') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#repayments">{{ _lang('Repayments') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#due-upcoming">{{ _lang('Due Today & Upcoming') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#collections">{{ _lang('Collections') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#products">{{ _lang('Products & Tools') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('Pipeline'), 'target' => '#pipeline', 'active' => true],
+                ['label' => _lang('Disbursements'), 'target' => '#disbursements'],
+                ['label' => _lang('Repayments'), 'target' => '#repayments'],
+                ['label' => _lang('Due Today & Upcoming'), 'target' => '#due-upcoming'],
+                ['label' => _lang('Collections'), 'target' => '#collections'],
+                ['label' => _lang('Products & Tools'), 'target' => '#products'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="pipeline">

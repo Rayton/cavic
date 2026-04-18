@@ -36,14 +36,16 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#all-members">{{ _lang('All Members') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#onboarding">{{ _lang('Onboarding / Requests') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kyc">{{ _lang('KYC & Documents') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#branches">{{ _lang('Branches') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#leaders">{{ _lang('Leaders') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#setup">{{ _lang('Import & Setup') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('All Members'), 'target' => '#all-members', 'active' => true],
+                ['label' => _lang('Onboarding / Requests'), 'target' => '#onboarding'],
+                ['label' => _lang('KYC & Documents'), 'target' => '#kyc'],
+                ['label' => _lang('Branches'), 'target' => '#branches'],
+                ['label' => _lang('Leaders'), 'target' => '#leaders'],
+                ['label' => _lang('Import & Setup'), 'target' => '#setup'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="all-members">

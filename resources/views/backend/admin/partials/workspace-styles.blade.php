@@ -41,4 +41,18 @@
 .workspace-exception-list li { display: flex; align-items: center; justify-content: space-between; padding: .65rem 0; border-bottom: 1px solid #eef1f5; }
 .workspace-exception-list li:last-child { border-bottom: 0; }
 .workspace-section-title { font-size: .92rem; font-weight: 600; color: #1f2d3d; margin-bottom: .75rem; }
+.workspace-module-tabs { gap: .35rem; flex-wrap: wrap; }
+.workspace-module-tabs .nav-link { display: inline-flex; align-items: center; gap: .45rem; }
+.workspace-tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 .38rem; border-radius: 999px; background: rgba(26, 142, 143, .12); color: #1A8E8F; font-size: .7rem; font-weight: 700; }
+.workspace-nav .nav-link.active .workspace-tab-badge { background: rgba(255,255,255,.18); color: #fff; }
+.workspace-quick-actions-card .card-body { padding-top: 1rem; padding-bottom: 1rem; }
+.workspace-quick-actions-list .btn { white-space: nowrap; }
+.workspace-filter-card .card-body { padding-top: 1rem; padding-bottom: 1rem; }
+.workspace-filter-copy { max-width: 520px; }
+.workspace-filter-controls .form-control { min-height: 38px; }
+.workspace-empty-state { padding: 2rem 1.25rem; text-align: center; border: 1px dashed #d9e2e8; border-radius: 14px; background: #fcfdfd; }
+.workspace-empty-state-icon { width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; background: #eef7f7; color: #1A8E8F; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; }
+.workspace-empty-state-title { color: #1f2d3d; font-weight: 600; }
+.workspace-empty-state-text { color: #6c757d; max-width: 480px; margin-left: auto; margin-right: auto; }
+.workspace-anchor-offset { scroll-margin-top: 110px; }
 </style>

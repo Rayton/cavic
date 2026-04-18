@@ -12,6 +12,7 @@ $action_center_total = $member_requests_count + $pending_loans_count + $deposit_
 $finance_queue_total = $deposit_requests_count + $withdraw_requests_count;
 @endphp
 
+<li class="menu-section-label">{{ _lang('Workspaces') }}</li>
 @include('layouts.menus.admin.dashboard')
 @include('layouts.menus.admin.action-center')
 @include('layouts.menus.admin.members')

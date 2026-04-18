@@ -96,13 +96,15 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#executive">{{ _lang('Executive KPIs') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#portfolio">{{ _lang('Portfolio & Loans') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#accounts">{{ _lang('Accounts') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#transactions">{{ _lang('Transactions & Expenses') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#banking">{{ _lang('Banking & Revenue') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => true],
+                ['label' => _lang('Portfolio & Loans'), 'target' => '#portfolio'],
+                ['label' => _lang('Accounts'), 'target' => '#accounts'],
+                ['label' => _lang('Transactions & Expenses'), 'target' => '#transactions'],
+                ['label' => _lang('Banking & Revenue'), 'target' => '#banking'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="executive">

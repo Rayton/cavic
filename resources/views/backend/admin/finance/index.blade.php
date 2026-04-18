@@ -43,16 +43,18 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#wallets">{{ _lang('Wallets') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#accounts">{{ _lang('Savings Accounts') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#cash-ops">{{ _lang('Cash Transactions') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#requests">{{ _lang('Requests') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#exceptions">{{ _lang('Exceptions & Reconciliation') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#expenses">{{ _lang('Expenses') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#banking">{{ _lang('Banking') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#methods">{{ _lang('Methods & Interest') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('Wallets'), 'target' => '#wallets', 'active' => true],
+                ['label' => _lang('Savings Accounts'), 'target' => '#accounts'],
+                ['label' => _lang('Cash Transactions'), 'target' => '#cash-ops'],
+                ['label' => _lang('Requests'), 'target' => '#requests'],
+                ['label' => _lang('Exceptions & Reconciliation'), 'target' => '#exceptions'],
+                ['label' => _lang('Expenses'), 'target' => '#expenses'],
+                ['label' => _lang('Banking'), 'target' => '#banking'],
+                ['label' => _lang('Methods & Interest'), 'target' => '#methods'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="wallets">

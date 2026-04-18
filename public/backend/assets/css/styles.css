@@ -5422,3 +5422,460 @@ Payment Gateway
 .table-export-toolbar { gap: 0.5rem; }
 .table-totals-row td { font-weight: 600; background: #f8f9fa !important; border-top: 2px solid #dee2e6 !important; }
 .table-totals-row td.text-right { text-align: right !important; }
+
+/*--------------------------------------------
+    Admin Shell V2 - inspired by newcavic.webp
+    Scoped to admin pages to avoid frontend/public changes
+----------------------------------------------*/
+:root {
+    --cavic-bg: #f4f4f2;
+    --cavic-surface: #ffffff;
+    --cavic-surface-muted: #fafaf8;
+    --cavic-border: #e7e9e4;
+    --cavic-text: #2e3338;
+    --cavic-text-soft: #6f787f;
+    --cavic-text-muted: #9aa2a8;
+    --cavic-primary: #3f686d;
+    --cavic-primary-dark: #32555a;
+    --cavic-primary-soft: #e7f1f0;
+    --cavic-success: #17b26a;
+    --cavic-success-soft: #eaf8f0;
+    --cavic-danger: #f04452;
+    --cavic-danger-soft: #fdecee;
+    --cavic-warning: #d9a441;
+    --cavic-warning-soft: #fff6e1;
+    --cavic-info: #4e8da6;
+    --cavic-info-soft: #eaf4f8;
+    --cavic-radius-app: 28px;
+    --cavic-radius-card: 20px;
+    --cavic-radius-control: 12px;
+    --cavic-shadow-soft: 0 10px 30px rgba(31, 41, 55, 0.05);
+}
+
+.tenant-switcher {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.tenant-switcher-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+    letter-spacing: 0.08em;
+}
+
+.tenant-switcher-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 12px;
+}
+
+.tenant-switcher-btn:hover,
+.tenant-switcher-btn:focus {
+    color: #fff;
+}
+
+.admin-shell-v2 {
+    background: var(--cavic-bg);
+    color: var(--cavic-text);
+    min-height: 100vh;
+    padding: 16px;
+}
+
+.admin-shell-v2 .page-container.admin-shell-container {
+    background: var(--cavic-surface);
+    border: 1px solid rgba(231, 233, 228, 0.95);
+    border-radius: var(--cavic-radius-app);
+    box-shadow: var(--cavic-shadow-soft);
+    min-height: calc(100vh - 32px);
+    overflow: hidden;
+}
+
+.admin-shell-v2 .sidebar-menu.admin-sidebar-v2 {
+    width: 300px;
+    max-width: 300px;
+    background: var(--cavic-surface-muted);
+    border-right: 1px solid var(--cavic-border);
+    box-shadow: none;
+}
+
+.admin-shell-v2 .sbar_collapsed .sidebar-menu.admin-sidebar-v2 {
+    margin-left: -320px;
+}
+
+.admin-shell-v2 .sidebar-menu .extra-details.admin-sidebar-brand {
+    background: transparent;
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--cavic-border);
+}
+
+.admin-shell-v2 .admin-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+}
+
+.admin-shell-v2 .sidebar-menu .sidebar-logo {
+    max-height: 54px;
+    max-width: 54px;
+    border-radius: 16px;
+    object-fit: cover;
+    background: #fff;
+}
+
+.admin-shell-v2 .admin-brand-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.admin-shell-v2 .admin-brand-title {
+    color: var(--cavic-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-shell-v2 .admin-brand-subtitle {
+    color: var(--cavic-text-soft);
+    font-size: 0.78rem;
+    margin-top: 0.18rem;
+}
+
+.admin-shell-v2 .admin-sidebar-intro {
+    padding-top: 14px;
+}
+
+.admin-shell-v2 .admin-sidebar-eyebrow,
+.admin-shell-v2 .menu-section-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--cavic-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-shell-v2 .admin-sidebar-note {
+    color: var(--cavic-text-soft);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin-top: 0.35rem;
+}
+
+.admin-shell-v2 .main-menu.admin-menu-scroll {
+    padding: 14px 14px 90px 14px;
+    height: auto;
+}
+
+.admin-shell-v2 .menu-inner {
+    padding-right: 0;
+}
+
+.admin-shell-v2 #menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-shell-v2 .menu-section-label {
+    list-style: none;
+    padding: 8px 12px 4px;
+    margin-bottom: 4px;
+}
+
+.admin-shell-v2 .metismenu > li > a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px !important;
+    color: var(--cavic-text-soft);
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-shell-v2 .metismenu li a i {
+    color: var(--cavic-text-soft);
+    width: 18px;
+    text-align: center;
+}
+
+.admin-shell-v2 .metismenu li a span {
+    margin-left: 0;
+}
+
+.admin-shell-v2 .metismenu li a:after {
+    right: 16px;
+    top: 12px;
+    color: var(--cavic-text-muted);
+}
+
+.admin-shell-v2 .metismenu > li:hover > a,
+.admin-shell-v2 .metismenu li:hover > a {
+    background: rgba(63, 104, 109, 0.08);
+    color: var(--cavic-primary-dark);
+}
+
+.admin-shell-v2 .metismenu > li:hover > a i,
+.admin-shell-v2 .metismenu li:hover > a i {
+    color: var(--cavic-primary-dark);
+}
+
+.admin-shell-v2 .metismenu > li.active-nav > a,
+.admin-shell-v2 .metismenu > li.active > a {
+    background: var(--cavic-primary);
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(63, 104, 109, 0.18);
+}
+
+.admin-shell-v2 .metismenu > li.active-nav > a i,
+.admin-shell-v2 .metismenu > li.active > a i,
+.admin-shell-v2 .metismenu > li.active-nav > a:after,
+.admin-shell-v2 .metismenu > li.active > a:after {
+    color: #fff;
+}
+
+.admin-shell-v2 .metismenu li ul {
+    background: transparent;
+    padding: 8px 0 4px 34px;
+}
+
+.admin-shell-v2 .metismenu li ul li a {
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+}
+
+.admin-shell-v2 .sidebar-notification-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    margin-left: 8px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    color: inherit;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.admin-shell-v2 .metismenu > li:not(.active-nav):not(.active) .sidebar-notification-count {
+    background: var(--cavic-primary-soft);
+    color: var(--cavic-primary-dark);
+}
+
+.admin-shell-v2 .main-content {
+    background: transparent;
+}
+
+.admin-shell-v2 .header-area.admin-header-v2,
+.admin-shell-v2 .page-title-area.admin-page-title-v2 {
+    background: var(--cavic-surface);
+    border-bottom: 1px solid var(--cavic-border);
+}
+
+.admin-shell-v2 .header-area.admin-header-v2 {
+    padding: 14px 28px;
+}
+
+.admin-shell-v2 .nav-btn span {
+    width: 20px;
+    height: 2px;
+    background: var(--cavic-primary);
+    box-shadow: none;
+}
+
+.admin-shell-v2 .notification-area li {
+    margin-left: 14px;
+}
+
+.admin-shell-v2 .notification-area li > i {
+    color: var(--cavic-primary-dark);
+    font-size: 1.35rem;
+    text-shadow: none;
+}
+
+.admin-shell-v2 .notification-area li i > span {
+    background: var(--cavic-primary);
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+}
+
+.admin-shell-v2 .notification-area .dropdown-toggle,
+.admin-shell-v2 .notification-area a {
+    color: var(--cavic-text);
+}
+
+.admin-shell-v2 .notify-box,
+.admin-shell-v2 .notification-area .dropdown-menu,
+.admin-shell-v2 .user-profile .dropdown-menu {
+    border: 1px solid var(--cavic-border);
+    border-radius: 18px;
+    box-shadow: var(--cavic-shadow-soft);
+}
+
+.admin-shell-v2 .user-profile {
+    margin-right: 0;
+    padding: 10px 0 10px 16px;
+}
+
+.admin-shell-v2 .user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cavic-text);
+}
+
+.admin-shell-v2 .user-profile img.avatar {
+    height: 42px;
+    width: 42px;
+}
+
+.admin-shell-v2 .page-title-area.admin-page-title-v2 {
+    padding: 0 28px;
+}
+
+.admin-shell-v2 .page-title-area.admin-page-title-v2 h6 {
+    color: var(--cavic-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.admin-shell-v2 .main-content-inner.admin-main-content-inner {
+    padding: 28px 28px 42px;
+}
+
+.admin-shell-v2 .card,
+.admin-shell-v2 .workspace-hero-card,
+.admin-shell-v2 .workspace-page-header-card,
+.admin-shell-v2 .workspace-section-card,
+.admin-shell-v2 .workspace-stat-card,
+.admin-shell-v2 .workspace-bucket-card {
+    border: 1px solid var(--cavic-border);
+    border-radius: var(--cavic-radius-card);
+    box-shadow: none;
+    background: var(--cavic-surface);
+}
+
+.admin-shell-v2 .card .card-header,
+.admin-shell-v2 .workspace-section-card .card-header {
+    border-bottom: 1px solid var(--cavic-border);
+    border-radius: var(--cavic-radius-card) var(--cavic-radius-card) 0 0;
+    background: var(--cavic-surface);
+}
+
+.admin-shell-v2 .table {
+    color: var(--cavic-text);
+}
+
+.admin-shell-v2 .table thead th {
+    border-top: none;
+    border-bottom: 1px solid var(--cavic-border);
+    color: var(--cavic-text-soft);
+    font-size: 0.86rem;
+    font-weight: 600;
+    background: transparent;
+}
+
+.admin-shell-v2 .table td,
+.admin-shell-v2 .table th {
+    border-color: #eef1ec;
+}
+
+.admin-shell-v2 .form-control,
+.admin-shell-v2 .select2-selection,
+.admin-shell-v2 .btn,
+.admin-shell-v2 .input-group-text {
+    border-radius: var(--cavic-radius-control);
+}
+
+.admin-shell-v2 .btn-primary,
+.admin-shell-v2 .btn-outline-primary:hover {
+    background: var(--cavic-primary);
+    border-color: var(--cavic-primary);
+}
+
+.admin-shell-v2 .btn-outline-primary {
+    color: var(--cavic-primary);
+    border-color: rgba(63, 104, 109, 0.22);
+}
+
+.admin-shell-v2 .btn-outline-primary:hover {
+    color: #fff;
+}
+
+.admin-shell-v2 .workspace-pill {
+    background: var(--cavic-primary-soft);
+    color: var(--cavic-primary-dark);
+}
+
+.admin-shell-v2 .workspace-nav .nav-link.active {
+    background: var(--cavic-primary);
+}
+
+.admin-shell-v2 .workspace-breadcrumbs li,
+.admin-shell-v2 .workspace-breadcrumbs a {
+    color: var(--cavic-text-soft);
+}
+
+.admin-shell-v2 .workspace-breadcrumbs a:hover {
+    color: var(--cavic-primary);
+}
+
+.admin-shell-v2 #main_modal .modal-content,
+.admin-shell-v2 #secondary_modal .modal-content {
+    border: 1px solid var(--cavic-border);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--cavic-shadow-soft);
+}
+
+.admin-shell-v2 #main_modal .modal-header,
+.admin-shell-v2 #secondary_modal .modal-header {
+    border-bottom: 1px solid var(--cavic-border);
+    padding: 1rem 1.25rem;
+}
+
+.admin-shell-v2 #main_modal .modal-body,
+.admin-shell-v2 #secondary_modal .modal-body {
+    padding: 1.25rem;
+}
+
+.admin-shell-v2 .admin-tenant-switcher {
+    border-top: 1px solid var(--cavic-border);
+    background: transparent;
+}
+
+.admin-shell-v2 .admin-tenant-switcher .tenant-switcher-label {
+    color: var(--cavic-text-muted);
+}
+
+.admin-shell-v2 .admin-tenant-switcher .tenant-switcher-btn {
+    background: var(--cavic-surface);
+    border: 1px solid var(--cavic-border);
+    color: var(--cavic-text);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.admin-shell-v2 .admin-tenant-switcher .tenant-switcher-btn:hover,
+.admin-shell-v2 .admin-tenant-switcher .tenant-switcher-btn:focus {
+    color: var(--cavic-text);
+    background: var(--cavic-primary-soft);
+    border-color: rgba(63, 104, 109, 0.18);
+}

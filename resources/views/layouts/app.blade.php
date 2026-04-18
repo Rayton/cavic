@@ -64,7 +64,16 @@
 		@include('layouts.others.languages')
     </head>
 
-    <body>
+    @php
+        $authUser = auth()->user();
+        $userType = $authUser?->user_type;
+        $isAdminWorkspace = $userType === 'admin';
+        $tenantDisplayName = app()->bound('tenant')
+            ? app('tenant')->name
+            : get_option('site_title', config('app.name'));
+    @endphp
+
+    <body class="backend-app user-type-{{ $userType ?? 'guest' }} {{ $isAdminWorkspace ? 'admin-shell-v2' : '' }}">
 		<!-- Main Modal -->
 		<div id="main_modal" class="modal" tabindex="-1" role="dialog">
 		    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -110,16 +119,29 @@
 
 		@php $user_type = auth()->user()->user_type; @endphp
 
-		<div class="page-container">
+		<div class="page-container {{ $isAdminWorkspace ? 'admin-shell-container' : '' }}">
 		    <!-- sidebar menu area start -->
-			<div class="sidebar-menu" style="display: flex; flex-direction: column;">
-				<div class="extra-details">
-					<a href="{{ $user_type == 'superadmin' ? route('admin.dashboard.index') : route('dashboard.index') }}">
+			<div class="sidebar-menu {{ $isAdminWorkspace ? 'admin-sidebar-v2' : '' }}" style="display: flex; flex-direction: column;">
+				<div class="extra-details {{ $isAdminWorkspace ? 'admin-sidebar-brand' : '' }}">
+					<a href="{{ $user_type == 'superadmin' ? route('admin.dashboard.index') : route('dashboard.index') }}" class="{{ $isAdminWorkspace ? 'admin-brand-link' : '' }}">
 						<img class="sidebar-logo" src="{{ get_logo() }}" alt="logo">
+						@if($isAdminWorkspace)
+							<span class="admin-brand-copy">
+								<span class="admin-brand-title">{{ $tenantDisplayName }}</span>
+								<span class="admin-brand-subtitle">{{ _lang('Operations Console') }}</span>
+							</span>
+						@endif
 					</a>
 				</div>
 
-				<div class="main-menu" style="flex: 1; overflow-y: auto;">
+				@if($isAdminWorkspace)
+					<div class="admin-sidebar-intro px-3 pb-2">
+						<span class="admin-sidebar-eyebrow">{{ _lang('Main Menu') }}</span>
+						<p class="admin-sidebar-note mb-0">{{ _lang('Task-based workspaces for administration and operations.') }}</p>
+					</div>
+				@endif
+
+				<div class="main-menu {{ $isAdminWorkspace ? 'admin-menu-scroll' : '' }}" style="flex: 1; overflow-y: auto;">
 					<div class="menu-inner">
 						<nav>
 							<ul class="metismenu {{ $user_type == 'user' ? 'staff-menu' : '' }}" id="menu">
@@ -152,10 +174,10 @@
 						$hasMultipleTenants = ($mainTenant && $memberTenant) || ($user->user_type == 'admin' && $memberTenant);
 					@endphp
 					@if($hasMultipleTenants && $currentTenant)
-						<div class="tenant-switcher" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-							<label style="color: rgba(255,255,255,0.7); font-size: 11px; text-transform: uppercase; margin-bottom: 8px; display: block;">{{ _lang('Switch Account') }}</label>
+						<div class="tenant-switcher {{ $isAdminWorkspace ? 'admin-tenant-switcher' : '' }}">
+							<label class="tenant-switcher-label">{{ _lang('Switch Account') }}</label>
 							<div class="dropdown">
-								<button class="btn btn-sm btn-block text-left" type="button" id="tenantSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 8px 12px; border-radius: 4px; width: 100%; font-size: 12px;">
+								<button class="btn btn-sm btn-block text-left tenant-switcher-btn" type="button" id="tenantSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<span id="current-tenant-name">{{ $currentTenant ? (strlen($currentTenant->name) > 25 ? substr($currentTenant->name, 0, 22) . '...' : $currentTenant->name) : '' }}</span>
 									<i class="ti-angle-down float-right" style="margin-top: 2px;"></i>
 								</button>
@@ -187,7 +209,7 @@
 			<!-- main content area start -->
 			<div class="main-content">
 				<!-- header area start -->
-				<div class="header-area">
+				<div class="header-area {{ $isAdminWorkspace ? 'admin-header-v2' : '' }}">
 					<div class="row align-items-center">
 						<!-- nav and search button -->
 						<div class="col-lg-6 col-4 clearfix rtl-2">
@@ -297,7 +319,7 @@
 
 				<!-- Page title area start -->
 				@if(Request::is('dashboard') || Request::is('*/dashboard'))
-				<div class="page-title-area">
+				<div class="page-title-area {{ $isAdminWorkspace ? 'admin-page-title-v2' : '' }}">
 					<div class="row align-items-center py-3">
 						<div class="col-sm-12">
 							<div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -335,7 +357,7 @@
 				</div><!-- page title area end -->
 				@endif
 
-				<div class="main-content-inner mt-4">
+				<div class="main-content-inner mt-4 {{ $isAdminWorkspace ? 'admin-main-content-inner' : '' }}">
 					<div class="row">
 						<div class="{{ isset($alert_col) ? $alert_col : 'col-lg-12' }}">
 

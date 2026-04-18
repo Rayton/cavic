@@ -31,13 +31,15 @@
 
 <div class="card workspace-section-card">
     <div class="card-header">
-        <ul class="nav nav-pills workspace-nav" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#users">{{ _lang('Users') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#roles">{{ _lang('Roles & Permissions') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#settings">{{ _lang('Settings') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#currency">{{ _lang('Currency') }}</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#templates">{{ _lang('Templates') }}</a></li>
-        </ul>
+        @include('backend.admin.partials.module-tabs', [
+            'tabs' => [
+                ['label' => _lang('Users'), 'target' => '#users', 'active' => true],
+                ['label' => _lang('Roles & Permissions'), 'target' => '#roles'],
+                ['label' => _lang('Settings'), 'target' => '#settings'],
+                ['label' => _lang('Currency'), 'target' => '#currency'],
+                ['label' => _lang('Templates'), 'target' => '#templates'],
+            ],
+        ])
     </div>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="users">
