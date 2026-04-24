@@ -5,10 +5,10 @@
     'variant' => 'top-strip',
     'role' => 'navigation',
     'tabs' => [
-        ['label' => _lang('Overview'), 'url' => '#dashboard-overview', 'active' => true, 'toggle' => false],
-        ['label' => _lang('Portfolio Health'), 'url' => '#portfolio-health', 'toggle' => false],
-        ['label' => _lang('Collections Snapshot'), 'url' => '#collections-snapshot', 'toggle' => false],
-        ['label' => _lang('Branch Performance'), 'url' => '#branch-performance', 'toggle' => false],
+        ['label' => _lang('Overview'), 'target' => '#dashboard-overview', 'active' => true],
+        ['label' => _lang('Portfolio Health'), 'target' => '#portfolio-health'],
+        ['label' => _lang('Collections Snapshot'), 'target' => '#collections-snapshot'],
+        ['label' => _lang('Branch Performance'), 'target' => '#branch-performance'],
     ],
 ])
 @endsection
@@ -339,223 +339,233 @@
 
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'dashboard-collection-range'])
 
-<div class="row mb-4 workspace-anchor-offset" id="dashboard-overview">
-    <div class="col-xl-8 mb-3 mb-xl-0">
-        <div class="card dashboard-command-card h-100 mb-0">
-            <div class="card-body">
-                <div class="dashboard-command-eyebrow">{{ _lang('Operations Command Center') }}</div>
-                <h3 class="dashboard-command-title">{{ _lang('See risk, workload, and movement in one glance.') }}</h3>
-                <p class="dashboard-command-subtitle mb-0">{{ _lang('The dashboard is organized around immediate attention, portfolio pressure, cash movement trends, and branch hotspots so an admin can decide what to do next without reading a wall of tables.') }}</p>
-
-                <div class="dashboard-command-meta">
-                    <span class="meta-pill"><i class="fas fa-calendar-alt mr-2"></i>{{ _lang('Analytics Range') }}: {{ $collectionDateRange['label'] ?? _lang('Today') }}</span>
-                    <span class="meta-pill"><i class="fas fa-bolt mr-2"></i>{{ _lang('Call Today Queue') }}: {{ $collection_queue_counts['call_today'] ?? 0 }}</span>
-                    <span class="meta-pill"><i class="fas fa-bell mr-2"></i>{{ _lang('Upcoming Reminders') }}: {{ $collection_queue_counts['upcoming_reminders'] ?? 0 }}</span>
-                    <span class="meta-pill"><i class="fas fa-radiation-alt mr-2"></i>{{ _lang('Critical Collections') }}: {{ $collection_queue_counts['critical'] ?? 0 }}</span>
-                </div>
-
-                <div class="dashboard-command-grid">
-                    <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Call Today Queue') }}</div>
-                        <div class="mini-value">{{ number_format($collection_queue_counts['call_today'] ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Due-today plus near-term overdue cases queued for immediate action') }}</div>
-                    </div>
-                    <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Upcoming Reminders') }}</div>
-                        <div class="mini-value">{{ number_format($collection_queue_counts['upcoming_reminders'] ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Borrowers needing pre-due reminder outreach') }}</div>
-                    </div>
-                    <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Finance Exceptions') }}</div>
-                        <div class="mini-value">{{ number_format($finance_exception_count ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Pending finance requests, cash postings, and bank exceptions') }}</div>
-                    </div>
-                    <div class="dashboard-command-mini">
-                        <div class="mini-label">{{ _lang('Ready for Disbursement') }}</div>
-                        <div class="mini-value">{{ number_format($ready_for_disbursement_count ?? 0) }}</div>
-                        <div class="mini-meta">{{ _lang('Approved loans waiting release into member accounts') }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4">
-        <div class="card dashboard-priority-card h-100 mb-0">
-            <div class="card-body">
-                <div class="dashboard-priority-header">
-                    <div>
-                        <div class="text-muted small mb-1">{{ _lang('Needs attention now') }}</div>
-                        <div class="dashboard-attention-total">{{ number_format($attentionTotal) }}</div>
-                        <div class="dashboard-compact-note mt-1">{{ _lang('Combined immediate pressure across overdue, due-today, and finance exception queues.') }}</div>
-                    </div>
-                    <a href="{{ route('action_center.index') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Queue') }}</a>
-                </div>
-
-                <div class="dashboard-priority-list">
-                    @foreach($priorityList as $item)
-                        @php $progressWidth = $priorityMax > 0 ? min(100, round(($item['value'] / $priorityMax) * 100, 0)) : 0; @endphp
-                        <a href="{{ $item['href'] }}" class="dashboard-priority-item">
-                            <div class="topline">
-                                <span class="priority-label"><i class="{{ $item['icon'] }}"></i> {{ $item['label'] }}</span>
-                                <span class="priority-value">{{ number_format($item['value']) }}</span>
-                            </div>
-                            <div class="progress mb-2">
-                                <div class="progress-bar bg-{{ $item['theme'] === 'critical' ? 'danger' : ($item['theme'] === 'today' ? 'warning' : ($item['theme'] === 'active' ? 'success' : 'info')) }}" style="width: {{ $progressWidth }}%"></div>
-                            </div>
-                            <div class="priority-note">{{ $item['note'] }}</div>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4 workspace-anchor-offset" id="portfolio-health">
-    @foreach($executiveMetrics as $metric)
-        <div class="col-xl-3 col-md-6 mb-3">
-            <a href="{{ $metric['route'] }}" class="text-decoration-none">
-                <div class="card dashboard-kpi-card mb-0">
+<div class="tab-content dashboard-top-tab-content">
+    <div class="tab-pane fade show active" id="dashboard-overview">
+        <div class="row mb-4">
+            <div class="col-xl-8 mb-3 mb-xl-0">
+                <div class="card dashboard-command-card h-100 mb-0">
                     <div class="card-body">
-                        <div class="dashboard-kpi-top">
-                            <span class="dashboard-kpi-icon"><i class="{{ $metric['icon'] }}"></i></span>
+                        <div class="dashboard-command-eyebrow">{{ _lang('Operations Command Center') }}</div>
+                        <h3 class="dashboard-command-title">{{ _lang('See risk, workload, and movement in one glance.') }}</h3>
+                        <p class="dashboard-command-subtitle mb-0">{{ _lang('The dashboard is organized around immediate attention, portfolio pressure, cash movement trends, and branch hotspots so an admin can decide what to do next without reading a wall of tables.') }}</p>
+
+                        <div class="dashboard-command-meta">
+                            <span class="meta-pill"><i class="fas fa-calendar-alt mr-2"></i>{{ _lang('Analytics Range') }}: {{ $collectionDateRange['label'] ?? _lang('Today') }}</span>
+                            <span class="meta-pill"><i class="fas fa-bolt mr-2"></i>{{ _lang('Call Today Queue') }}: {{ $collection_queue_counts['call_today'] ?? 0 }}</span>
+                            <span class="meta-pill"><i class="fas fa-bell mr-2"></i>{{ _lang('Upcoming Reminders') }}: {{ $collection_queue_counts['upcoming_reminders'] ?? 0 }}</span>
+                            <span class="meta-pill"><i class="fas fa-radiation-alt mr-2"></i>{{ _lang('Critical Collections') }}: {{ $collection_queue_counts['critical'] ?? 0 }}</span>
                         </div>
-                        <div class="dashboard-kpi-label">{{ $metric['label'] }}</div>
-                        <div class="dashboard-kpi-value">{{ $metric['formatted_amount'] }}</div>
-                        <div class="dashboard-kpi-meta">{{ $metric['meta'] }}</div>
-                        @if($metric['delta'] !== null)
-                            <div class="dashboard-kpi-change {{ $metric['delta_tone'] }}">
-                                <i class="fas {{ $metric['delta'] > 0 ? 'fa-arrow-up' : ($metric['delta'] < 0 ? 'fa-arrow-down' : 'fa-minus') }}"></i>
-                                <span>{{ number_format(abs($metric['delta']), 1) }}% {{ _lang('vs last month') }}</span>
+
+                        <div class="dashboard-command-grid">
+                            <div class="dashboard-command-mini">
+                                <div class="mini-label">{{ _lang('Call Today Queue') }}</div>
+                                <div class="mini-value">{{ number_format($collection_queue_counts['call_today'] ?? 0) }}</div>
+                                <div class="mini-meta">{{ _lang('Due-today plus near-term overdue cases queued for immediate action') }}</div>
                             </div>
-                        @endif
-                        <div class="dashboard-kpi-link">{{ _lang('Open detail') }}</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    @endforeach
-</div>
-
-<div class="row mb-4 workspace-anchor-offset" id="collections-snapshot">
-    <div class="col-lg-8 mb-3 mb-lg-0">
-        <div class="card dashboard-chart-card h-100 mb-0">
-            <div class="card-header d-flex align-items-center flex-wrap">
-                <span>{{ _lang('Deposit & Withdraw Trend') . ' - ' . date('Y') }}</span>
-                <select class="filter-select ml-auto py-0 auto-select form-control form-control-sm" style="max-width: 140px;" data-selected="{{ base_currency_id() }}">
-                    @foreach(\App\Models\Currency::where('status',1)->get() as $currency)
-                        <option value="{{ $currency->id }}" data-symbol="{{ currency_symbol($currency->name) }}">{{ $currency->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="card-body">
-                <div class="chart-wrap">
-                    <canvas id="transactionAnalysis"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card dashboard-chart-card h-100 mb-0">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span>{{ _lang('Expense Trend') . ' - ' . date('M Y') }}</span>
-                <a href="{{ route('expenses.index') }}" class="small">{{ _lang('Open expenses') }}</a>
-            </div>
-            <div class="card-body">
-                <div class="chart-wrap">
-                    <canvas id="expenseOverview"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4 workspace-anchor-offset" id="branch-performance">
-    <div class="col-lg-4 mb-3 mb-lg-0">
-        <div class="card dashboard-panel-card h-100 mb-0">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span>{{ _lang('Risk Radar') }}</span>
-                <a href="{{ route('loans.workspace') }}" class="small">{{ _lang('Open loans workspace') }}</a>
-            </div>
-            <div class="card-body">
-                @foreach(($collection_buckets ?? []) as $bucket)
-                    <div class="dashboard-progress-row">
-                        <div class="progress-meta">
-                            <span>{{ $bucket['label'] }}</span>
-                            <strong>{{ number_format($bucket['count']) }}</strong>
+                            <div class="dashboard-command-mini">
+                                <div class="mini-label">{{ _lang('Upcoming Reminders') }}</div>
+                                <div class="mini-value">{{ number_format($collection_queue_counts['upcoming_reminders'] ?? 0) }}</div>
+                                <div class="mini-meta">{{ _lang('Borrowers needing pre-due reminder outreach') }}</div>
+                            </div>
+                            <div class="dashboard-command-mini">
+                                <div class="mini-label">{{ _lang('Finance Exceptions') }}</div>
+                                <div class="mini-value">{{ number_format($finance_exception_count ?? 0) }}</div>
+                                <div class="mini-meta">{{ _lang('Pending finance requests, cash postings, and bank exceptions') }}</div>
+                            </div>
+                            <div class="dashboard-command-mini">
+                                <div class="mini-label">{{ _lang('Ready for Disbursement') }}</div>
+                                <div class="mini-value">{{ number_format($ready_for_disbursement_count ?? 0) }}</div>
+                                <div class="mini-meta">{{ _lang('Approved loans waiting release into member accounts') }}</div>
+                            </div>
                         </div>
-                        <div class="progress"><div class="progress-bar bg-info" style="width: {{ $bucketMax > 0 ? min(100, round(($bucket['count'] / $bucketMax) * 100, 0)) : 0 }}%"></div></div>
                     </div>
-                @endforeach
-                <div class="dashboard-progress-row mt-3 pt-3 border-top">
-                    <div class="progress-meta">
-                        <span>{{ _lang('Critical Collections') }}</span>
-                        <strong>{{ $collection_queue_counts['critical'] ?? 0 }}</strong>
-                    </div>
-                    <div class="progress"><div class="progress-bar bg-danger" style="width: {{ $priorityMax > 0 ? min(100, round((($collection_queue_counts['critical'] ?? 0) / $priorityMax) * 100, 0)) : 0 }}%"></div></div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-3 mb-lg-0">
-        <div class="card dashboard-panel-card h-100 mb-0">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span>{{ _lang('Branch Pressure Leaderboard') }}</span>
-                <a href="{{ route('members.workspace') }}" class="small">{{ _lang('Open members workspace') }}</a>
-            </div>
-            <div class="card-body">
-                @forelse($branchPressureLeaderboard as $branch)
-                    <div class="dashboard-leaderboard-item">
-                        <div class="dashboard-leaderboard-top">
+            <div class="col-xl-4">
+                <div class="card dashboard-priority-card h-100 mb-0">
+                    <div class="card-body">
+                        <div class="dashboard-priority-header">
                             <div>
-                                <div class="dashboard-leaderboard-branch">{{ $branch->name }}</div>
-                                <div class="dashboard-leaderboard-meta">{{ $branch->due_today }} {{ _lang('due today') }} · {{ $branch->overdue }} {{ _lang('overdue') }} · {{ decimalPlace($branch->overdue_amount_base ?? 0, $dashboardBaseCurrency, 0) }} {{ _lang('overdue value') }}</div>
+                                <div class="text-muted small mb-1">{{ _lang('Needs attention now') }}</div>
+                                <div class="dashboard-attention-total">{{ number_format($attentionTotal) }}</div>
+                                <div class="dashboard-compact-note mt-1">{{ _lang('Combined immediate pressure across overdue, due-today, and finance exception queues.') }}</div>
                             </div>
-                            <div class="dashboard-leaderboard-score">{{ $branch->pressure_score }}</div>
+                            <a href="{{ route('action_center.index') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Queue') }}</a>
                         </div>
-                        <div class="progress"><div class="progress-bar bg-danger" style="width: {{ $branchPressureMax > 0 ? min(100, round(($branch->pressure_score / $branchPressureMax) * 100, 0)) : 0 }}%"></div></div>
+
+                        <div class="dashboard-priority-list">
+                            @foreach($priorityList as $item)
+                                @php $progressWidth = $priorityMax > 0 ? min(100, round(($item['value'] / $priorityMax) * 100, 0)) : 0; @endphp
+                                <a href="{{ $item['href'] }}" class="dashboard-priority-item">
+                                    <div class="topline">
+                                        <span class="priority-label"><i class="{{ $item['icon'] }}"></i> {{ $item['label'] }}</span>
+                                        <span class="priority-value">{{ number_format($item['value']) }}</span>
+                                    </div>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-{{ $item['theme'] === 'critical' ? 'danger' : ($item['theme'] === 'today' ? 'warning' : ($item['theme'] === 'active' ? 'success' : 'info')) }}" style="width: {{ $progressWidth }}%"></div>
+                                    </div>
+                                    <div class="priority-note">{{ $item['note'] }}</div>
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
-                @empty
-                    @include('backend.admin.partials.empty-state', [
-                        'title' => _lang('No branch pressure yet'),
-                        'description' => _lang('Once due and overdue pressure is detected by branch, a ranked view will appear here.'),
-                        'class' => 'py-4',
-                    ])
-                @endforelse
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card dashboard-panel-card h-100 mb-0">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span>{{ _lang('Recent Activity') }}</span>
-                <a href="{{ route('transactions.index') }}" class="small">{{ _lang('Open transactions') }}</a>
-            </div>
-            <div class="card-body">
-                @if($recentTransactionPreview->count() > 0)
-                    <div class="dashboard-activity-list">
-                        @foreach($recentTransactionPreview as $transaction)
-                            @php
-                                $symbol = $transaction->dr_cr == 'dr' ? '-' : '+';
-                                $class = $transaction->dr_cr == 'dr' ? 'text-danger' : 'text-success';
-                            @endphp
-                            <div class="dashboard-activity-item">
-                                <div class="dashboard-activity-icon"><i class="fas fa-exchange-alt"></i></div>
-                                <div class="flex-grow-1">
-                                    <div class="dashboard-activity-title">{{ $transaction->member->name }}</div>
-                                    <div class="dashboard-activity-meta">{{ $transaction->trans_date }} · {{ ucwords(str_replace('_',' ',$transaction->type)) }}</div>
+
+    <div class="tab-pane fade" id="portfolio-health">
+        <div class="row mb-4">
+            @foreach($executiveMetrics as $metric)
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <a href="{{ $metric['route'] }}" class="text-decoration-none">
+                        <div class="card dashboard-kpi-card mb-0">
+                            <div class="card-body">
+                                <div class="dashboard-kpi-top">
+                                    <span class="dashboard-kpi-icon"><i class="{{ $metric['icon'] }}"></i></span>
                                 </div>
-                                <div class="dashboard-activity-amount {{ $class }}">{{ $symbol . ' ' . decimalPlace($transaction->amount, currency($transaction->account->savings_type->currency->name)) }}</div>
+                                <div class="dashboard-kpi-label">{{ $metric['label'] }}</div>
+                                <div class="dashboard-kpi-value">{{ $metric['formatted_amount'] }}</div>
+                                <div class="dashboard-kpi-meta">{{ $metric['meta'] }}</div>
+                                @if($metric['delta'] !== null)
+                                    <div class="dashboard-kpi-change {{ $metric['delta_tone'] }}">
+                                        <i class="fas {{ $metric['delta'] > 0 ? 'fa-arrow-up' : ($metric['delta'] < 0 ? 'fa-arrow-down' : 'fa-minus') }}"></i>
+                                        <span>{{ number_format(abs($metric['delta']), 1) }}% {{ _lang('vs last month') }}</span>
+                                    </div>
+                                @endif
+                                <div class="dashboard-kpi-link">{{ _lang('Open detail') }}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="collections-snapshot">
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="card dashboard-chart-card h-100 mb-0">
+                    <div class="card-header d-flex align-items-center flex-wrap">
+                        <span>{{ _lang('Deposit & Withdraw Trend') . ' - ' . date('Y') }}</span>
+                        <select class="filter-select ml-auto py-0 auto-select form-control form-control-sm" style="max-width: 140px;" data-selected="{{ base_currency_id() }}">
+                            @foreach(\App\Models\Currency::where('status',1)->get() as $currency)
+                                <option value="{{ $currency->id }}" data-symbol="{{ currency_symbol($currency->name) }}">{{ $currency->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-wrap">
+                            <canvas id="transactionAnalysis"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card dashboard-chart-card h-100 mb-0">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>{{ _lang('Expense Trend') . ' - ' . date('M Y') }}</span>
+                        <a href="{{ route('expenses.index') }}" class="small">{{ _lang('Open expenses') }}</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-wrap">
+                            <canvas id="expenseOverview"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="branch-performance">
+        <div class="row mb-4">
+            <div class="col-lg-4 mb-3 mb-lg-0">
+                <div class="card dashboard-panel-card h-100 mb-0">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>{{ _lang('Risk Radar') }}</span>
+                        <a href="{{ route('loans.workspace') }}" class="small">{{ _lang('Open loans workspace') }}</a>
+                    </div>
+                    <div class="card-body">
+                        @foreach(($collection_buckets ?? []) as $bucket)
+                            <div class="dashboard-progress-row">
+                                <div class="progress-meta">
+                                    <span>{{ $bucket['label'] }}</span>
+                                    <strong>{{ number_format($bucket['count']) }}</strong>
+                                </div>
+                                <div class="progress"><div class="progress-bar bg-info" style="width: {{ $bucketMax > 0 ? min(100, round(($bucket['count'] / $bucketMax) * 100, 0)) : 0 }}%"></div></div>
                             </div>
                         @endforeach
+                        <div class="dashboard-progress-row mt-3 pt-3 border-top">
+                            <div class="progress-meta">
+                                <span>{{ _lang('Critical Collections') }}</span>
+                                <strong>{{ $collection_queue_counts['critical'] ?? 0 }}</strong>
+                            </div>
+                            <div class="progress"><div class="progress-bar bg-danger" style="width: {{ $priorityMax > 0 ? min(100, round((($collection_queue_counts['critical'] ?? 0) / $priorityMax) * 100, 0)) : 0 }}%"></div></div>
+                        </div>
                     </div>
-                @else
-                    @include('backend.admin.partials.empty-state', [
-                        'title' => _lang('No recent transactions yet'),
-                        'description' => _lang('When finance activity is posted, the latest movement will appear here for quick scanning.'),
-                        'class' => 'py-4',
-                    ])
-                @endif
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3 mb-lg-0">
+                <div class="card dashboard-panel-card h-100 mb-0">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>{{ _lang('Branch Pressure Leaderboard') }}</span>
+                        <a href="{{ route('members.workspace') }}" class="small">{{ _lang('Open members workspace') }}</a>
+                    </div>
+                    <div class="card-body">
+                        @forelse($branchPressureLeaderboard as $branch)
+                            <div class="dashboard-leaderboard-item">
+                                <div class="dashboard-leaderboard-top">
+                                    <div>
+                                        <div class="dashboard-leaderboard-branch">{{ $branch->name }}</div>
+                                        <div class="dashboard-leaderboard-meta">{{ $branch->due_today }} {{ _lang('due today') }} · {{ $branch->overdue }} {{ _lang('overdue') }} · {{ decimalPlace($branch->overdue_amount_base ?? 0, $dashboardBaseCurrency, 0) }} {{ _lang('overdue value') }}</div>
+                                    </div>
+                                    <div class="dashboard-leaderboard-score">{{ $branch->pressure_score }}</div>
+                                </div>
+                                <div class="progress"><div class="progress-bar bg-danger" style="width: {{ $branchPressureMax > 0 ? min(100, round(($branch->pressure_score / $branchPressureMax) * 100, 0)) : 0 }}%"></div></div>
+                            </div>
+                        @empty
+                            @include('backend.admin.partials.empty-state', [
+                                'title' => _lang('No branch pressure yet'),
+                                'description' => _lang('Once due and overdue pressure is detected by branch, a ranked view will appear here.'),
+                                'class' => 'py-4',
+                            ])
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card dashboard-panel-card h-100 mb-0">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>{{ _lang('Recent Activity') }}</span>
+                        <a href="{{ route('transactions.index') }}" class="small">{{ _lang('Open transactions') }}</a>
+                    </div>
+                    <div class="card-body">
+                        @if($recentTransactionPreview->count() > 0)
+                            <div class="dashboard-activity-list">
+                                @foreach($recentTransactionPreview as $transaction)
+                                    @php
+                                        $symbol = $transaction->dr_cr == 'dr' ? '-' : '+';
+                                        $class = $transaction->dr_cr == 'dr' ? 'text-danger' : 'text-success';
+                                    @endphp
+                                    <div class="dashboard-activity-item">
+                                        <div class="dashboard-activity-icon"><i class="fas fa-exchange-alt"></i></div>
+                                        <div class="flex-grow-1">
+                                            <div class="dashboard-activity-title">{{ $transaction->member->name }}</div>
+                                            <div class="dashboard-activity-meta">{{ $transaction->trans_date }} · {{ ucwords(str_replace('_',' ',$transaction->type)) }}</div>
+                                        </div>
+                                        <div class="dashboard-activity-amount {{ $class }}">{{ $symbol . ' ' . decimalPlace($transaction->amount, currency($transaction->account->savings_type->currency->name)) }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            @include('backend.admin.partials.empty-state', [
+                                'title' => _lang('No recent transactions yet'),
+                                'description' => _lang('When finance activity is posted, the latest movement will appear here for quick scanning.'),
+                                'class' => 'py-4',
+                            ])
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -849,7 +859,7 @@
             <div class="workspace-section-title mt-4">{{ _lang('Recent Transactions') }}</div>
             <div class="dashboard-proof-datatable-card">
                 <div class="table-responsive">
-                <table id="dashboard_recent_transactions_table" class="table table-bordered table-export dashboard-table-compact" data-export-filename="Dashboard_Recent_Transactions">
+                <table id="dashboard_recent_transactions_table" class="table table-bordered table-striped table-export dashboard-table-compact" data-export-filename="Dashboard_Recent_Transactions">
                     <thead>
                         <tr>
                             <th data-total-label="{{ _lang('Total') }}" class="pl-3">{{ _lang('Date') }}</th>
@@ -899,6 +909,50 @@
 (function ($) {
     "use strict";
 
+    if (!$) {
+        return;
+    }
+
+    function findDashboardChart(canvasId) {
+        if (typeof Chart === 'undefined') {
+            return null;
+        }
+
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            return null;
+        }
+
+        if (typeof Chart.getChart === 'function') {
+            return Chart.getChart(canvas);
+        }
+
+        if (!Chart.instances) {
+            return null;
+        }
+
+        for (var key in Chart.instances) {
+            if (Object.prototype.hasOwnProperty.call(Chart.instances, key) && Chart.instances[key].canvas === canvas) {
+                return Chart.instances[key];
+            }
+        }
+
+        return null;
+    }
+
+    function refreshCollectionsCharts() {
+        ['transactionAnalysis', 'expenseOverview'].forEach(function (canvasId) {
+            var chart = findDashboardChart(canvasId);
+
+            if (!chart) {
+                return;
+            }
+
+            chart.resize();
+            chart.update('none');
+        });
+    }
+
     var $table = $('#dashboard_recent_transactions_table');
     if ($table.length && typeof window.cavicAdminDataTable === 'function') {
         var table = window.cavicAdminDataTable('#dashboard_recent_transactions_table', {
@@ -911,7 +965,7 @@
             buttons: [
                 {
                     extend: 'pdf',
-                    text: '<i class="ti-download"></i><span>{{ _lang('Export PDF') }}</span>',
+                    text: '<i class="ti-download"></i><span>{{ _lang('PDF') }}</span>',
                     className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
                     filename: 'Dashboard_Recent_Transactions',
                     title: 'Dashboard Recent Transactions',
@@ -919,17 +973,11 @@
                 },
                 {
                     extend: 'excel',
-                    text: '<i class="ti-download"></i><span>{{ _lang('Export XLS') }}</span>',
+                    text: '<i class="ti-download"></i><span>{{ _lang('Excel') }}</span>',
                     className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
                     filename: 'Dashboard_Recent_Transactions',
                     title: 'Dashboard Recent Transactions',
                     exportOptions: { columns: ':not([data-no-export="1"])' }
-                },
-                {
-                    extend: 'colvis',
-                    text: '<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span>',
-                    className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
-                    columns: ':not([data-no-export="1"])'
                 }
             ],
             language: {
@@ -950,6 +998,10 @@
                 var $wrapper = $(api.table().container());
                 var $left = $wrapper.find('.admin-datatable-top-left');
                 var $right = $wrapper.find('.admin-datatable-top-right');
+                var $top = $wrapper.find('.admin-datatable-top');
+                var $length = $left.find('.dataTables_length').detach();
+                var $search = $right.find('.dataTables_filter').detach();
+                var $buttons = $left.find('.dt-buttons').detach();
 
                 var $statusFilter = $('<select class="dashboard-proof-filter"><option value="">{{ _lang('Status') }}</option></select>');
                 var $typeFilter = $('<select class="dashboard-proof-filter"><option value="">{{ _lang('Type') }}</option></select>');
@@ -974,11 +1026,82 @@
                     api.column(5).search(val ? '^' + val + '$' : '', true, false).draw();
                 });
 
-                $left.append($typeFilter).append($statusFilter);
-                $right.find('.dataTables_filter input').attr('placeholder', '{{ _lang('Search transactions') }}');
+                var $toolbarLeft = $('<div class="dashboard-proof-top-left"></div>');
+                var $toolbarCenter = $('<div class="dashboard-proof-top-center"></div>');
+                var $toolbarRight = $('<div class="dashboard-proof-top-right"></div>');
+                var $columnsDropdown = $(
+                    '<div class="dropdown dashboard-columns-dropdown">' +
+                        '<button type="button" class="btn btn-xs admin-dt-btn admin-dt-btn-ghost dashboard-columns-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                            '<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span><i class="fas fa-chevron-down dashboard-columns-chevron"></i>' +
+                        '</button>' +
+                        '<div class="dropdown-menu dropdown-menu-right dashboard-columns-menu"></div>' +
+                    '</div>'
+                );
+                var $columnsMenu = $columnsDropdown.find('.dashboard-columns-menu');
+
+                api.columns().every(function (index) {
+                    var column = this;
+                    var $header = $(column.header());
+                    var label = $header.text().trim();
+                    var isLocked = $header.data('noExport') === 1 || $header.attr('data-no-export') === '1' || label === '{{ _lang('Action') }}';
+
+                    if (!label || isLocked) {
+                        return;
+                    }
+
+                    var itemId = 'dashboard-column-toggle-' + index;
+                    var $item = $(
+                        '<label class="dropdown-item dashboard-columns-item" for="' + itemId + '">' +
+                            '<span class="dashboard-columns-label">' + label + '</span>' +
+                            '<input type="checkbox" class="dashboard-columns-checkbox" id="' + itemId + '"' + (column.visible() ? ' checked' : '') + '>' +
+                        '</label>'
+                    );
+
+                    $item.on('click', function (event) {
+                        event.stopPropagation();
+                    });
+
+                    $item.find('.dashboard-columns-checkbox').on('change', function () {
+                        column.visible($(this).is(':checked'));
+                        api.columns.adjust();
+                    });
+
+                    $columnsMenu.append($item);
+                });
+
+                $columnsMenu.on('click', function (event) {
+                    event.stopPropagation();
+                });
+
+                $buttons.addClass('dashboard-proof-export-buttons');
+
+                $toolbarLeft.append(
+                    $('<div class="dashboard-toolbar-item dashboard-toolbar-item-length"></div>').append($length)
+                );
+                $toolbarCenter.append(
+                    $('<div class="dashboard-toolbar-item dashboard-toolbar-item-export"></div>').append($buttons)
+                );
+                $toolbarRight
+                    .append($('<div class="dashboard-toolbar-item"></div>').append($columnsDropdown))
+                    .append($('<div class="dashboard-toolbar-item"></div>').append($typeFilter))
+                    .append($('<div class="dashboard-toolbar-item"></div>').append($statusFilter))
+                    .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-search"></div>').append($search));
+
+                $top.empty().append($toolbarLeft, $toolbarCenter, $toolbarRight);
+                $search.find('input').attr('placeholder', '{{ _lang('Search transactions') }}');
             }
         });
     }
-})(jQuery);
+
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"][href="#collections-snapshot"]', function () {
+        window.setTimeout(refreshCollectionsCharts, 60);
+    });
+
+    $(window).on('load', function () {
+        if ($('#collections-snapshot').hasClass('active') || $('#collections-snapshot').hasClass('show')) {
+            window.setTimeout(refreshCollectionsCharts, 60);
+        }
+    });
+})(window.jQuery || window.$);
 </script>
 @endsection

@@ -1,6 +1,10 @@
 (function($) {
     "use strict";
 
+    if (!$) {
+        return;
+    }
+
     /*================================
     Preloader
     ==================================*/
@@ -77,10 +81,58 @@
         e.stopPropagation();
     });
 
-    function syncTopStripTabs(target) {
+    function getTabStateStorage() {
+        try {
+            return window.localStorage;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function getTabStateKey($nav) {
+        if (!$nav || !$nav.length) return '';
+        return String($nav.data('tabStateKey') || '').trim();
+    }
+
+    function buildStoredTabKey($nav) {
+        var navKey = getTabStateKey($nav);
+        if (!navKey) return '';
+
+        return 'cavic:tabs:' + window.location.pathname + ':' + navKey;
+    }
+
+    function storeActiveTab($trigger) {
+        if (!$trigger || !$trigger.length) return;
+
+        var storage = getTabStateStorage();
+        if (!storage) return;
+
+        var $nav = $trigger.closest('[data-tab-state-key]');
+        var storageKey = buildStoredTabKey($nav);
+        var target = $trigger.attr('href');
+
+        if (!storageKey || !target || target.charAt(0) !== '#') return;
+
+        storage.setItem(storageKey, target);
+    }
+
+    function getStoredTab($nav) {
+        var storage = getTabStateStorage();
+        var storageKey = buildStoredTabKey($nav);
+
+        if (!storage || !storageKey) return '';
+
+        return storage.getItem(storageKey) || '';
+    }
+
+    function syncTopStripTabs(target, $topStrip) {
         if (!target) return;
-        $('.admin-dashboard-top-tab').removeClass('active');
-        $('.admin-dashboard-top-tab[href="' + target + '"]').addClass('active');
+
+        var $tabs = $topStrip && $topStrip.length ? $topStrip.find('.admin-dashboard-top-tab') : $('.admin-dashboard-top-tab');
+        if (!$tabs.length || $tabs.filter('[href="' + target + '"]').length === 0) return;
+
+        $tabs.removeClass('active');
+        $tabs.filter('[href="' + target + '"]').addClass('active');
     }
 
     function getTabTargetFromUrl() {
@@ -118,8 +170,8 @@
         var currentUrl = window.location.pathname + window.location.search + window.location.hash;
         if (currentUrl === nextUrl) return;
 
-        if (window.history && window.history.pushState) {
-            window.history.pushState({}, '', nextUrl);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', nextUrl);
         } else {
             window.location.hash = target;
         }
@@ -129,28 +181,62 @@
         var target = getTabTargetFromUrl();
         if (!target) return;
 
-        var $trigger = $('a[data-toggle="tab"][href="' + target + '"]').first();
+        var $topStrip = $('.admin-dashboard-top-tabs[data-tab-state-key]').first();
+        var $topStripTrigger = $topStrip.find('a[data-toggle="tab"][href="' + target + '"]').first();
+        var $trigger = $topStripTrigger.length ? $topStripTrigger : $('a[data-toggle="tab"][href="' + target + '"]').first();
+
         if ($trigger.length) {
             if (!$trigger.hasClass('active')) {
                 $trigger.tab('show');
             } else {
-                syncTopStripTabs(target);
+                syncTopStripTabs(target, $trigger.closest('.admin-dashboard-top-tabs'));
             }
         } else {
-            syncTopStripTabs(target);
+            syncTopStripTabs(target, $topStrip);
         }
     }
 
-    $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
-        var target = $(e.target).attr('href');
-        syncTopStripTabs(target);
-        updateTabUrl(target);
-    });
+    function activateStoredTabs() {
+        $('[data-tab-state-key]').each(function() {
+            var $nav = $(this);
+            var targetFromUrl = getTabTargetFromUrl();
+            var storedTarget = getStoredTab($nav);
 
-    $(document).on('click', '.admin-dashboard-top-tab:not([data-toggle="tab"])', function() {
-        var target = $(this).attr('href');
-        syncTopStripTabs(target);
-        updateTabUrl(target);
+            if (!storedTarget || storedTarget === targetFromUrl) {
+                return;
+            }
+
+            if ($nav.find('[href="' + targetFromUrl + '"]').length > 0) {
+                return;
+            }
+
+            var $trigger = $nav.find('a[data-toggle="tab"][href="' + storedTarget + '"]').first();
+            if ($trigger.length && !$trigger.hasClass('active')) {
+                $trigger.tab('show');
+                return;
+            }
+
+            if ($nav.hasClass('admin-dashboard-top-tabs')) {
+                syncTopStripTabs(storedTarget, $nav);
+            }
+        });
+    }
+
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
+        var $trigger = $(e.target);
+        var target = $(e.target).attr('href');
+        var $topStrip = $trigger.closest('.admin-dashboard-top-tabs');
+
+        storeActiveTab($trigger);
+
+        if ($topStrip.length) {
+            syncTopStripTabs(target, $topStrip);
+            updateTabUrl(target);
+        } else if ($('.admin-dashboard-top-tabs').length === 0) {
+            updateTabUrl(target);
+        }
+
+        syncFirstTabStats();
     });
 
     function syncFirstTabStats(instant) {
@@ -183,17 +269,32 @@
         });
     }
 
+    $(document).on('click', '.admin-dashboard-top-tab:not([data-toggle="tab"])', function(e) {
+        var $trigger = $(this);
+        var target = $trigger.attr('href');
+        var $topStrip = $trigger.closest('.admin-dashboard-top-tabs');
+
+        storeActiveTab($trigger);
+        syncTopStripTabs(target, $topStrip);
+
+        if (target && target.charAt(0) === '#' && $(target).hasClass('tab-pane')) {
+            e.preventDefault();
+            $trigger.tab('show');
+            return;
+        }
+
+        updateTabUrl(target);
+    });
+
     $(window).on('popstate hashchange', function() {
         activateTabFromLocation();
+        activateStoredTabs();
         syncFirstTabStats();
     });
 
     activateTabFromLocation();
+    activateStoredTabs();
     syncFirstTabStats(true);
-
-    $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function() {
-        syncFirstTabStats();
-    });
 
     window.cavicAdminDataTable = function(selector, config) {
         if (typeof $.fn.DataTable === 'undefined') {
@@ -289,7 +390,13 @@
             }
         };
 
-        return $table.DataTable($.extend(true, {}, defaults, config || {}));
+        var finalConfig = $.extend(true, {}, defaults, config || {});
+
+        if (config && Object.prototype.hasOwnProperty.call(config, 'buttons')) {
+            finalConfig.buttons = config.buttons;
+        }
+
+        return $table.DataTable(finalConfig);
     };
 
 	/*================================
@@ -1646,7 +1753,7 @@
 		e.stopPropagation();
 	});
 
-})(jQuery);
+})(window.jQuery || window.$);
 
 function readFileURL(input) {
 	if(input.files){
@@ -1751,4 +1858,3 @@ function showRole(elem) {
 	}
 	window.location = _user_url + '/roles/' + $(elem).val() + '/access_control';
 }
-

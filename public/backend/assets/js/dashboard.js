@@ -1,6 +1,10 @@
 (function($) {
     "use strict";
 
+    if (!$) {
+        return;
+    }
+
 	  //Expense By Category Chart
     if(document.getElementById('expenseOverview')){
       var link2 = _url + "/dashboard/json_expense_by_category";
@@ -172,4 +176,4 @@
 
    $(document).on('change', '#branch-switch', function(){});
 
-})(jQuery);	
+})(window.jQuery || window.$);	

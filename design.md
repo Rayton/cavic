@@ -455,6 +455,43 @@ Use the table reference image (`datatable1.png` in the project root) as the cons
 - subtle selected-row emphasis without heavy fills
 - minimal grid noise and stronger readability for the content itself
 
+### Canonical admin DataTable standard
+The dashboard recent transactions table is now the source-of-truth pattern for all admin DataTables.
+
+Reference implementation:
+- `resources/views/backend/admin/dashboard-admin.blade.php`
+- `public/backend/assets/css/styles.css`
+
+All future admin tables should follow this exact structure unless there is a strong workflow reason not to:
+- toolbar split into three zones:
+  - left: page length
+  - center: export buttons
+  - right: column visibility, table filters, and search
+- do not expose raw plugin-default DataTables controls when a styled CAVIC control exists
+- use a dedicated `Columns` visibility control rather than relying on misaligned plugin markup
+- keep all toolbar controls vertically centered in one shared row
+- export buttons should be compact and visually lighter than the filters/search controls
+- filters and search should use the same height, radius, and alignment rules
+- toolbar controls should feel like a product workspace, not a jQuery plugin toolbar
+
+### Row and table behavior standard
+All admin DataTables should also inherit the dashboard table behavior:
+- compact row height with approximately 30% less vertical space than the legacy tables
+- striped rows for scanability
+- clear hover highlight across the full row
+- hover state must visually carry into the actions cell/button as part of the same row
+- soft bordered table card with rounded outer container
+- readable header contrast with minimal grid noise
+- action column kept narrow and visually consistent
+- status chips kept compact so data density stays high
+
+### Implementation rule
+When updating any admin table:
+- use the dashboard recent transactions table as the baseline before inventing a new variation
+- preserve workflow-specific filters, but keep the shared toolbar layout and table density
+- if a table needs custom actions, fit them into this pattern instead of adding a second toolbar
+- if DataTables plugin markup fights the layout, replace that specific control with a custom CAVIC control rather than stacking more CSS hacks on top
+
 ### CAVIC tables that should use this style
 - members list
 - loans list

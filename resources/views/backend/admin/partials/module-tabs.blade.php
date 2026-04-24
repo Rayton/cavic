@@ -3,11 +3,15 @@
     $class = $class ?? '';
     $role = $role ?? 'tablist';
     $variant = $variant ?? 'default';
+    $tabStateSignature = collect($tabs)->map(function ($tab) {
+        return $tab['id'] ?? ($tab['url'] ?? ($tab['target'] ?? ''));
+    })->implode('|');
+    $tabStateKey = $tabStateKey ?? md5($variant . '|' . $tabStateSignature);
 @endphp
 
 @if(! empty($tabs))
     @if($variant === 'top-strip')
-        <div class="admin-dashboard-top-tabs nav {{ $class }}" role="{{ $role }}">
+        <div class="admin-dashboard-top-tabs nav {{ $class }}" role="{{ $role }}" data-tab-state-key="{{ $tabStateKey }}">
             @foreach($tabs as $tab)
                 @php
                     $href = $tab['url'] ?? $tab['target'] ?? '#';
@@ -30,7 +34,7 @@
             @endforeach
         </div>
     @else
-<ul class="nav nav-pills workspace-nav workspace-module-tabs {{ $class }}" role="{{ $role }}">
+<ul class="nav nav-pills workspace-nav workspace-module-tabs {{ $class }}" role="{{ $role }}" data-tab-state-key="{{ $tabStateKey }}">
     @foreach($tabs as $tab)
         @php
             $href = $tab['url'] ?? $tab['target'] ?? '#';

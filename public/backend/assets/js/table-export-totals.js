@@ -1,10 +1,13 @@
 /**
  * Table Export & Footer Totals
- * - Adds Export CSV/Excel buttons above tables with class .table-export
  * - Computes footer totals for columns with data-sum="1" on <th> and fills <tfoot .table-totals-row>
  */
 (function ($) {
 	'use strict';
+
+	if (!$) {
+		return;
+	}
 
 	function stripHtml(html) {
 		var tmp = document.createElement('div');
@@ -92,69 +95,6 @@
 		return data;
 	}
 
-	function csvEscapeCell(cell) {
-		var s = String(cell).replace(/"/g, '""');
-		// Prefix values that start with =, +, -, @ or tab so Excel does not treat them as formulas (avoids #NAME? for zero amounts like "+ 0 Tsh0.00")
-		if (s.length && /^[=+\-@\t]/.test(s)) s = "'" + s;
-		if (/[",\n\r]/.test(s)) return '"' + s + '"';
-		return s;
-	}
-
-	function exportCsv(table, filename) {
-		var data = tableToArray(table, true);
-		if (!data.length) return;
-		var csv = data.map(function (row) {
-			return row.map(csvEscapeCell).join(',');
-		}).join('\r\n');
-		var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-		downloadBlob(blob, (filename || 'export') + '.csv');
-	}
-
-	function exportExcel(table, filename) {
-		// Export as CSV so Excel opens without "format and extension don't match" warning
-		var data = tableToArray(table, true);
-		if (!data.length) return;
-		var csv = data.map(function (row) {
-			return row.map(csvEscapeCell).join(',');
-		}).join('\r\n');
-		var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-		downloadBlob(blob, (filename || 'export') + '.csv');
-	}
-
-	function downloadBlob(blob, filename) {
-		var a = document.createElement('a');
-		var url = (window.URL || window.webkitURL).createObjectURL(blob);
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		(window.URL || window.webkitURL).revokeObjectURL(url);
-	}
-
-	function initExportToolbar() {
-		$('table.table-export').each(function () {
-			var $table = $(this);
-			if ($table.closest('.no-export').length) return;
-			if ($table.data('export-toolbar')) return;
-			var id = $table.attr('id') || ('tbl-' + Math.random().toString(36).slice(2));
-			if (!$table.attr('id')) $table.attr('id', id);
-			// Filename: data-export-filename on table, or card title (panel-title/header-title), else 'Table'
-			var title = $table.attr('data-export-filename') || $table.closest('.card').find('.panel-title').first().text().trim() || $table.closest('.card').find('.header-title').first().text().trim() || 'Table';
-			var filename = (typeof title === 'string' ? title : 'Table').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'export';
-			var $wrap = $table.closest('.table-responsive').length ? $table.closest('.table-responsive') : $table.parent();
-			var $toolbar = $('<div class="table-export-toolbar mb-2 d-flex align-items-center flex-wrap"></div>');
-			$toolbar.append(
-				'<button type="button" class="btn btn-sm btn-outline-secondary mr-2 table-export-csv"><i class="ti-download mr-1"></i> CSV</button>' +
-				'<button type="button" class="btn btn-sm btn-outline-secondary table-export-excel"><i class="ti-files mr-1"></i> Excel</button>'
-			);
-			$wrap.before($toolbar);
-			$toolbar.find('.table-export-csv').on('click', function () { exportCsv($table[0], filename); });
-			$toolbar.find('.table-export-excel').on('click', function () { exportExcel($table[0], filename); });
-			$table.data('export-toolbar', true);
-		});
-	}
-
 	function computeFooterTotals() {
 		$('table').each(function () {
 			var $table = $(this);
@@ -188,11 +128,9 @@
 	}
 
 	$(document).ready(function () {
-		initExportToolbar();
 		computeFooterTotals();
-		// Re-run toolbar after DataTables and other dynamic inits
+		// Re-run totals after DataTables and other dynamic inits
 		setTimeout(function () {
-			initExportToolbar();
 			computeFooterTotals();
 		}, 500);
 	});
@@ -204,8 +142,7 @@
 
 	// Expose for manual refresh
 	window.TableExportTotals = {
-		initToolbars: initExportToolbar,
 		computeTotals: computeFooterTotals,
-		refresh: function () { initExportToolbar(); computeFooterTotals(); }
+		refresh: function () { computeFooterTotals(); }
 	};
-})(jQuery);
+})(window.jQuery || window.$);

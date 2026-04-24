@@ -2,6 +2,10 @@
 (function($) {
     "use strict";
 
+    if (!$) {
+        return;
+    }
+
     //Show success message
     @if(Session::has('success'))
         $("#main_alert > span.msg").html(" {{ session('success') }} ");
@@ -48,6 +52,6 @@
 
     @endforeach
 
-})(jQuery);
+})(window.jQuery || window.$);
 
 </script>
