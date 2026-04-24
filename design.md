@@ -440,6 +440,20 @@ The bottom area of the screenshot uses a soft modern table.
 - status as pills
 - row actions in final column or kebab menu
 - checkbox column optional
+- toolbar controls should feel like product controls, not raw plugin defaults
+- use the CAVIC brand teal for active pagination, filters, exports, and primary row actions
+- keep table action styling consistent across all admin pages
+
+### Data table and action pattern
+Use the table reference image (`datatable1.png` in the project root) as the consistent pattern for admin tables:
+- a clean toolbar above the table with export/filter/search controls
+- column visibility control with checked states for toggled columns
+- polished pagination and record summary controls, not raw plugin defaults
+- soft outlined action controls with the brand color, not unrelated framework colors
+- a compact overflow-style action affordance on the far right where appropriate
+- airy dropdown menus for row actions
+- subtle selected-row emphasis without heavy fills
+- minimal grid noise and stronger readability for the content itself
 
 ### CAVIC tables that should use this style
 - members list

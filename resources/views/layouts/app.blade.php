@@ -128,12 +128,6 @@
 					</a>
 				</div>
 
-				@if($isAdminWorkspace)
-					<div class="admin-sidebar-intro px-3 pb-2">
-						<span class="admin-sidebar-eyebrow">{{ _lang('Main Menu') }}</span>
-						<p class="admin-sidebar-note mb-0">{{ _lang('Task-based workspaces for administration and operations.') }}</p>
-					</div>
-				@endif
 
 				<div class="main-menu {{ $isAdminWorkspace ? 'admin-menu-scroll' : '' }}" style="flex: 1; overflow-y: auto;">
 					<div class="menu-inner">

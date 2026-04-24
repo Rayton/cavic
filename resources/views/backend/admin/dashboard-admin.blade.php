@@ -326,20 +326,6 @@
 }
 </style>
 
-@include('backend.admin.partials.page-header', [
-    'title' => _lang('Dashboard'),
-    'subtitle' => _lang('A glance-first operations dashboard for approvals, collections pressure, finance exceptions, and branch workload.'),
-    'badge' => _lang('Executive Overview'),
-    'breadcrumbs' => [
-        ['label' => _lang('Dashboard'), 'active' => true],
-    ],
-    'actions' => [
-        ['label' => _lang('Open Action Center'), 'url' => route('action_center.index'), 'class' => 'btn-primary btn-sm'],
-        ['label' => _lang('Loans Workspace'), 'url' => route('loans.workspace'), 'class' => 'btn-outline-primary btn-sm'],
-        ['label' => _lang('Finance Workspace'), 'url' => route('finance.index'), 'class' => 'btn-outline-primary btn-sm'],
-    ],
-])
-
 @include('backend.admin.partials.quick-actions', [
     'title' => _lang('Operational Quick Actions'),
     'subtitle' => _lang('Keep common admin actions near the dashboard instead of adding more sidebar clutter.'),
@@ -689,7 +675,7 @@
                                             <td>{{ $item->borrower_name }}</td>
                                             <td>{{ $item->promised_payment_date }}</td>
                                             <td><span class="workspace-status-chip {{ $item->promise_status_theme }}">{{ $item->promise_status_label }}</span></td>
-                                            <td class="pr-3"><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                            <td class="pr-3">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No promise follow-up items found') }}</td></tr>
@@ -861,8 +847,9 @@
             </div>
 
             <div class="workspace-section-title mt-4">{{ _lang('Recent Transactions') }}</div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-export dashboard-table-compact">
+            <div class="dashboard-proof-datatable-card">
+                <div class="table-responsive">
+                <table id="dashboard_recent_transactions_table" class="table table-bordered table-export dashboard-table-compact" data-export-filename="Dashboard_Recent_Transactions">
                     <thead>
                         <tr>
                             <th data-total-label="{{ _lang('Total') }}" class="pl-3">{{ _lang('Date') }}</th>
@@ -872,7 +859,7 @@
                             <th class="text-nowrap">{{ _lang('Debit/Credit') }}</th>
                             <th>{{ _lang('Type') }}</th>
                             <th>{{ _lang('Status') }}</th>
-                            <th class="text-center">{{ _lang('Action') }}</th>
+                            <th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -892,12 +879,13 @@
                                 <td>{{ strtoupper($transaction->dr_cr) }}</td>
                                 <td>{{ ucwords(str_replace('_',' ',$transaction->type)) }}</td>
                                 <td>{!! xss_clean(transaction_status($transaction->status)) !!}</td>
-                                <td class="text-center"><a href="{{ route('transactions.show', $transaction->id) }}" target="_blank" class="btn btn-outline-primary btn-xs"><i class="ti-arrow-right"></i>&nbsp;{{ _lang('View') }}</a></td>
+                                <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('transactions.show', $transaction->id), 'icon' => 'ti-eye', 'target' => '_blank']]])</td>
                             </tr>
                         @endforeach
                     </tbody>
                     <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>
                 </table>
+                </div>
             </div>
         </div>
     </div>
@@ -907,4 +895,90 @@
 @section('js-script')
 <script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
 <script src="{{ asset('public/backend/assets/js/dashboard.js') }}"></script>
+<script>
+(function ($) {
+    "use strict";
+
+    var $table = $('#dashboard_recent_transactions_table');
+    if ($table.length && typeof window.cavicAdminDataTable === 'function') {
+        var table = window.cavicAdminDataTable('#dashboard_recent_transactions_table', {
+            paging: true,
+            searching: true,
+            info: true,
+            ordering: false,
+            lengthChange: true,
+            pageLength: 10,
+            buttons: [
+                {
+                    extend: 'pdf',
+                    text: '<i class="ti-download"></i><span>{{ _lang('Export PDF') }}</span>',
+                    className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                    filename: 'Dashboard_Recent_Transactions',
+                    title: 'Dashboard Recent Transactions',
+                    exportOptions: { columns: ':not([data-no-export="1"])' }
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="ti-download"></i><span>{{ _lang('Export XLS') }}</span>',
+                    className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                    filename: 'Dashboard_Recent_Transactions',
+                    title: 'Dashboard Recent Transactions',
+                    exportOptions: { columns: ':not([data-no-export="1"])' }
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span>',
+                    className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                    columns: ':not([data-no-export="1"])'
+                }
+            ],
+            language: {
+                info: '{{ _lang('Viewing') }} _START_-_END_ {{ _lang('of') }} _TOTAL_',
+                infoEmpty: '{{ _lang('Viewing 0-0 of 0') }}',
+                search: '',
+                searchPlaceholder: '{{ _lang('Search transactions') }}',
+                lengthMenu: '_MENU_',
+                zeroRecords: '{{ _lang('No matching transactions found') }}',
+                emptyTable: '{{ _lang('No Data Available') }}',
+                paginate: {
+                    previous: '<i class="fas fa-angle-left"></i>',
+                    next: '<i class="fas fa-angle-right"></i>'
+                }
+            },
+            initComplete: function () {
+                var api = this.api();
+                var $wrapper = $(api.table().container());
+                var $left = $wrapper.find('.admin-datatable-top-left');
+                var $right = $wrapper.find('.admin-datatable-top-right');
+
+                var $statusFilter = $('<select class="dashboard-proof-filter"><option value="">{{ _lang('Status') }}</option></select>');
+                var $typeFilter = $('<select class="dashboard-proof-filter"><option value="">{{ _lang('Type') }}</option></select>');
+
+                api.column(6).data().unique().sort().each(function (value) {
+                    var text = $('<div>').html(value).text().trim();
+                    if (text) $statusFilter.append('<option value="' + text.replace(/"/g, '&quot;') + '">' + text + '</option>');
+                });
+
+                api.column(5).data().unique().sort().each(function (value) {
+                    var text = $('<div>').html(value).text().trim();
+                    if (text) $typeFilter.append('<option value="' + text.replace(/"/g, '&quot;') + '">' + text + '</option>');
+                });
+
+                $statusFilter.on('change', function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                    api.column(6).search(val ? val : '', true, false).draw();
+                });
+
+                $typeFilter.on('change', function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                    api.column(5).search(val ? '^' + val + '$' : '', true, false).draw();
+                });
+
+                $left.append($typeFilter).append($statusFilter);
+                $right.find('.dataTables_filter input').attr('placeholder', '{{ _lang('Search transactions') }}');
+            }
+        });
+    }
+})(jQuery);
+</script>
 @endsection

@@ -42,11 +42,13 @@
     ],
 ])
 
+<div class="workspace-first-tab-stats" data-tab="#all-members">
 <div class="row mb-4">
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Total Members') }}</div><div class="stat-value">{{ number_format($membersCount) }}</div><a class="stat-link" href="{{ route('members.index') }}">{{ _lang('Open member list') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Requests') }}</div><div class="stat-value">{{ $memberRequests }}</div><a class="stat-link" href="{{ route('members.pending_requests') }}">{{ _lang('Review onboarding') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Branches') }}</div><div class="stat-value">{{ $branchesCount }}</div><a class="stat-link" href="{{ route('branches.index') }}">{{ _lang('Manage branches') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Active Borrowers') }}</div><div class="stat-value">{{ $activeBorrowersCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'active') }}">{{ _lang('View active loans') }}</a></div></div></div>
+</div>
 </div>
 
 <div class="card workspace-section-card">
@@ -72,7 +74,7 @@
                                 <td>{{ $member->branch->name }}</td>
                                 <td>{{ $member->documents_count }}</td>
                                 <td><span class="workspace-status-chip active">{{ _lang('Active') }}</span></td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('members.show', $member->id) }}">{{ _lang('View') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No members found') }}</td></tr>
@@ -104,8 +106,12 @@
                                 <td>{{ $member->documents_count }}</td>
                                 <td><span class="workspace-status-chip pending">{{ _lang('Pending Approval') }}</span></td>
                                 <td>
-                                    <a class="btn btn-light btn-xs mr-1" href="{{ route('members.show', $member->id) }}">{{ _lang('Profile') }}</a>
-                                    <a class="btn btn-success btn-xs ajax-modal" href="{{ route('members.accept_request', $member->id) }}" data-title="{{ _lang('Approve Member Request') }}">{{ _lang('Approve') }}</a>
+                                    @include('backend.admin.partials.table-actions', [
+                                        'items' => [
+                                            ['label' => _lang('Profile'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye'],
+                                            ['label' => _lang('Approve'), 'url' => route('members.accept_request', $member->id), 'icon' => 'ti-check', 'class' => 'ajax-modal', 'data_title' => _lang('Approve Member Request')],
+                                        ],
+                                    ])
                                 </td>
                             </tr>
                         @empty
@@ -139,8 +145,12 @@
                                         <td>{{ $member->branch->name }}</td>
                                         <td><span class="workspace-status-chip review">{{ _lang('Missing Documents') }}</span></td>
                                         <td>
-                                            <a class="btn btn-light btn-xs mr-1" href="{{ route('members.show', $member->id) }}">{{ _lang('Profile') }}</a>
-                                            <a class="btn btn-outline-primary btn-xs" href="{{ route('member_documents.index', $member->id) }}">{{ _lang('Documents') }}</a>
+                                            @include('backend.admin.partials.table-actions', [
+                                                'items' => [
+                                                    ['label' => _lang('Profile'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye'],
+                                                    ['label' => _lang('Documents'), 'url' => route('member_documents.index', $member->id), 'icon' => 'ti-files'],
+                                                ],
+                                            ])
                                         </td>
                                     </tr>
                                 @empty
@@ -168,7 +178,7 @@
                                         <td>{{ $document->member->name }}</td>
                                         <td>{{ optional($document->member->branch)->name }}</td>
                                         <td>{{ $document->name }}</td>
-                                        <td><a class="btn btn-light btn-xs" href="{{ route('members.show', $document->member_id) }}">{{ _lang('Open Member') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open Member'), 'url' => route('members.show', $document->member_id), 'icon' => 'ti-eye']]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="4" class="text-center text-muted">{{ _lang('No recent KYC uploads found') }}</td></tr>
@@ -228,7 +238,7 @@
                                 <td>{{ optional(optional($leader->member)->branch)->name }}</td>
                                 <td>{{ $leader->position_text }}</td>
                                 <td><span class="workspace-status-chip {{ (int) $leader->status === 1 ? 'active' : 'review' }}">{{ (int) $leader->status === 1 ? _lang('Active') : _lang('Inactive') }}</span></td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('leaders.index') }}">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('leaders.index'), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center text-muted">{{ _lang('No leaders found') }}</td></tr>

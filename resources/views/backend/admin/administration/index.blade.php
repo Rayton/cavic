@@ -36,11 +36,13 @@
     ],
 ])
 
+<div class="workspace-first-tab-stats" data-tab="#users">
 <div class="row mb-4">
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Users') }}</div><div class="stat-value">{{ $userCount }}</div><a class="stat-link" href="{{ route('users.index') }}">{{ _lang('Manage users') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Roles') }}</div><div class="stat-value">{{ $roleCount }}</div><a class="stat-link" href="{{ route('roles.index') }}">{{ _lang('Manage roles') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Currencies') }}</div><div class="stat-value">{{ $currencyCount }}</div><a class="stat-link" href="{{ route('currency.index') }}">{{ _lang('Manage currency') }}</a></div></div></div>
     <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Notification Templates') }}</div><div class="stat-value">{{ $templateCount }}</div><a class="stat-link" href="{{ route('email_templates.index') }}">{{ _lang('Open templates') }}</a></div></div></div>
+</div>
 </div>
 
 <div class="card workspace-section-card">
@@ -89,7 +91,7 @@
                             <tr>
                                 <td>{{ $role->name }}</td>
                                 <td>{{ $role->permissions_count }}</td>
-                                <td><a href="{{ route('roles.index') }}" class="btn btn-light btn-xs">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('roles.index'), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="3" class="text-center text-muted">{{ _lang('No roles found') }}</td></tr>
@@ -131,7 +133,7 @@
                             <tr>
                                 <td>{{ $currency->name }}</td>
                                 <td><span class="workspace-status-chip {{ (int) $currency->status === 1 ? 'active' : 'review' }}">{{ (int) $currency->status === 1 ? _lang('Active') : _lang('Inactive') }}</span></td>
-                                <td><a href="{{ route('currency.index') }}" class="btn btn-light btn-xs">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('currency.index'), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="3" class="text-center text-muted">{{ _lang('No currencies found') }}</td></tr>
@@ -156,7 +158,7 @@
                             <tr>
                                 <td>{{ $template->name }}</td>
                                 <td>{{ $template->slug }}</td>
-                                <td><a href="{{ route('email_templates.index') }}" class="btn btn-light btn-xs">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('email_templates.index'), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="3" class="text-center text-muted">{{ _lang('No templates found') }}</td></tr>

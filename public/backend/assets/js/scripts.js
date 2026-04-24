@@ -153,11 +153,144 @@
         updateTabUrl(target);
     });
 
+    function syncFirstTabStats(instant) {
+        $('.workspace-first-tab-stats').each(function() {
+            var $stats = $(this);
+            var target = $stats.data('tab');
+            if (!target) return;
+
+            var isActive = $('a[data-toggle="tab"].active[href="' + target + '"]').length > 0;
+
+            if (instant) {
+                $stats.stop(true, true).css('opacity', 1).toggle(isActive);
+                return;
+            }
+
+            if (isActive) {
+                if (!$stats.is(':visible')) {
+                    $stats
+                        .stop(true, true)
+                        .css({ opacity: 0, display: 'none' })
+                        .slideDown(180)
+                        .animate({ opacity: 1 }, { duration: 180, queue: false });
+                }
+            } else if ($stats.is(':visible')) {
+                $stats
+                    .stop(true, true)
+                    .animate({ opacity: 0 }, { duration: 140, queue: false })
+                    .slideUp(180);
+            }
+        });
+    }
+
     $(window).on('popstate hashchange', function() {
         activateTabFromLocation();
+        syncFirstTabStats();
     });
 
     activateTabFromLocation();
+    syncFirstTabStats(true);
+
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function() {
+        syncFirstTabStats();
+    });
+
+    window.cavicAdminDataTable = function(selector, config) {
+        if (typeof $.fn.DataTable === 'undefined') {
+            return null;
+        }
+
+        var $table = $(selector);
+        if (!$table.length) {
+            return null;
+        }
+
+        var exportFilename = $table.data('exportFilename') || document.title || 'Export';
+        var hasButtons = !!($.fn.DataTable.Buttons);
+        var exportColumnSelector = function(idx, data, node) {
+            return $(node).attr('data-no-export') !== '1';
+        };
+
+        var defaultButtons = hasButtons ? [
+            {
+                extend: 'colvis',
+                text: '<i class="ti-layout-column2"></i><span>Columns</span>',
+                className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                columns: exportColumnSelector
+            },
+            {
+                extend: 'excel',
+                text: '<i class="ti-download"></i><span>Excel</span>',
+                className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                filename: exportFilename,
+                title: exportFilename,
+                exportOptions: { columns: exportColumnSelector }
+            },
+            {
+                extend: 'csv',
+                text: '<i class="ti-download"></i><span>CSV</span>',
+                className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                filename: exportFilename,
+                exportOptions: { columns: exportColumnSelector }
+            },
+            {
+                extend: 'pdf',
+                text: '<i class="ti-download"></i><span>PDF</span>',
+                className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                filename: exportFilename,
+                title: exportFilename,
+                exportOptions: { columns: exportColumnSelector }
+            },
+            {
+                extend: 'print',
+                text: '<i class="ti-printer"></i><span>Print</span>',
+                className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                title: exportFilename,
+                exportOptions: { columns: exportColumnSelector }
+            }
+        ] : [];
+
+        var userDrawCallback = config && config.drawCallback;
+        var userInitComplete = config && config.initComplete;
+
+        var defaults = {
+            responsive: true,
+            bStateSave: true,
+            bAutoWidth: false,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            dom: hasButtons
+                ? "<'admin-datatable-top d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3'<'admin-datatable-top-left d-flex flex-wrap align-items-center gap-2'B l><'admin-datatable-top-right d-flex flex-wrap align-items-center justify-content-xl-end gap-2'f>>" +
+                  "<'admin-datatable-table-wrap't>" +
+                  "<'admin-datatable-bottom d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3'<'admin-datatable-bottom-left'i><'admin-datatable-bottom-right'p>>"
+                : "<'admin-datatable-top d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3'<'admin-datatable-top-left'l><'admin-datatable-top-right'f>>" +
+                  "<'admin-datatable-table-wrap't>" +
+                  "<'admin-datatable-bottom d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3'<'admin-datatable-bottom-left'i><'admin-datatable-bottom-right'p>>",
+            buttons: defaultButtons,
+            language: window.cavicDataTableLanguage || {},
+            drawCallback: function() {
+                var $wrapper = $table.closest('.dataTables_wrapper');
+                $wrapper.addClass('admin-datatable-wrapper');
+                $wrapper.find('.dataTables_paginate > .pagination').addClass('pagination-bordered');
+                $wrapper.find('.dataTables_filter input').attr('placeholder', 'Search records');
+                if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
+                if (typeof userDrawCallback === 'function') {
+                    userDrawCallback.apply(this, arguments);
+                }
+            },
+            initComplete: function() {
+                var $wrapper = $table.closest('.dataTables_wrapper');
+                $wrapper.addClass('admin-datatable-wrapper');
+                $wrapper.find('.dataTables_filter input').attr('placeholder', 'Search records');
+                $wrapper.find('.dt-buttons').addClass('admin-dt-buttons-ready');
+                if (typeof userInitComplete === 'function') {
+                    userInitComplete.apply(this, arguments);
+                }
+            }
+        };
+
+        return $table.DataTable($.extend(true, {}, defaults, config || {}));
+    };
 
 	/*================================
     Hide Empty Menu

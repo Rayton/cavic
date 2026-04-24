@@ -314,7 +314,7 @@
 (function ($) {
 	"use strict";
 
-	$('#transactions_table').DataTable({
+	window.cavicAdminDataTable('#transactions_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/members/get_member_transaction_data/{{ $member->id }}',

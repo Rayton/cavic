@@ -54,6 +54,7 @@
 
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'loan-workspace-collection-range'])
 
+<div class="workspace-first-tab-stats" data-tab="#pipeline">
 <div class="row mb-4">
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Loans') }}</div><div class="stat-value">{{ $pendingLoansCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'pending') }}">{{ _lang('Review queue') }}</a></div></div></div>
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Ready for Disbursement') }}</div><div class="stat-value">{{ $readyForDisbursementCount }}</div><span class="text-muted small">{{ _lang('Approved and waiting to be released') }}</span></div></div></div>
@@ -63,6 +64,7 @@
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><span class="text-muted small">{{ _lang('31+ day cases needing escalation') }}</span></div></div></div>
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Active Loans') }}</div><div class="stat-value">{{ $activeLoansCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'active') }}">{{ _lang('Open active loans') }}</a></div></div></div>
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Loan Products') }}</div><div class="stat-value">{{ $loanProductsCount }}</div><a class="stat-link" href="{{ route('loan_products.index') }}">{{ _lang('Manage products') }}</a></div></div></div>
+</div>
 </div>
 
 <div class="card workspace-section-card">
@@ -91,7 +93,7 @@
                                     <span class="workspace-status-chip {{ $loan->workspace_stage_theme ?? 'review' }}">{{ $loan->workspace_stage_label ?? _lang('Under Review') }}</span>
                                     <div class="small text-muted mt-1">{{ $loan->workspace_stage_meta ?? _lang('Waiting in queue') }}</div>
                                 </td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $loan->id) }}">{{ _lang('Review') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Review'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No pending loans in queue') }}</td></tr>
@@ -141,7 +143,7 @@
                                 <td>{{ $loan->loan_product->name }}</td>
                                 <td>{{ decimalPlace($loan->applied_amount, optional($loan->currency)->name) }}</td>
                                 <td><span class="workspace-status-chip ready">{{ _lang('Ready') }}</span></td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $loan->id) }}">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No loans currently marked as ready for disbursement') }}</td></tr>
@@ -173,7 +175,7 @@
                                 <td>{{ $loan->amount }}</td>
                                 <td>{{ $loan->progress }}</td>
                                 <td><span class="workspace-status-chip {{ $loan->blocker_theme }}">{{ $loan->blocker_label }}</span></td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $loan->id) }}">{{ _lang('Review') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Review'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="7" class="text-center text-muted">{{ _lang('No blocked approvals at the moment') }}</td></tr>
@@ -280,7 +282,7 @@
                                             @endif
                                         </td>
                                         <td>{{ $item->next_action }}</td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="7" class="text-center text-muted">{{ _lang('No call list items available') }}</td></tr>
@@ -317,7 +319,7 @@
                                                 <span class="text-muted small">{{ _lang('No log yet') }}</span>
                                             @endif
                                         </td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No reminder items available') }}</td></tr>
@@ -408,8 +410,12 @@
                                         </td>
                                         <td><span class="workspace-status-chip {{ $item->action_theme }}">{{ $item->action_label }}</span></td>
                                         <td>
-                                            <a class="btn btn-light btn-xs mr-1" href="{{ route('loans.show', $item->loan_route_id) }}">{{ _lang('Loan') }}</a>
-                                            <a class="btn btn-outline-primary btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a>
+                                            @include('backend.admin.partials.table-actions', [
+                                                'items' => [
+                                                    ['label' => _lang('Loan'), 'url' => route('loans.show', $item->loan_route_id), 'icon' => 'ti-eye'],
+                                                    ['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')],
+                                                ],
+                                            ])
                                         </td>
                                     </tr>
                                 @empty
@@ -439,7 +445,7 @@
                                         <td>{{ $item->borrower_name }}</td>
                                         <td>{{ $item->promised_payment_date }}</td>
                                         <td><span class="workspace-status-chip {{ $item->promise_status_theme }}">{{ $item->promise_status_label }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No promise follow-up items found') }}</td></tr>
@@ -604,7 +610,7 @@
                                         {{ $daysLate >= 31 ? _lang('Critical') : _lang('Overdue') }}
                                     </span>
                                 </td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $repayment->loan_id) }}">{{ _lang('Loan') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="7" class="text-center text-muted">{{ _lang('No overdue repayments found') }}</td></tr>

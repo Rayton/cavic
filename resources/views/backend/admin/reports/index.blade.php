@@ -36,6 +36,7 @@
     ],
 ])
 
+<div class="workspace-first-tab-stats" data-tab="#executive">
 <div class="row mb-4">
     <div class="col-md-4 col-xl mb-3">
         <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Executive Reports') }}</div><div class="stat-value">{{ $reportCounts['executive'] }}</div><div class="text-muted small">{{ _lang('Cash and KPI summaries') }}</div></div></div>
@@ -106,6 +107,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <div class="card workspace-section-card">

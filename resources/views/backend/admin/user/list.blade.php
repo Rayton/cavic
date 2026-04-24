@@ -37,7 +37,7 @@
 
 	"use strict";
 
-	$('#users_table').DataTable({
+	window.cavicAdminDataTable('#users_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/users/get_table_data',

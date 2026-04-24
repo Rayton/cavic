@@ -285,6 +285,9 @@ Keep as full page:
 - [ ] Standardize soft modern table card styling
 - [ ] Add consistent row spacing and muted separators
 - [ ] Keep action menus aligned and predictable
+- [ ] Apply the `datatable1.png` table/action pattern consistently across admin tables
+- [ ] Use the CAVIC brand teal for active table controls, exports, pagination, and row actions
+- [ ] Add professional column visibility controls, toolbar actions, and polished pagination states to admin DataTables
 
 ### Badges
 - [ ] Standardize status pill classes across admin pages

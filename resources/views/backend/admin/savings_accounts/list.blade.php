@@ -36,7 +36,7 @@
 
 	"use strict";
 
-	var savings_accounts_table = $('#savings_accounts_table').DataTable({
+	var savings_accounts_table = window.cavicAdminDataTable('#savings_accounts_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/savings_accounts/get_table_data',

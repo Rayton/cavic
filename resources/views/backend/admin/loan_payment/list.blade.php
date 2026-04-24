@@ -36,7 +36,7 @@
 $(function() {
 	"use strict";
 
-	$('#loan_payments_table').DataTable({
+	window.cavicAdminDataTable('#loan_payments_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/loan_payments/get_table_data',

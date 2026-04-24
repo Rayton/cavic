@@ -40,7 +40,7 @@
 (function ($) {
 	"use strict";
 
-	$('#members_table').DataTable({
+	window.cavicAdminDataTable('#members_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/members/get_table_data',

@@ -55,7 +55,7 @@
 							@endif
 
 							<div class="col-xl-2 col-lg-4">
-								<button type="submit" class="btn btn-light btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+								<button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
 							</div>
 						</form>
 

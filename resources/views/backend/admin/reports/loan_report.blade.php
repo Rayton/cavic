@@ -62,7 +62,7 @@
 							</div>
 
 							<div class="col-xl-2 col-lg-4">
-								<button type="submit" class="btn btn-light btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+								<button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
 							</div>
 						</form>
 
@@ -114,7 +114,7 @@
 										{!! xss_clean(show_status(_lang('Cancelled'), 'danger')) !!}
 									@endif
 								</td>
-								<td class="text-center"><a href="{{ route('loans.show', $loan->id) }}" target="_blank" class="btn btn-outline-primary btn-xs">{{ _lang('View') }}</a></td>
+								<td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye', 'target' => '_blank']]])</td>
 							</tr>
 						@endforeach
 					@endif

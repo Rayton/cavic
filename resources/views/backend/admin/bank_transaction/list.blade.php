@@ -36,7 +36,7 @@
 (function ($) {
 	"use strict";
 
-	var bank_transactions_table = $('#bank_transactions_table').DataTable({
+	var bank_transactions_table = window.cavicAdminDataTable('#bank_transactions_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/bank_transactions/get_table_data',

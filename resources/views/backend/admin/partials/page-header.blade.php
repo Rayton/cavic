@@ -10,7 +10,6 @@
     <div class="card-body">
         <div class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between">
             <div class="pr-lg-4 mb-3 mb-lg-0">
-                @include('layouts.others.breadcrumbs', ['items' => $breadcrumbs])
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                     <h4 class="mb-0">{{ $title }}</h4>
                     @if($badge)

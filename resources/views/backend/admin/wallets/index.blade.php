@@ -399,24 +399,19 @@ $(document).ready(function() {
 	function initWalletsDataTable(tableId, exportFilename) {
 		if ($.fn.DataTable.isDataTable('#' + tableId)) return;
 		var fname = getExportFilename(exportFilename);
-		$('#' + tableId).DataTable({
+		window.cavicAdminDataTable('#' + tableId, {
 			responsive: true,
 			bAutoWidth: false,
 			ordering: true,
 			lengthChange: true,
-			dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
-				"<'row'<'col-sm-12'tr>>" +
-				"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 			buttons: [
-				{ extend: 'excel', text: btnLang.excel, className: 'btn btn-light btn-xs', filename: fname, title: exportFilename || 'Wallets' },
-				{ extend: 'csv', text: btnLang.csv, className: 'btn btn-light btn-xs', filename: fname },
-				{ extend: 'pdf', text: btnLang.pdf, className: 'btn btn-light btn-xs', filename: fname, title: exportFilename || 'Wallets' },
-				{ extend: 'print', text: btnLang.print, className: 'btn btn-light btn-xs', title: exportFilename || 'Wallets' }
+				{ extend: 'colvis', text: '<i class="ti-layout-column2"></i><span>Columns</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost' },
+				{ extend: 'excel', text: '<i class="ti-download"></i><span>' + btnLang.excel + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname, title: exportFilename || 'Wallets' },
+				{ extend: 'csv', text: '<i class="ti-download"></i><span>' + btnLang.csv + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname },
+				{ extend: 'pdf', text: '<i class="ti-download"></i><span>' + btnLang.pdf + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname, title: exportFilename || 'Wallets' },
+				{ extend: 'print', text: '<i class="ti-printer"></i><span>' + btnLang.print + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', title: exportFilename || 'Wallets' }
 			],
-			language: lang,
-			drawCallback: function() {
-				$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
-			}
+			language: lang
 		});
 	}
 

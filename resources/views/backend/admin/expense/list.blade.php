@@ -37,7 +37,7 @@
 
 	"use strict";
 
-	$('#expenses_table').DataTable({
+	window.cavicAdminDataTable('#expenses_table', {
 		processing: true,
 		serverSide: true,
 		ajax: _tenant_url + '/expenses/get_table_data',

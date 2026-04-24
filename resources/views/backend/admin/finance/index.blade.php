@@ -47,6 +47,7 @@
     ],
 ])
 
+<div class="workspace-first-tab-stats" data-tab="#wallets">
 <div class="row mb-4">
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Deposit Requests') }}</div><div class="stat-value">{{ $depositRequests }}</div><a class="stat-link" href="{{ route('deposit_requests.index') }}">{{ _lang('Review deposits') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Withdraw Requests') }}</div><div class="stat-value">{{ $withdrawRequests }}</div><a class="stat-link" href="{{ route('withdraw_requests.index') }}">{{ _lang('Review withdrawals') }}</a></div></div></div>
@@ -56,6 +57,7 @@
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Bank Accounts') }}</div><div class="stat-value">{{ $bankAccounts }}</div><a class="stat-link" href="{{ route('bank_accounts.index') }}">{{ _lang('Manage banking') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Today\'s Transactions') }}</div><div class="stat-value">{{ $todayTransactions }}</div><span class="text-muted small">{{ _lang('Operational posting activity for today') }}</span></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Today\'s Expenses') }}</div><div class="stat-value">{{ $todayExpenses }}</div><span class="text-muted small">{{ _lang('Expense entries posted today') }}</span></div></div></div>
+</div>
 </div>
 
 <div class="card workspace-section-card">
@@ -98,7 +100,7 @@
                                 <td>{{ $account->member->name }}</td>
                                 <td>{{ optional($account->member->branch)->name }}</td>
                                 <td>{{ $account->savings_type->name }}</td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('savings_accounts.index') }}">{{ _lang('Open') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open'), 'url' => route('savings_accounts.index'), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center text-muted">{{ _lang('No recent savings accounts found') }}</td></tr>
@@ -132,7 +134,7 @@
                                 <td>{{ $transaction->type }}</td>
                                 <td>{{ decimalPlace($transaction->amount, optional(optional($transaction->account)->savings_type->currency)->name) }}</td>
                                 <td>{!! xss_clean(transaction_status($transaction->status)) !!}</td>
-                                <td><a class="btn btn-light btn-xs" href="{{ route('transactions.show', $transaction->id) }}">{{ _lang('View') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('transactions.show', $transaction->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No recent transactions found') }}</td></tr>
@@ -163,7 +165,7 @@
                                         <td>{{ decimalPlace($request->amount, optional(optional(optional($request->account)->savings_type)->currency)->name) }}</td>
                                         <td>{{ $request->method->name }}</td>
                                         <td><span class="workspace-status-chip pending">{{ _lang('Pending') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Deposit Request Details') }}" href="{{ route('deposit_requests.show', $request->id) }}">{{ _lang('Quick View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('deposit_requests.show', $request->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Deposit Request Details')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending deposit requests') }}</td></tr>
@@ -184,7 +186,7 @@
                                         <td>{{ decimalPlace($request->amount, optional(optional(optional($request->account)->savings_type)->currency)->name) }}</td>
                                         <td>{{ $request->method->name }}</td>
                                         <td><span class="workspace-status-chip pending">{{ _lang('Pending') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Withdraw Request Details') }}" href="{{ route('withdraw_requests.show', $request->id) }}">{{ _lang('Quick View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('withdraw_requests.show', $request->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Withdraw Request Details')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending withdraw requests') }}</td></tr>
@@ -252,7 +254,7 @@
                                         <td>{{ $transaction->member->name }}</td>
                                         <td>{{ ucwords(str_replace('_', ' ', $transaction->type)) }}</td>
                                         <td>{{ decimalPlace($transaction->amount, optional(optional($transaction->account)->savings_type->currency)->name) }}</td>
-                                        <td><a class="btn btn-light btn-xs" href="{{ route('transactions.show', $transaction->id) }}">{{ _lang('View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('transactions.show', $transaction->id), 'icon' => 'ti-eye']]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending cash transactions') }}</td></tr>
@@ -273,7 +275,7 @@
                                         <td>{{ $transaction->bank_account->account_name ?? $transaction->bank_account->account_number }}</td>
                                         <td>{{ ucwords(str_replace('_', ' ', $transaction->type)) }}</td>
                                         <td>{{ money_format_2($transaction->amount) }}</td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Bank Transaction Details') }}" href="{{ route('bank_transactions.show', $transaction->id) }}">{{ _lang('Quick View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('bank_transactions.show', $transaction->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Bank Transaction Details')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending bank transactions') }}</td></tr>
@@ -302,7 +304,7 @@
                                 <td>{{ ucwords(str_replace('_', ' ', $transaction->type)) }}</td>
                                 <td>{{ money_format_2($transaction->amount) }}</td>
                                 <td>{!! $transaction->status == 0 ? xss_clean(show_status(_lang('Pending'), 'danger')) : xss_clean(show_status(_lang('Completed'), 'success')) !!}</td>
-                                <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Bank Transaction Details') }}" href="{{ route('bank_transactions.show', $transaction->id) }}">{{ _lang('Quick View') }}</a></td>
+                                <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('bank_transactions.show', $transaction->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Bank Transaction Details')]]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No recent bank transactions found') }}</td></tr>

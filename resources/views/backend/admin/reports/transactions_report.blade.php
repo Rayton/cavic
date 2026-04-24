@@ -70,7 +70,7 @@
 							</div>
 
 							<div class="col-xl-2 col-lg-4">
-								<button type="submit" class="btn btn-light btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+								<button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
 							</div>
 						</form>
 
@@ -112,7 +112,7 @@
 								<td>{{ strtoupper($transaction->dr_cr) }}</td>
 								<td>{{ str_replace('_',' ',$transaction->type) }}</td>
 								<td>{!! xss_clean(transaction_status($transaction->status)) !!}</td>
-								<td class="text-center"><a href="{{ route('transactions.show', $transaction->id) }}" target="_blank" class="btn btn-outline-primary btn-xs">{{ _lang('View') }}</a></td>
+								<td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('transactions.show', $transaction->id), 'icon' => 'ti-eye', 'target' => '_blank']]])</td>
 							</tr>
 						@endforeach
 					@endif

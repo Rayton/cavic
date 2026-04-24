@@ -43,18 +43,9 @@
     .workspace-mini-table .btn { white-space: nowrap; }
 </style>
 
-@include('backend.admin.partials.page-header', [
-    'title' => _lang('Action Center'),
-    'subtitle' => _lang('Process urgent approvals, repayment pressure, and finance exceptions from one operational queue.'),
-    'badge' => _lang('Operational Queue'),
-    'breadcrumbs' => [
-        ['label' => _lang('Dashboard'), 'url' => route('dashboard.index')],
-        ['label' => _lang('Action Center'), 'active' => true],
-    ],
-])
-
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'action-center-collection-range'])
 
+<div class="workspace-first-tab-stats" data-tab="#member-requests">
 <div class="row mb-4">
     <div class="col-md-4 col-xl mb-3">
         <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Member Requests') }}</div><div class="stat-value">{{ $memberRequestsCount }}</div><a class="stat-link" href="{{ route('members.pending_requests') }}">{{ _lang('Open queue') }}</a></div></div>
@@ -77,6 +68,7 @@
     <div class="col-md-4 col-xl mb-3">
         <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><a class="stat-link" href="{{ route('loans.workspace') }}">{{ _lang('Escalate critical cases') }}</a></div></div>
     </div>
+</div>
 </div>
 
 <div class="card workspace-section-card">
@@ -101,8 +93,12 @@
                                 <td>{{ $member->branch->name }}</td>
                                 <td><span class="workspace-status-chip pending">{{ _lang('Pending Approval') }}</span></td>
                                 <td class="text-center">
-                                    <a class="btn btn-light btn-xs" href="{{ route('members.show', $member->id) }}">{{ _lang('View') }}</a>
-                                    <a class="btn btn-success btn-xs ajax-modal" href="{{ route('members.accept_request', $member->id) }}" data-title="{{ _lang('Approve Member Request') }}">{{ _lang('Approve') }}</a>
+                                    @include('backend.admin.partials.table-actions', [
+                                        'items' => [
+                                            ['label' => _lang('View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye'],
+                                            ['label' => _lang('Approve'), 'url' => route('members.accept_request', $member->id), 'icon' => 'ti-check', 'class' => 'ajax-modal', 'data_title' => _lang('Approve Member Request')],
+                                        ],
+                                    ])
                                 </td>
                             </tr>
                         @empty
@@ -136,7 +132,7 @@
                                 <td>{{ decimalPlace($loan->applied_amount, optional($loan->currency)->name) }}</td>
                                 <td><span class="workspace-status-chip {{ $loan->workspace_stage_theme ?? 'review' }}">{{ $loan->workspace_stage_label ?? _lang('Under Review') }}</span></td>
                                 <td><span class="text-muted small">{{ $loan->workspace_stage_meta ?? _lang('Waiting in queue') }}</span></td>
-                                <td class="text-center"><a class="btn btn-light btn-xs" href="{{ route('loans.show', $loan->id) }}">{{ _lang('Review') }}</a></td>
+                                <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Review'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye']]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="7" class="text-center text-muted">{{ _lang('No pending loans') }}</td></tr>
@@ -160,7 +156,7 @@
                                         <td>{{ decimalPlace($request->amount, optional(optional(optional($request->account)->savings_type)->currency)->name) }}</td>
                                         <td>{{ $request->method->name }}</td>
                                         <td><span class="workspace-status-chip pending">{{ _lang('Pending') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Deposit Request Details') }}" href="{{ route('deposit_requests.show', $request->id) }}">{{ _lang('Quick View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('deposit_requests.show', $request->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Deposit Request Details')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending deposit requests') }}</td></tr>
@@ -182,7 +178,7 @@
                                         <td>{{ decimalPlace($request->amount, optional(optional(optional($request->account)->savings_type)->currency)->name) }}</td>
                                         <td>{{ $request->method->name }}</td>
                                         <td><span class="workspace-status-chip pending">{{ _lang('Pending') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Withdraw Request Details') }}" href="{{ route('withdraw_requests.show', $request->id) }}">{{ _lang('Quick View') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Quick View'), 'url' => route('withdraw_requests.show', $request->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Withdraw Request Details')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No pending withdraw requests') }}</td></tr>
@@ -218,7 +214,7 @@
                                         <td>{{ $repayment->repayment_date }}</td>
                                         <td>{{ decimalPlace($repayment->amount_to_pay, optional($repayment->loan->currency)->name) }}</td>
                                         <td><span class="workspace-status-chip today">{{ _lang('Due Today') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $repayment->loan_id) }}">{{ _lang('Loan') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye']]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No repayments due today') }}</td></tr>
@@ -249,7 +245,7 @@
                                         <td>{{ $repayment->repayment_date }}</td>
                                         <td>{{ decimalPlace($repayment->amount_to_pay, optional($repayment->loan->currency)->name) }}</td>
                                         <td><span class="workspace-status-chip upcoming">{{ _lang('Upcoming') }}</span></td>
-                                        <td><a class="btn btn-light btn-xs" href="{{ route('loans.show', $repayment->loan_id) }}">{{ _lang('Loan') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye']]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No upcoming repayments in the next 7 days') }}</td></tr>
@@ -290,7 +286,7 @@
                                             @endif
                                         </td>
                                         <td>{{ $item->next_action }}</td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="7" class="text-center text-muted">{{ _lang('No call list items available') }}</td></tr>
@@ -327,7 +323,7 @@
                                                 <span class="text-muted small">{{ _lang('No log yet') }}</span>
                                             @endif
                                         </td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No reminder items available') }}</td></tr>
@@ -517,7 +513,7 @@
                                             @endif
                                         </td>
                                         <td><span class="workspace-status-chip {{ $item->action_theme }}">{{ $item->action_label }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="8" class="text-center text-muted">{{ _lang('No overdue repayments') }}</td></tr>
@@ -544,7 +540,7 @@
                                         <td>{{ $item->borrower_name }}</td>
                                         <td>{{ $item->promised_payment_date }}</td>
                                         <td><span class="workspace-status-chip {{ $item->promise_status_theme }}">{{ $item->promise_status_label }}</span></td>
-                                        <td><a class="btn btn-light btn-xs ajax-modal" data-title="{{ _lang('Log Collection Follow-up') }}" href="{{ route('loan_collection_follow_ups.create', $item->repayment_id) }}">{{ _lang('Log') }}</a></td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center text-muted">{{ _lang('No promise follow-up items found') }}</td></tr>
