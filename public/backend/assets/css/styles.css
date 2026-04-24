@@ -5825,9 +5825,9 @@ Payment Gateway
 }
 
 .admin-shell-v2 .user-profile {
-    margin-right: 5px !important;
+    margin-right: 0 !important;
     margin-left: auto;
-    padding: 4px 0;
+    padding: 0;
     display: flex;
     justify-content: flex-end;
 }
@@ -5842,14 +5842,18 @@ Payment Gateway
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 10px;
-    border: 1px solid var(--cavic-border);
-    border-radius: 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
     background: transparent;
+    box-shadow: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .admin-shell-v2 .admin-user-trigger:hover {
-    background: var(--cavic-surface-muted);
+    background: transparent;
+    box-shadow: none;
+    opacity: 0.92;
 }
 
 .admin-shell-v2 .user-profile img.avatar {
@@ -5858,17 +5862,26 @@ Payment Gateway
 }
 
 .admin-shell-v2 .admin-user-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 16px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 0;
+    background: #ecf3f1;
+    box-shadow: none;
+}
+
+.admin-shell-v2 img.admin-user-avatar {
     object-fit: cover;
-    border: 1px solid rgba(63, 104, 109, 0.16);
-    background: #f7faf9;
-    box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
+    background: #ecf3f1;
 }
 
 .admin-shell-v2 .admin-user-trigger:hover .admin-user-avatar {
-    border-color: rgba(63, 104, 109, 0.28);
+    box-shadow: none;
 }
 
 .admin-shell-v2 .admin-user-name-text {
@@ -5880,6 +5893,14 @@ Payment Gateway
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 190px;
+}
+
+.admin-shell-v2 .admin-user-avatar-initials {
+    font-size: 0.94rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #375259;
 }
 
 .admin-shell-v2 .page-title-area.admin-page-title-v2 {

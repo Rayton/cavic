@@ -71,6 +71,52 @@
         $tenantDisplayName = app()->bound('tenant')
             ? app('tenant')->name
             : get_option('site_title', config('app.name'));
+        $profileNameParts = [];
+
+        if ($authUser?->user_type === 'customer' && $authUser?->member) {
+            $profileNameParts = array_filter([
+                trim((string) $authUser->member->first_name),
+                trim((string) $authUser->member->last_name),
+            ]);
+        }
+
+        $profileDisplayName = trim(
+            count($profileNameParts) > 0
+                ? implode(' ', $profileNameParts)
+                : (string) ($authUser?->name ?? '')
+        );
+
+        if ($profileDisplayName === '') {
+            $profileDisplayName = $tenantDisplayName ?: _lang('User');
+        }
+
+        $profileImageFile = $authUser?->profile_picture;
+
+        if (
+            ($profileImageFile === null || $profileImageFile === '' || in_array($profileImageFile, ['default.png', 'avatar.png']))
+            && $authUser?->user_type === 'customer'
+            && $authUser?->member
+            && filled($authUser->member->photo)
+            && ! in_array($authUser->member->photo, ['default.png', 'avatar.png'])
+        ) {
+            $profileImageFile = $authUser->member->photo;
+        }
+
+        $hasCustomProfileImage = filled($profileImageFile)
+            && ! in_array($profileImageFile, ['default.png', 'avatar.png']);
+
+        $profileAvatarUrl = $hasCustomProfileImage ? profile_picture($profileImageFile) : null;
+
+        $profileInitialParts = array_values(array_filter(preg_split('/\s+/', $profileDisplayName)));
+        $profileInitials = collect(array_slice($profileInitialParts, 0, 2))
+            ->map(function ($part) {
+                return strtoupper(substr($part, 0, 1));
+            })
+            ->implode('');
+
+        if ($profileInitials === '') {
+            $profileInitials = 'U';
+        }
     @endphp
 
     <body class="backend-app user-type-{{ $userType ?? 'guest' }} {{ $isAdminWorkspace ? 'admin-shell-v2' : '' }}">
@@ -275,7 +321,11 @@
 									<div class="user-profile dropdown">
 										<a class="user-name dropdown-toggle admin-user-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											<span class="admin-user-name-text">{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }}</span>
-											<img class="avatar user-thumb admin-user-avatar" id="my-profile-img" src="{{ profile_picture() }}" alt="avatar">
+											@if($hasCustomProfileImage)
+												<img class="avatar user-thumb admin-user-avatar" id="my-profile-img" src="{{ $profileAvatarUrl }}" alt="{{ $profileDisplayName }}">
+											@else
+												<span class="admin-user-avatar admin-user-avatar-initials" id="my-profile-img" aria-hidden="true">{{ $profileInitials }}</span>
+											@endif
 											<i class="fas fa-chevron-down admin-dropdown-chevron"></i>
 										</a>
 										<div class="dropdown-menu dropdown-menu-right">

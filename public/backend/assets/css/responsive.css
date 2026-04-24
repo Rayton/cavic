@@ -956,6 +956,22 @@
         justify-content: flex-end;
     }
 
+    .admin-shell-v2 .admin-user-trigger {
+        gap: 6px;
+        padding: 0;
+        border-radius: 0;
+    }
+
+    .admin-shell-v2 .admin-user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 14px;
+    }
+
+    .admin-shell-v2 .admin-user-name-text {
+        max-width: 110px;
+    }
+
     .admin-shell-v2 .admin-header-left-cluster {
         gap: 10px;
     }
