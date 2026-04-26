@@ -2,7 +2,34 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>{{ !isset($page_title) ? get_option('site_title', config('app.name')) : $page_title }}</title>
+        @php
+            $fallbackTitle = trim((string) get_option('site_title', config('app.name')));
+            $routeName = request()->route()?->getName();
+            $routeParts = $routeName ? explode('.', $routeName) : [];
+            $ignoredRouteParts = ['index', 'store'];
+            $titleSource = null;
+
+            if (isset($page_title) && trim((string) $page_title) !== '' && trim((string) $page_title) !== '-') {
+                $titleSource = trim((string) $page_title);
+            }
+
+            if ($titleSource === null && $routeName) {
+                $usableParts = array_values(array_filter($routeParts, function ($part) use ($ignoredRouteParts) {
+                    return !in_array($part, $ignoredRouteParts, true);
+                }));
+                $titlePart = end($usableParts) ?: null;
+                if ($titlePart) {
+                    $titleSource = \Illuminate\Support\Str::headline(str_replace(['-', '_'], ' ', $titlePart));
+                }
+            }
+
+            if ($titleSource === null || $titleSource === '' || $titleSource === '-') {
+                $titleSource = $fallbackTitle !== '' && $fallbackTitle !== '-' ? $fallbackTitle : config('app.name');
+            }
+
+            $resolvedTitle = $titleSource;
+        @endphp
+        <title>{{ $resolvedTitle }}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="csrf-token" content="{{ csrf_token() }}">

@@ -2,11 +2,60 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-		@if(app()->bound('tenant'))
-        <title>{{ !isset($page_title) ? get_tenant_option('business_name', get_option('site_title', config('app.name'))) : $page_title }}</title>
-		@else
-        <title>{{ !isset($page_title) ? get_option('site_title', config('app.name')) : $page_title }}</title>
-		@endif
+        @php
+            $fallbackTitle = app()->bound('tenant')
+                ? get_tenant_option('business_name', get_option('site_title', config('app.name')))
+                : get_option('site_title', config('app.name'));
+            $fallbackTitle = trim((string) $fallbackTitle);
+            $routeName = request()->route()?->getName();
+            $routeParts = $routeName ? explode('.', $routeName) : [];
+            $ignoredRouteParts = ['admin', 'index', 'list', 'filter', 'store', 'update', 'destroy'];
+            $actionRouteParts = ['create', 'edit', 'show', 'view'];
+            $routeAction = end($routeParts) ?: null;
+            $titleSource = null;
+
+            if (isset($page_title) && trim((string) $page_title) !== '' && trim((string) $page_title) !== '-') {
+                $titleSource = trim((string) $page_title);
+            }
+
+            if ($titleSource === null && $routeName) {
+                $titlePart = null;
+
+                if (in_array($routeAction, $actionRouteParts, true) && count($routeParts) >= 2) {
+                    $resourcePart = $routeParts[count($routeParts) - 2];
+                    $resourceLabel = \Illuminate\Support\Str::headline(str_replace(['-', '_'], ' ', \Illuminate\Support\Str::singular($resourcePart)));
+                    $actionLabel = \Illuminate\Support\Str::headline($routeAction);
+                    $titlePart = $actionLabel . ' ' . $resourceLabel;
+                } else {
+                    $usableParts = array_values(array_filter($routeParts, function ($part) use ($ignoredRouteParts) {
+                        return !in_array($part, $ignoredRouteParts, true);
+                    }));
+                    $titlePart = end($usableParts) ?: null;
+                }
+
+                if ($titlePart) {
+                    $titleSource = \Illuminate\Support\Str::headline(str_replace(['-', '_'], ' ', $titlePart));
+                }
+            }
+
+            if ($titleSource === null) {
+                $segments = request()->segments();
+                $tenantSlug = app()->bound('tenant') ? app('tenant')->slug : null;
+                $usableSegments = array_values(array_filter($segments, function ($segment) use ($tenantSlug) {
+                    return $segment !== $tenantSlug && !is_numeric($segment);
+                }));
+                $segmentTitle = end($usableSegments) ?: null;
+                $titleSource = $segmentTitle ? \Illuminate\Support\Str::headline(str_replace(['-', '_'], ' ', $segmentTitle)) : null;
+            }
+
+            if ($titleSource === null || $titleSource === '' || $titleSource === '-') {
+                $titleSource = $fallbackTitle !== '' && $fallbackTitle !== '-' ? $fallbackTitle : config('app.name');
+            }
+
+            $resolvedPageTitle = $titleSource;
+            $resolvedTitle = $resolvedPageTitle;
+        @endphp
+        <title>{{ $resolvedTitle }}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -365,8 +414,11 @@
 				</div><!-- header area end -->
 
 				<!-- Page title area start -->
-				@php $hasWorkspaceTopTabs = trim($__env->yieldContent('workspace_top_tabs')) !== ''; @endphp
-				@if(Request::is('dashboard') || Request::is('*/dashboard') || $hasWorkspaceTopTabs)
+				@php
+					$hasWorkspaceTopTabs = trim($__env->yieldContent('workspace_top_tabs')) !== '';
+					$isDashboardPage = Request::is('dashboard') || Request::is('*/dashboard');
+				@endphp
+				@if($isDashboardPage || $hasWorkspaceTopTabs)
 				<div class="page-title-area {{ $isAdminWorkspace ? 'admin-page-title-v2' : '' }}">
 					<div class="row align-items-center {{ $isAdminWorkspace ? 'admin-dashboard-top-row' : 'py-3' }}">
 						<div class="col-sm-12">
@@ -421,6 +473,31 @@
 							</div>
 							@endif
 						</div>
+					</div>
+				</div><!-- page title area end -->
+				@else
+				<div class="page-title-area {{ $isAdminWorkspace ? 'admin-page-title-v2' : '' }}">
+					<div class="row align-items-center py-3">
+						<div class="col-sm-8">
+							<h4 class="mb-1">{{ $resolvedPageTitle }}</h4>
+							@include('layouts.others.breadcrumbs')
+						</div>
+						@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+						<div class="col-sm-4 d-flex justify-content-sm-end mt-2 mt-sm-0">
+							<div class="dropdown">
+								<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="pageBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
+								</a>
+								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="pageBranchSwitcher">
+									<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
+									<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
+									@foreach( \App\Models\Branch::all() as $branch )
+									<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
+									@endforeach
+								</div>
+							</div>
+						</div>
+						@endif
 					</div>
 				</div><!-- page title area end -->
 				@endif

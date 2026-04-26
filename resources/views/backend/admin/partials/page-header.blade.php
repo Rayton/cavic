@@ -1,5 +1,9 @@
 @php
     $title = $title ?? ($page_title ?? _lang('Workspace'));
+    $title = trim((string) $title);
+    if ($title === '' || $title === '-') {
+        $title = _lang('Workspace');
+    }
     $subtitle = $subtitle ?? null;
     $badge = $badge ?? null;
     $actions = $actions ?? [];
