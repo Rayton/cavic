@@ -952,6 +952,60 @@
 		return false;
 	});
 
+	$(document).on("click", ".ajax-action", function () {
+		var link = $(this).data("href");
+		if (typeof link == 'undefined') {
+			link = $(this).attr("href");
+		}
+
+		var confirmMessage = $(this).data("confirm");
+		if (confirmMessage && ! window.confirm(confirmMessage)) {
+			return false;
+		}
+
+		$.ajax({
+			url: link,
+			beforeSend: function () {
+				$("#preloader").css("display", "block");
+			},
+			success: function (data) {
+				$("#preloader").css("display", "none");
+
+				if (typeof data === "string") {
+					try {
+						data = JSON.parse(data);
+					} catch (e) {
+						window.location.reload();
+						return;
+					}
+				}
+
+				if (data.result == "success" || data.result == "info") {
+					$.toast({
+						text: data.message,
+						showHideTransition: 'slide',
+						icon: data.result == "success" ? 'success' : 'info',
+						position: 'top-right'
+					});
+					window.setTimeout(function () { window.location.reload() }, 500);
+				} else {
+					$.toast({
+						text: data.message || 'Error',
+						showHideTransition: 'slide',
+						icon: 'error',
+						position: 'top-right'
+					});
+				}
+			},
+			error: function (request, status, error) {
+				$("#preloader").css("display", "none");
+				console.log(request.responseText);
+			}
+		});
+
+		return false;
+	});
+
 	$("#main_modal").on('show.bs.modal', function () {
 		$('#main_modal').css("overflow-y", "hidden");
 	});

@@ -55,3 +55,19 @@
     </tbody>
 </table>
 @endif
+
+@if((int) $depositrequest->status === 0)
+<div class="d-flex flex-wrap justify-content-end mt-4">
+    @if($depositrequest->deposit_request_group_id && $depositrequest->group_requests->where('status', '!=', 2)->count() > 1)
+        <a href="{{ route('deposit_requests.approve_group', $depositrequest->deposit_request_group_id) }}" class="btn btn-success btn-sm mr-2 mb-2 ajax-action" data-confirm="{{ _lang('Approve all pending deposits in this submission?') }}">
+            <i class="fas fa-check-double mr-1"></i>{{ _lang('Approve Group') }}
+        </a>
+    @endif
+    <a href="{{ route('deposit_requests.approve', $depositrequest->id) }}" class="btn btn-success btn-sm mr-2 mb-2 ajax-action" data-confirm="{{ _lang('Approve this deposit request?') }}">
+        <i class="fas fa-check-circle mr-1"></i>{{ _lang('Approve') }}
+    </a>
+    <a href="{{ route('deposit_requests.reject', $depositrequest->id) }}" class="btn btn-danger btn-sm mb-2 ajax-action" data-confirm="{{ _lang('Reject this deposit request?') }}">
+        <i class="fas fa-times-circle mr-1"></i>{{ _lang('Reject') }}
+    </a>
+</div>
+@endif

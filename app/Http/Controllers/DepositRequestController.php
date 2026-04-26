@@ -154,14 +154,20 @@ class DepositRequestController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function approve($tenant, $id) {
+    public function approve(Request $request, $tenant, $id) {
         $depositRequest = DepositRequest::find($id);
         if (! $depositRequest || $depositRequest->status == 2) {
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Request not found or already approved')]);
+            }
             return redirect()->route('deposit_requests.index')->with('error', _lang('Request not found or already approved'));
         }
         DB::beginTransaction();
         $this->performApproval($depositRequest);
         DB::commit();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Request Approved')]);
+        }
         return redirect()->route('deposit_requests.index')->with('success', _lang('Request Approved'));
     }
 
@@ -171,9 +177,12 @@ class DepositRequestController extends Controller {
      * @param  string  $groupId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function approveGroup($tenant, $groupId) {
+    public function approveGroup(Request $request, $tenant, $groupId) {
         $requests = DepositRequest::where('deposit_request_group_id', $groupId)->where('status', '!=', 2)->get();
         if ($requests->isEmpty()) {
+            if ($request->ajax()) {
+                return response()->json(['result' => 'info', 'message' => _lang('No pending requests in this group')]);
+            }
             return redirect()->route('deposit_requests.index')->with('info', _lang('No pending requests in this group'));
         }
         DB::beginTransaction();
@@ -181,6 +190,9 @@ class DepositRequestController extends Controller {
             $this->performApproval($depositRequest);
         }
         DB::commit();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('All requests in group approved')]);
+        }
         return redirect()->route('deposit_requests.index')->with('success', _lang('All requests in group approved'));
     }
 
@@ -409,13 +421,22 @@ class DepositRequestController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function reject($tenant, $id) {
+    public function reject(Request $request, $tenant, $id) {
         DB::beginTransaction();
         $depositRequest = DepositRequest::find($id);
+        if (! $depositRequest) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Request not found')]);
+            }
+            return redirect()->route('deposit_requests.index')->with('error', _lang('Request not found'));
+        }
 
         if ($depositRequest->transaction_id != null) {
             $transaction = Transaction::find($depositRequest->transaction_id);
-            $transaction->delete();
+            if ($transaction) {
+                $transaction->delete();
+            }
         }
 
         $depositRequest->status         = 1;
@@ -428,6 +449,9 @@ class DepositRequestController extends Controller {
             $depositRequest->member->notify(new RejectDepositRequest($depositRequest));
         } catch (\Exception $e) {}
 
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Request Rejected')]);
+        }
         return redirect()->route('deposit_requests.index')->with('success', _lang('Request Rejected'));
     }
 

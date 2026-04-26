@@ -320,6 +320,10 @@ class MemberController extends Controller
             ->orderBy("id", "asc")
             ->get();
 
+        if ($request->ajax()) {
+            return view('backend.admin.member.modal.quick_view', compact('member', 'id', 'customFields'));
+        }
+
         return view('backend.admin.member.view', compact('member', 'id', 'customFields', 'assets'));
     }
 
@@ -683,11 +687,23 @@ class MemberController extends Controller
         }
     }
 
-    public function reject_request($tenant, $id)
+    public function reject_request(Request $request, $tenant, $id)
     {
         $member = Member::withoutGlobalScopes(['status'])->find($id);
-        $member->user->delete();
+        if (! $member) {
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Member request not found')]);
+            }
+            return redirect()->back()->with('error', _lang('Member request not found'));
+        }
+
+        if ($member->user) {
+            $member->user->delete();
+        }
         $member->delete();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Member Request Rejected')]);
+        }
         return redirect()->back()->with('error', _lang('Member Request Rejected'));
     }
 

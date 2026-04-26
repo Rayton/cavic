@@ -244,6 +244,7 @@ class ActionCenterController extends Controller
 
         return view('backend.admin.action_center.index', [
             'page_title' => _lang('Action Center'),
+            'assets' => ['datatable'],
             'memberRequests' => $memberRequests,
             'pendingLoans' => $pendingLoans,
             'depositRequests' => $depositRequests,

@@ -1,4 +1,4 @@
-<form method="post" class="validate" autocomplete="off" action="{{ route('members.accept_request', $member->id) }}">
+<form method="post" class="ajax-submit" autocomplete="off" action="{{ route('members.accept_request', $member->id) }}">
 	@csrf
 	<div class="row px-2">
 	    <div class="col-md-12">

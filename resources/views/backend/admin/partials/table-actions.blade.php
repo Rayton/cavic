@@ -14,6 +14,9 @@
                 href="{{ $item['url'] ?? '#' }}"
                 class="dropdown-item {{ $item['class'] ?? '' }}"
                 @if(! empty($item['data_title'])) data-title="{{ $item['data_title'] }}" @endif
+                @if(array_key_exists('data_fullscreen', $item)) data-fullscreen="{{ $item['data_fullscreen'] ? 'true' : 'false' }}" @endif
+                @if(array_key_exists('data_reload', $item)) data-reload="{{ $item['data_reload'] ? 'true' : 'false' }}" @endif
+                @if(! empty($item['data_confirm'])) data-confirm="{{ $item['data_confirm'] }}" @endif
                 @if(! empty($item['target'])) target="{{ $item['target'] }}" @endif
             >
                 @if(! empty($item['icon']))

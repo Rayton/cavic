@@ -21,3 +21,14 @@
     </tr>
     <tr><td>{{ _lang('Status') }}</td><td>{!! xss_clean(transaction_status($withdrawRequest->status)) !!}</td></tr>
 </table>
+
+@if((int) $withdrawRequest->status === 0)
+<div class="d-flex flex-wrap justify-content-end mt-4">
+    <a href="{{ route('withdraw_requests.approve', $withdrawRequest->id) }}" class="btn btn-success btn-sm mr-2 mb-2 ajax-action" data-confirm="{{ _lang('Approve this withdraw request?') }}">
+        <i class="fas fa-check-circle mr-1"></i>{{ _lang('Approve') }}
+    </a>
+    <a href="{{ route('withdraw_requests.reject', $withdrawRequest->id) }}" class="btn btn-danger btn-sm mb-2 ajax-action" data-confirm="{{ _lang('Reject this withdraw request?') }}">
+        <i class="fas fa-times-circle mr-1"></i>{{ _lang('Reject') }}
+    </a>
+</div>
+@endif

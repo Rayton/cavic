@@ -31,6 +31,7 @@
         $segments = '';
         $requestSegments = Request::segments();
         $tenantSlug = app()->bound('tenant') ? app('tenant')->slug : null;
+        $ignoredSegments = ['admin', 'index', 'list', 'filter', 'store', 'update', 'destroy'];
     @endphp
 
     @foreach($requestSegments as $segment)
@@ -48,7 +49,7 @@
             @endif
         @endif
 
-        @if(! ignoreRoutes($segments))
+        @if(in_array($segment, $ignoredSegments, true))
             @php continue; @endphp
         @endif
 

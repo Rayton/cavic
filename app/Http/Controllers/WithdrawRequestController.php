@@ -111,18 +111,27 @@ class WithdrawRequestController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function approve($tenant, $id) {
+    public function approve(Request $request, $tenant, $id) {
         DB::beginTransaction();
 
         $withdrawRequest         = WithdrawRequest::find($id);
+        if (! $withdrawRequest) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Request not found')]);
+            }
+            return redirect()->route('withdraw_requests.index')->with('error', _lang('Request not found'));
+        }
         $withdrawRequest->status = 2;
         $withdrawRequest->save();
 
         $transaction         = Transaction::find($withdrawRequest->transaction_id);
-        $transaction->status = 2;
-        $transaction->save();
+        if ($transaction) {
+            $transaction->status = 2;
+            $transaction->save();
+        }
 
-        $childTransaction = Transaction::where('parent_id', $transaction->id)->first();
+        $childTransaction = $transaction ? Transaction::where('parent_id', $transaction->id)->first() : null;
 
         if ($childTransaction) {
             $childTransaction->status = 2;
@@ -134,6 +143,9 @@ class WithdrawRequestController extends Controller {
         } catch (\Exception $e) {}
 
         DB::commit();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Request Approved')]);
+        }
         return redirect()->route('withdraw_requests.index')->with('success', _lang('Request Approved'));
     }
 
@@ -143,15 +155,24 @@ class WithdrawRequestController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function reject($tenant, $id) {
+    public function reject(Request $request, $tenant, $id) {
         DB::beginTransaction();
         $withdrawRequest = WithdrawRequest::find($id);
+        if (! $withdrawRequest) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Request not found')]);
+            }
+            return redirect()->route('withdraw_requests.index')->with('error', _lang('Request not found'));
+        }
 
         $transaction         = Transaction::find($withdrawRequest->transaction_id);
-        $transaction->status = 1;
-        $transaction->save();
+        if ($transaction) {
+            $transaction->status = 1;
+            $transaction->save();
+        }
 
-        $childTransaction = Transaction::where('parent_id', $transaction->id)->first();
+        $childTransaction = $transaction ? Transaction::where('parent_id', $transaction->id)->first() : null;
 
         if ($childTransaction) {
             $childTransaction->status = 1;
@@ -162,10 +183,15 @@ class WithdrawRequestController extends Controller {
         $withdrawRequest->save();
 
         try {
-            $transaction->member->notify(new RejectWithdrawRequest($withdrawRequest));
+            if ($transaction) {
+                $transaction->member->notify(new RejectWithdrawRequest($withdrawRequest));
+            }
         } catch (\Exception $e) {}
 
         DB::commit();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Request Rejected')]);
+        }
         return redirect()->route('withdraw_requests.index')->with('success', _lang('Request Rejected'));
     }
 

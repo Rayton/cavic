@@ -348,6 +348,10 @@ class LoanController extends Controller {
 
         $payments = LoanPayment::where('loan_id', $loan->id)->orderBy('id', 'desc')->get();
 
+        if ($request->ajax()) {
+            return view('backend.admin.loan.modal.quick_view', compact('loan', 'loancollaterals', 'repayments', 'payments', 'guarantors', 'customFields'));
+        }
+
         return view('backend.admin.loan.view', compact('loan', 'loancollaterals', 'repayments', 'payments', 'guarantors', 'customFields', 'assets'));
     }
 
@@ -364,6 +368,9 @@ class LoanController extends Controller {
 
             // Check if loan has approval process and if it's complete
             if ($loan->approvals && $loan->approvals->count() > 0 && !$loan->isFullyApproved()) {
+                if ($request->ajax()) {
+                    return response('<div class="alert alert-warning mb-0">' . _lang('Cannot approve loan. All approval levels must be completed first.') . '</div>');
+                }
                 return back()->with('error', _lang('Cannot approve loan. All approval levels must be completed first.'));
             }
 
@@ -376,7 +383,14 @@ class LoanController extends Controller {
             }
 
             if ($loan->loan_id == NULL || $loan->release_date == NULL) {
+                if ($request->ajax()) {
+                    return response('<div class="alert alert-warning mb-0">' . _lang('Loan ID and Release date must required !') . '</div>');
+                }
                 return back()->with('error', _lang('Loan ID and Release date must required !'));
+            }
+
+            if ($request->ajax()) {
+                return view('backend.admin.loan.modal.approve', compact('loan', 'accounts'));
             }
 
             return view('backend.admin.loan.approve', compact('loan', 'accounts', 'alert_col'));
@@ -389,6 +403,9 @@ class LoanController extends Controller {
         // Check if loan has approval process and if it's complete
         if ($loan->approvals && $loan->approvals->count() > 0 && !$loan->isFullyApproved()) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Cannot approve loan. All approval levels must be completed first.')]);
+            }
             return back()->with('error', _lang('Cannot approve loan. All approval levels must be completed first.'));
         }
 
@@ -397,6 +414,10 @@ class LoanController extends Controller {
         }
 
         if ($loan->loan_id == NULL || $loan->release_date == NULL) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Loan ID and Release date must required !')]);
+            }
             return back()->with('error', _lang('Loan ID and Release date must required !'));
         }
 
@@ -409,6 +430,10 @@ class LoanController extends Controller {
             $account = SavingsAccount::where('member_id', $loan->borrower_id)->first();
 
             if (! $account) {
+                DB::rollBack();
+                if ($request->ajax()) {
+                    return response()->json(['result' => 'error', 'message' => _lang('No account found for deducting loan processing fee')]);
+                }
                 return back()->with('error', _lang('No account found for deducting loan processing fee'));
             }
         }
@@ -420,6 +445,10 @@ class LoanController extends Controller {
                 ->first();
 
             if (! $account) {
+                DB::rollBack();
+                if ($request->ajax()) {
+                    return response()->json(['result' => 'error', 'message' => _lang('Invalid account !')]);
+                }
                 return back()->with('error', _lang('Invalid account !'));
             }
         }
@@ -434,6 +463,10 @@ class LoanController extends Controller {
         $charge += $loanProduct->loan_insurance_fee_type == 1 ? ($loanProduct->loan_insurance_fee / 100) * $convertedAmount : $loanProduct->loan_insurance_fee;
 
         if (get_account_balance($account->id, $loan->borrower_id) < $charge) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Insufficient balance for deducting loan application and insurance fee !')]);
+            }
             return back()->with('error', _lang('Insufficient balance for deducting loan application and insurance fee !'));
         }
 
@@ -506,6 +539,10 @@ class LoanController extends Controller {
         try {
             $loan->borrower->notify(new ApprovedLoanRequest($loan));
         } catch (\Exception $e) {}
+
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Loan Request Approved'), 'data' => $loan]);
+        }
 
         return redirect()->route('loans.show', $loan->id)->with('success', _lang('Loan Request Approved'));
 

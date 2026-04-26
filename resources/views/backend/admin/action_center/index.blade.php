@@ -39,8 +39,38 @@
 @endphp
 @include('backend.admin.partials.workspace-styles')
 <style>
-    .workspace-mini-table td, .workspace-mini-table th { vertical-align: middle; }
-    .workspace-mini-table .btn { white-space: nowrap; }
+    .action-center-table-actions .table-responsive { border: 1px solid var(--cavic-border, #e7e9e4); border-radius: 18px; background: var(--cavic-surface, #fff); overflow-x: auto; overflow-y: visible; }
+    .action-center-table-actions .workspace-mini-table { border: 0 !important; border-collapse: separate; border-spacing: 0; color: var(--cavic-text, #2e3338); font-size: .86rem; min-width: 720px; }
+    .action-center-table-actions .workspace-mini-table.table-bordered th,
+    .action-center-table-actions .workspace-mini-table.table-bordered td { border-left: 0; border-right: 0; }
+    .action-center-table-actions .workspace-mini-table th { border-top: 0; border-bottom: 1px solid var(--cavic-border, #e7e9e4); background: var(--cavic-surface-muted, #fafaf8); color: var(--cavic-text-soft, #6f787f); font-size: .74rem; font-weight: 800; padding: .58rem .8rem; vertical-align: middle; white-space: nowrap; }
+    .action-center-table-actions .workspace-mini-table td { border-top: 0; border-bottom: 1px solid #eef1ec; background: var(--cavic-surface, #fff); padding: .52rem .8rem; vertical-align: middle; }
+    .action-center-table-actions .workspace-mini-table tbody tr:last-child td { border-bottom: 0; }
+    .action-center-table-actions .workspace-mini-table tbody tr:hover td { background: #fcfdfb; }
+    .action-center-table-actions .workspace-mini-table td:first-child { color: var(--cavic-text, #2e3338); font-weight: 700; }
+    .action-center-table-actions .workspace-mini-table td.text-center.text-muted,
+    .action-center-table-actions .workspace-mini-table td[colspan] { padding: 1.25rem; color: var(--cavic-text-muted, #9aa2a8) !important; font-weight: 600; }
+    .action-center-table-actions .workspace-mini-table .btn { white-space: nowrap; }
+    .action-center-table-actions .workspace-mini-table .workspace-status-chip { white-space: nowrap; }
+    .action-center-table-actions .workspace-mini-table th:last-child,
+    .action-center-table-actions .workspace-mini-table td:last-child { text-align: center; width: 1%; white-space: nowrap; }
+    .action-center-link { display: inline-flex; align-items: center; gap: .35rem; font-size: .78rem; font-weight: 700; color: var(--cavic-primary, #1A8E8F); text-decoration: none; }
+    .action-center-link:hover { color: #126768; text-decoration: none; }
+    .workspace-stat-card .stat-link.action-center-link { margin-top: .35rem; }
+    .action-center-local-link { border: 1px solid rgba(26, 142, 143, .28); border-radius: 999px; padding: .3rem .7rem; background: rgba(26, 142, 143, .08); }
+    .action-center-local-link:hover { background: rgba(26, 142, 143, .14); }
+    .action-center-table-actions .table-row-actions .btn { min-height: 30px; border: 1px solid rgba(63, 104, 109, .28); border-radius: 10px; color: var(--cavic-primary-dark, #32555a); background: var(--cavic-surface, #fff); font-size: .75rem; font-weight: 800; padding: .28rem .7rem; }
+    .action-center-table-actions .table-row-actions .btn:hover { background: var(--cavic-primary-soft, #e7f1f0); border-color: var(--cavic-primary, #3f686d); color: var(--cavic-primary-dark, #32555a); }
+    .action-center-table-actions .table-row-actions .dropdown-menu { border-color: var(--cavic-border, #e7e9e4); border-radius: 12px; box-shadow: 0 12px 28px rgba(31, 41, 55, .08); padding: .35rem; }
+    .action-center-table-actions .dropdown-item { display: flex; align-items: center; gap: .45rem; font-weight: 600; padding: .55rem .85rem; }
+    .action-center-table-actions .dropdown-item:hover { background: var(--cavic-primary-soft, #e7f1f0); color: var(--cavic-primary-dark, #32555a); border-radius: 9px; }
+    .action-center-table-actions .workspace-section-title,
+    .action-center-table-actions h6 { color: var(--cavic-text, #2e3338); font-weight: 800; }
+    .action-center-table-actions.dashboard-proof-datatable-card .admin-datatable-top { margin-bottom: .7rem; }
+    .action-center-table-actions.dashboard-proof-datatable-card .admin-datatable-table-wrap { border: 0; border-radius: 0; }
+    .action-center-table-actions.dashboard-proof-datatable-card .dashboard-proof-top-center { justify-content: center; }
+    .action-center-table-actions.dashboard-proof-datatable-card .dashboard-proof-export-buttons .admin-dt-btn { min-height: 30px; padding: .32rem .62rem; }
+    .action-center-table-actions.dashboard-proof-datatable-card .dashboard-columns-menu { z-index: 1085; max-height: min(420px, 70vh); overflow-y: auto; }
 </style>
 
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'action-center-collection-range'])
@@ -48,41 +78,41 @@
 <div class="workspace-first-tab-stats" data-tab="#member-requests">
 <div class="row mb-4">
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Member Requests') }}</div><div class="stat-value">{{ $memberRequestsCount }}</div><a class="stat-link" href="{{ route('members.pending_requests') }}">{{ _lang('Open queue') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Member Requests') }}</div><div class="stat-value">{{ $memberRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#member-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open queue') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Loans') }}</div><div class="stat-value">{{ $pendingLoansCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'pending') }}">{{ _lang('Review applications') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Loans') }}</div><div class="stat-value">{{ $pendingLoansCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#pending-loans"><i class="fas fa-arrow-right"></i>{{ _lang('Review applications') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Due Today') }}</div><div class="stat-value">{{ $dueTodayCount }}</div><a class="stat-link" href="{{ route('loans.workspace') }}">{{ _lang('Open today\'s collections') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Due Today') }}</div><div class="stat-value">{{ $dueTodayCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#due-upcoming"><i class="fas fa-arrow-right"></i>{{ _lang('Open today\'s collections') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Deposit Requests') }}</div><div class="stat-value">{{ $depositRequestsCount }}</div><a class="stat-link" href="{{ route('deposit_requests.index') }}">{{ _lang('Open requests') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Deposit Requests') }}</div><div class="stat-value">{{ $depositRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#finance-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open requests') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Withdraw Requests') }}</div><div class="stat-value">{{ $withdrawRequestsCount }}</div><a class="stat-link" href="{{ route('withdraw_requests.index') }}">{{ _lang('Open requests') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Withdraw Requests') }}</div><div class="stat-value">{{ $withdrawRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#finance-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open requests') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Overdue Repayments') }}</div><div class="stat-value">{{ $overdueRepaymentsCount }}</div><a class="stat-link" href="{{ route('loans.workspace') }}">{{ _lang('Review collections') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Overdue Repayments') }}</div><div class="stat-value">{{ $overdueRepaymentsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#exceptions"><i class="fas fa-arrow-right"></i>{{ _lang('Review collections') }}</a></div></div>
     </div>
     <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><a class="stat-link" href="{{ route('loans.workspace') }}">{{ _lang('Escalate critical cases') }}</a></div></div>
+        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#exceptions"><i class="fas fa-arrow-right"></i>{{ _lang('Escalate critical cases') }}</a></div></div>
     </div>
 </div>
 </div>
 
-<div class="card workspace-section-card">
+<div class="card workspace-section-card action-center-table-actions dashboard-proof-datatable-card">
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="member-requests">
             <div class="table-responsive">
-                <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Member') }}</th>
                             <th>{{ _lang('Member No') }}</th>
                             <th>{{ _lang('Branch') }}</th>
                             <th>{{ _lang('Status') }}</th>
-                            <th class="text-center">{{ _lang('Action') }}</th>
+                            <th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -95,8 +125,9 @@
                                 <td class="text-center">
                                     @include('backend.admin.partials.table-actions', [
                                         'items' => [
-                                            ['label' => _lang('View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye'],
+                                            ['label' => _lang('Quick View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Member Request Summary')],
                                             ['label' => _lang('Approve'), 'url' => route('members.accept_request', $member->id), 'icon' => 'ti-check', 'class' => 'ajax-modal', 'data_title' => _lang('Approve Member Request')],
+                                            ['label' => _lang('Reject'), 'url' => route('members.reject_request', $member->id), 'icon' => 'ti-close', 'class' => 'ajax-action', 'data_confirm' => _lang('Reject this member request?')],
                                         ],
                                     ])
                                 </td>
@@ -107,11 +138,11 @@
                     </tbody>
                 </table>
             </div>
-            <a href="{{ route('members.pending_requests') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Full Member Requests Queue') }}</a>
+            <a href="#member-requests" class="btn btn-outline-primary btn-sm action-center-tab-link">{{ _lang('Stay In Member Requests Queue') }}</a>
         </div>
         <div class="tab-pane fade" id="pending-loans">
             <div class="table-responsive">
-                <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Loan ID') }}</th>
@@ -120,7 +151,7 @@
                             <th>{{ _lang('Amount') }}</th>
                             <th>{{ _lang('Stage') }}</th>
                             <th>{{ _lang('Approval Progress') }}</th>
-                            <th class="text-center">{{ _lang('Action') }}</th>
+                            <th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,7 +163,10 @@
                                 <td>{{ decimalPlace($loan->applied_amount, optional($loan->currency)->name) }}</td>
                                 <td><span class="workspace-status-chip {{ $loan->workspace_stage_theme ?? 'review' }}">{{ $loan->workspace_stage_label ?? _lang('Under Review') }}</span></td>
                                 <td><span class="text-muted small">{{ $loan->workspace_stage_meta ?? _lang('Waiting in queue') }}</span></td>
-                                <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Review'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye']]])</td>
+                                <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [
+                                    ['label' => _lang('Quick Review'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Loan Review Summary')],
+                                    ['label' => _lang('Approve'), 'url' => route('loans.approve', $loan->id), 'icon' => 'ti-check', 'class' => 'ajax-modal', 'data_title' => _lang('Confirm Loan Approval')],
+                                ]])</td>
                             </tr>
                         @empty
                             <tr><td colspan="7" class="text-center text-muted">{{ _lang('No pending loans') }}</td></tr>
@@ -140,15 +174,15 @@
                     </tbody>
                 </table>
             </div>
-            <a href="{{ route('loans.filter', 'pending') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Full Pending Loans Queue') }}</a>
+            <a href="#pending-loans" class="btn btn-outline-primary btn-sm action-center-tab-link">{{ _lang('Stay In Pending Loans Queue') }}</a>
         </div>
         <div class="tab-pane fade" id="finance-requests">
             <div class="row">
                 <div class="col-lg-6 mb-3 mb-lg-0">
                     <h6>{{ _lang('Deposit Requests') }}</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
-                            <thead><tr><th>{{ _lang('Member') }}</th><th>{{ _lang('Amount') }}</th><th>{{ _lang('Method') }}</th><th>{{ _lang('Status') }}</th><th>{{ _lang('Action') }}</th></tr></thead>
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
+                            <thead><tr><th>{{ _lang('Member') }}</th><th>{{ _lang('Amount') }}</th><th>{{ _lang('Method') }}</th><th>{{ _lang('Status') }}</th><th data-no-export="1">{{ _lang('Action') }}</th></tr></thead>
                             <tbody>
                                 @forelse($depositRequests as $request)
                                     <tr>
@@ -164,13 +198,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <a href="{{ route('deposit_requests.index') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Deposit Requests') }}</a>
+                    <a href="#finance-requests" class="btn btn-outline-primary btn-sm action-center-tab-link">{{ _lang('Stay In Deposit Requests') }}</a>
                 </div>
                 <div class="col-lg-6">
                     <h6>{{ _lang('Withdraw Requests') }}</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
-                            <thead><tr><th>{{ _lang('Member') }}</th><th>{{ _lang('Amount') }}</th><th>{{ _lang('Method') }}</th><th>{{ _lang('Status') }}</th><th>{{ _lang('Action') }}</th></tr></thead>
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
+                            <thead><tr><th>{{ _lang('Member') }}</th><th>{{ _lang('Amount') }}</th><th>{{ _lang('Method') }}</th><th>{{ _lang('Status') }}</th><th data-no-export="1">{{ _lang('Action') }}</th></tr></thead>
                             <tbody>
                                 @forelse($withdrawRequests as $request)
                                     <tr>
@@ -186,7 +220,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <a href="{{ route('withdraw_requests.index') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Withdraw Requests') }}</a>
+                    <a href="#finance-requests" class="btn btn-outline-primary btn-sm action-center-tab-link">{{ _lang('Stay In Withdraw Requests') }}</a>
                 </div>
             </div>
         </div>
@@ -195,7 +229,7 @@
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Due Today') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -203,7 +237,7 @@
                                     <th>{{ _lang('Repayment Date') }}</th>
                                     <th>{{ _lang('Amount') }}</th>
                                     <th>{{ _lang('Status') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -214,7 +248,7 @@
                                         <td>{{ $repayment->repayment_date }}</td>
                                         <td>{{ decimalPlace($repayment->amount_to_pay, optional($repayment->loan->currency)->name) }}</td>
                                         <td><span class="workspace-status-chip today">{{ _lang('Due Today') }}</span></td>
-                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye']]])</td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan Summary'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Loan Repayment Summary')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No repayments due today') }}</td></tr>
@@ -226,7 +260,7 @@
                 <div class="col-lg-6">
                     <div class="workspace-section-title">{{ _lang('Next 7 Days') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -234,7 +268,7 @@
                                     <th>{{ _lang('Repayment Date') }}</th>
                                     <th>{{ _lang('Amount') }}</th>
                                     <th>{{ _lang('Status') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -245,7 +279,7 @@
                                         <td>{{ $repayment->repayment_date }}</td>
                                         <td>{{ decimalPlace($repayment->amount_to_pay, optional($repayment->loan->currency)->name) }}</td>
                                         <td><span class="workspace-status-chip upcoming">{{ _lang('Upcoming') }}</span></td>
-                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye']]])</td>
+                                        <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Loan Summary'), 'url' => route('loans.show', $repayment->loan_id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Loan Repayment Summary')]]])</td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center text-muted">{{ _lang('No upcoming repayments in the next 7 days') }}</td></tr>
@@ -259,7 +293,7 @@
                 <div class="col-lg-7 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Collector-ready Call List') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-0">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -268,7 +302,7 @@
                                     <th>{{ _lang('Queue') }}</th>
                                     <th>{{ _lang('Last Follow-up') }}</th>
                                     <th>{{ _lang('Next Action') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -298,7 +332,7 @@
                 <div class="col-lg-5">
                     <div class="workspace-section-title">{{ _lang('Upcoming Reminder Queue') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-0">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -306,7 +340,7 @@
                                     <th>{{ _lang('Due In') }}</th>
                                     <th>{{ _lang('Reminder') }}</th>
                                     <th>{{ _lang('Last Follow-up') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -333,7 +367,7 @@
                     </div>
                 </div>
             </div>
-            <a href="{{ route('loans.upcoming_loan_repayments') }}" class="btn btn-outline-primary btn-sm mt-4">{{ _lang('Open Full Repayment Schedule') }}</a>
+            <a href="#due-upcoming" class="btn btn-outline-primary btn-sm mt-4 action-center-tab-link">{{ _lang('Stay In Repayment Queue') }}</a>
         </div>
         <div class="tab-pane fade" id="exceptions">
             <div class="alert alert-light border mb-4">
@@ -382,7 +416,7 @@
                     </ul>
                     <div class="workspace-section-title mt-4">{{ _lang('Branch Collections Pressure') }}</div>
                     <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Branch_Collections_Pressure">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Branch_Collections_Pressure">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Branch') }}</th>
@@ -405,7 +439,7 @@
                     </div>
                     <div class="workspace-section-title">{{ _lang('Branch Follow-up Performance') }}</div>
                     <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Branch_Follow_Up_Performance">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Branch_Follow_Up_Performance">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Branch') }}</th>
@@ -432,7 +466,7 @@
                     </div>
                     <div class="workspace-section-title">{{ _lang('Collector Follow-up Performance') }}</div>
                     <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Collector_Follow_Up_Performance">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Collector_Follow_Up_Performance">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('User') }}</th>
@@ -457,7 +491,7 @@
                     </div>
                     <div class="workspace-section-title">{{ _lang('Recent Resolutions') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Recent_Resolutions">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Recent_Resolutions">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -484,7 +518,7 @@
                 <div class="col-lg-7">
                     <div class="workspace-section-title">{{ _lang('Collections Priority Queue') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Collections_Priority_Queue">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Collections_Priority_Queue">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -494,7 +528,7 @@
                                     <th>{{ _lang('Aging') }}</th>
                                     <th>{{ _lang('Last Follow-up') }}</th>
                                     <th>{{ _lang('Next Action') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -523,14 +557,14 @@
                     </div>
                     <div class="workspace-section-title mt-4">{{ _lang('Promise Follow-up Queue') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table table-export mb-0" data-export-filename="Action_Center_Promise_Follow_Up_Queue">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Promise_Follow_Up_Queue">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
                                     <th>{{ _lang('Borrower') }}</th>
                                     <th>{{ _lang('Promise Date') }}</th>
                                     <th>{{ _lang('Status') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -554,3 +588,191 @@
     </div>
 </div>
 @endsection
+
+@section('js-script')
+<script>
+    (function ($) {
+        function slugTableTitle(text, fallback) {
+            var clean = $.trim($('<div>').html(text || '').text()).replace(/\s+/g, '_').replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+            return clean ? 'Action_Center_' + clean : fallback;
+        }
+
+        function prepareEmptyTable($table) {
+            var $rows = $table.find('tbody tr');
+            var $emptyCell = $rows.length === 1 ? $rows.first().find('td[colspan]').first() : $();
+
+            if ($emptyCell.length) {
+                $table.attr('data-empty-message', $.trim($emptyCell.text()));
+                $rows.remove();
+            }
+        }
+
+        function tableTitle($table, index) {
+            var explicit = $table.data('exportFilename');
+            if (explicit) {
+                return explicit;
+            }
+
+            var title = $table.closest('.col-lg-7, .col-lg-6, .col-lg-5, .col-lg-4, .col-md-4, .tab-pane').find('.workspace-section-title, h6').first().text();
+            if (!title) {
+                title = $table.closest('.tab-pane').attr('id') || 'Queue_' + (index + 1);
+            }
+
+            return slugTableTitle(title, 'Action_Center_Table_' + (index + 1));
+        }
+
+        function buildActionCenterToolbar(api, $table, exportTitle) {
+            var $wrapper = $(api.table().container());
+            var $left = $wrapper.find('.admin-datatable-top-left');
+            var $right = $wrapper.find('.admin-datatable-top-right');
+            var $top = $wrapper.find('.admin-datatable-top');
+            var $length = $left.find('.dataTables_length').detach();
+            var $search = $right.find('.dataTables_filter').detach();
+            var $buttons = $left.find('.dt-buttons').detach();
+            var unique = $table.attr('id');
+
+            var $toolbarLeft = $('<div class="dashboard-proof-top-left"></div>');
+            var $toolbarCenter = $('<div class="dashboard-proof-top-center"></div>');
+            var $toolbarRight = $('<div class="dashboard-proof-top-right"></div>');
+            var $columnsDropdown = $(
+                '<div class="dropdown dashboard-columns-dropdown">' +
+                    '<button type="button" class="btn btn-xs admin-dt-btn admin-dt-btn-ghost dashboard-columns-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                        '<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span><i class="fas fa-chevron-down dashboard-columns-chevron"></i>' +
+                    '</button>' +
+                    '<div class="dropdown-menu dropdown-menu-right dashboard-columns-menu"></div>' +
+                '</div>'
+            );
+            var $columnsMenu = $columnsDropdown.find('.dashboard-columns-menu');
+
+            api.columns().every(function (columnIndex) {
+                var column = this;
+                var $header = $(column.header());
+                var label = $header.text().trim();
+                var isLocked = $header.attr('data-no-export') === '1' || label === '{{ _lang('Action') }}';
+
+                if (!label || isLocked) {
+                    return;
+                }
+
+                var itemId = unique + '-column-toggle-' + columnIndex;
+                var $item = $(
+                    '<label class="dropdown-item dashboard-columns-item" for="' + itemId + '">' +
+                        '<span class="dashboard-columns-label">' + label + '</span>' +
+                        '<input type="checkbox" class="dashboard-columns-checkbox" id="' + itemId + '"' + (column.visible() ? ' checked' : '') + '>' +
+                    '</label>'
+                );
+
+                $item.on('click', function (event) {
+                    event.stopPropagation();
+                });
+
+                $item.find('.dashboard-columns-checkbox').on('change', function () {
+                    column.visible($(this).is(':checked'));
+                    api.columns.adjust();
+                });
+
+                $columnsMenu.append($item);
+            });
+
+            $columnsMenu.on('click', function (event) {
+                event.stopPropagation();
+            });
+
+            $buttons.addClass('dashboard-proof-export-buttons');
+            $toolbarLeft.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-length"></div>').append($length));
+            $toolbarCenter.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-export"></div>').append($buttons));
+            $toolbarRight
+                .append($('<div class="dashboard-toolbar-item"></div>').append($columnsDropdown))
+                .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-search"></div>').append($search));
+
+            $top.empty().append($toolbarLeft, $toolbarCenter, $toolbarRight);
+            $search.find('input').attr('placeholder', '{{ _lang('Search records') }}');
+        }
+
+        $('.action-center-data-table').each(function (index) {
+            var $table = $(this);
+            var exportTitle = tableTitle($table, index);
+            var columnCount = $table.find('thead th').length;
+
+            $table.attr('id', $table.attr('id') || 'action-center-table-' + index);
+            $table.attr('data-export-filename', exportTitle);
+            $table.css('min-width', Math.max(760, columnCount * 132) + 'px');
+            prepareEmptyTable($table);
+
+            if (typeof window.cavicAdminDataTable === 'function') {
+                window.cavicAdminDataTable('#' + $table.attr('id'), {
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    ordering: false,
+                    lengthChange: true,
+                    pageLength: 6,
+                    lengthMenu: [[6, 10, 25, 50, 100], [6, 10, 25, 50, 100]],
+                    buttons: [
+                        {
+                            extend: 'pdf',
+                            text: '<i class="ti-download"></i><span>{{ _lang('PDF') }}</span>',
+                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                            filename: exportTitle,
+                            title: exportTitle,
+                            exportOptions: { columns: ':not([data-no-export="1"])' }
+                        },
+                        {
+                            extend: 'excel',
+                            text: '<i class="ti-download"></i><span>{{ _lang('Excel') }}</span>',
+                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                            filename: exportTitle,
+                            title: exportTitle,
+                            exportOptions: { columns: ':not([data-no-export="1"])' }
+                        },
+                        {
+                            extend: 'csv',
+                            text: '<i class="ti-download"></i><span>{{ _lang('CSV') }}</span>',
+                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+                            filename: exportTitle,
+                            exportOptions: { columns: ':not([data-no-export="1"])' }
+                        }
+                    ],
+                    language: {
+                        info: '{{ _lang('Viewing') }} _START_-_END_ {{ _lang('of') }} _TOTAL_',
+                        infoEmpty: '{{ _lang('Viewing 0-0 of 0') }}',
+                        search: '',
+                        searchPlaceholder: '{{ _lang('Search records') }}',
+                        lengthMenu: '_MENU_',
+                        zeroRecords: '{{ _lang('No matching records found') }}',
+                        emptyTable: $table.attr('data-empty-message') || '{{ _lang('No Data Available') }}',
+                        paginate: {
+                            previous: '<i class="fas fa-angle-left"></i>',
+                            next: '<i class="fas fa-angle-right"></i>'
+                        }
+                    },
+                    initComplete: function () {
+                        buildActionCenterToolbar(this.api(), $table, exportTitle);
+                    }
+                });
+            }
+        });
+
+        $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function () {
+            if ($.fn.DataTable) {
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            }
+        });
+    })(window.jQuery || window.$);
+
+    $(document).on('click', '.action-center-tab-link', function (event) {
+        var target = $(this).attr('href');
+        if (! target || target.charAt(0) !== '#') {
+            return;
+        }
+
+        event.preventDefault();
+        $('.workspace-module-tabs a[href="' + target + '"], .admin-dashboard-top-tabs a[href="' + target + '"]').first().tab('show');
+        var $target = $(target);
+        if ($target.length) {
+            $('html, body').animate({ scrollTop: $target.closest('.workspace-section-card').offset().top - 90 }, 200);
+        }
+    });
+</script>
+@endsection
+
