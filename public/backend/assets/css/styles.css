@@ -5999,7 +5999,10 @@ Payment Gateway
 .admin-shell-v2 .workspace-detail-card .table-responsive {
     border: 1px solid #edf1eb;
     border-radius: 18px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
     background: var(--cavic-surface);
 }
 
@@ -6130,6 +6133,12 @@ Payment Gateway
     gap: 0.9rem;
 }
 
+.admin-shell-v2 .admin-datatable-top {
+    position: relative;
+    z-index: 1200;
+    overflow: visible;
+}
+
 .admin-shell-v2 .admin-datatable-top-left,
 .admin-shell-v2 .admin-datatable-top-right,
 .admin-shell-v2 .admin-datatable-bottom-left,
@@ -6144,6 +6153,8 @@ Payment Gateway
     display: flex;
     flex-wrap: wrap;
     gap: 0.65rem;
+    position: relative;
+    z-index: 1250;
 }
 
 .admin-shell-v2 .dataTables_wrapper .dt-buttons .btn,
@@ -6196,16 +6207,48 @@ Payment Gateway
 }
 
 .admin-shell-v2 .dataTables_wrapper div.dt-button-collection,
-.admin-shell-v2 div.dt-button-collection {
+.admin-shell-v2 div.dt-button-collection,
+body div.dt-button-collection {
     min-width: 220px;
+    max-height: min(360px, calc(100vh - 120px)) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding: 0.45rem;
     border: 1px solid var(--cavic-border);
     border-radius: 16px;
     box-shadow: 0 16px 36px rgba(31, 41, 55, 0.12);
     background: var(--cavic-surface);
+    z-index: 3000 !important;
 }
 
-.admin-shell-v2 div.dt-button-collection .dt-button {
+.admin-shell-v2 .dataTables_wrapper div.dt-button-collection::-webkit-scrollbar,
+.admin-shell-v2 div.dt-button-collection::-webkit-scrollbar,
+body div.dt-button-collection::-webkit-scrollbar,
+.admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-menu::-webkit-scrollbar {
+    width: 10px;
+}
+
+.admin-shell-v2 .dataTables_wrapper div.dt-button-collection::-webkit-scrollbar-track,
+.admin-shell-v2 div.dt-button-collection::-webkit-scrollbar-track,
+body div.dt-button-collection::-webkit-scrollbar-track,
+.admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-menu::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: #eef2ed;
+}
+
+.admin-shell-v2 .dataTables_wrapper div.dt-button-collection::-webkit-scrollbar-thumb,
+.admin-shell-v2 div.dt-button-collection::-webkit-scrollbar-thumb,
+body div.dt-button-collection::-webkit-scrollbar-thumb,
+.admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-menu::-webkit-scrollbar-thumb {
+    border: 2px solid #eef2ed;
+    border-radius: 999px;
+    background: rgba(63, 104, 109, 0.5);
+}
+
+.admin-shell-v2 div.dt-button-collection .dt-button,
+body div.dt-button-collection .dt-button {
     width: 100%;
     min-height: 42px;
     border: 0;
@@ -6218,17 +6261,20 @@ Payment Gateway
     font-weight: 600;
 }
 
-.admin-shell-v2 div.dt-button-collection .dt-button:hover {
+.admin-shell-v2 div.dt-button-collection .dt-button:hover,
+body div.dt-button-collection .dt-button:hover {
     background: var(--cavic-primary-soft) !important;
     color: var(--cavic-primary-dark) !important;
 }
 
-.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility.active {
+.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility.active,
+body div.dt-button-collection .buttons-columnVisibility.active {
     background: rgba(63, 104, 109, 0.08) !important;
     color: var(--cavic-primary-dark) !important;
 }
 
-.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility::after {
+.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility::after,
+body div.dt-button-collection .buttons-columnVisibility::after {
     content: '';
     width: 16px;
     height: 16px;
@@ -6238,7 +6284,8 @@ Payment Gateway
     flex-shrink: 0;
 }
 
-.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility.active::after {
+.admin-shell-v2 div.dt-button-collection .buttons-columnVisibility.active::after,
+body div.dt-button-collection .buttons-columnVisibility.active::after {
     content: '\2713';
     display: inline-flex;
     align-items: center;
@@ -6279,10 +6326,61 @@ Payment Gateway
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .table-responsive {
+    position: relative;
+    z-index: 1;
     border-radius: 18px;
     border: 1px solid var(--cavic-border);
     background: var(--cavic-surface);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+}
+
+.admin-shell-v2 .table-responsive.admin-datatable-responsive {
+    overflow: visible;
+}
+
+.admin-shell-v2 .dashboard-proof-datatable-card .table-responsive.admin-datatable-responsive {
+    overflow: visible;
+}
+
+.admin-shell-v2 .table-responsive::-webkit-scrollbar,
+.admin-shell-v2 .admin-datatable-table-wrap::-webkit-scrollbar {
+    height: 10px;
+}
+
+.admin-shell-v2 .table-responsive::-webkit-scrollbar-track,
+.admin-shell-v2 .admin-datatable-table-wrap::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: #eef2ed;
+}
+
+.admin-shell-v2 .table-responsive::-webkit-scrollbar-thumb,
+.admin-shell-v2 .admin-datatable-table-wrap::-webkit-scrollbar-thumb {
+    border: 2px solid #eef2ed;
+    border-radius: 999px;
+    background: rgba(63, 104, 109, 0.45);
+}
+
+.admin-shell-v2 .table-responsive::-webkit-scrollbar-thumb:hover,
+.admin-shell-v2 .admin-datatable-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(63, 104, 109, 0.7);
+}
+
+.admin-shell-v2 .table-responsive,
+.admin-shell-v2 .admin-datatable-table-wrap {
+    scrollbar-color: rgba(63, 104, 109, 0.55) #eef2ed;
+    scrollbar-width: thin;
+}
+
+.admin-shell-v2 .admin-datatable-table-wrap {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .admin-datatable-top {
@@ -6291,6 +6389,9 @@ Payment Gateway
     align-items: center;
     min-height: 44px;
     margin-bottom: 0.9rem;
+    position: relative;
+    z-index: 1200;
+    overflow: visible;
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-proof-top-left,
@@ -6319,6 +6420,8 @@ Payment Gateway
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-proof-top-right {
     justify-content: flex-end;
+    position: relative;
+    z-index: 1250;
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-toolbar-item {
@@ -6377,6 +6480,8 @@ Payment Gateway
     display: inline-flex;
     align-items: center;
     min-height: 40px;
+    position: relative;
+    z-index: 1300;
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-trigger {
@@ -6405,10 +6510,26 @@ Payment Gateway
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-menu {
     min-width: 220px;
+    max-height: min(360px, calc(100vh - 120px)) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding: 0.45rem;
     border: 1px solid var(--cavic-border);
     border-radius: 16px;
     box-shadow: 0 16px 36px rgba(31, 41, 55, 0.12);
+    background: var(--cavic-surface);
+    z-index: 4000;
+}
+
+.admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-dropdown.show .dashboard-columns-menu,
+.admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-dropdown .dashboard-columns-menu.show {
+    top: calc(100% + 0.45rem) !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    display: block;
 }
 
 .admin-shell-v2 .dashboard-proof-datatable-card .dashboard-columns-item {

@@ -469,6 +469,7 @@ All future admin tables should follow this exact structure unless there is a str
   - right: column visibility, table filters, and search
 - do not expose raw plugin-default DataTables controls when a styled CAVIC control exists
 - use a dedicated `Columns` visibility control rather than relying on misaligned plugin markup
+- the `Columns` visibility menu must anchor to the Columns button, use a high shared overlay z-index, and scroll internally when it is taller than the viewport
 - keep all toolbar controls vertically centered in one shared row
 - export buttons should be compact and visually lighter than the filters/search controls
 - filters and search should use the same height, radius, and alignment rules
@@ -481,6 +482,8 @@ All admin DataTables should also inherit the dashboard table behavior:
 - clear hover highlight across the full row
 - hover state must visually carry into the actions cell/button as part of the same row
 - soft bordered table card with rounded outer container
+- wide tables must show a visible horizontal scrollbar inside the table card instead of clipping columns
+- avoid DataTables split-header horizontal scrolling unless it is proven aligned; prefer one real table inside an overflow wrapper
 - readable header contrast with minimal grid noise
 - action column kept narrow and visually consistent
 - status chips kept compact so data density stays high
@@ -491,6 +494,7 @@ When updating any admin table:
 - preserve workflow-specific filters, but keep the shared toolbar layout and table density
 - if a table needs custom actions, fit them into this pattern instead of adding a second toolbar
 - if DataTables plugin markup fights the layout, replace that specific control with a custom CAVIC control rather than stacking more CSS hacks on top
+- if the table can exceed the viewport or card width, set an explicit minimum table width and rely on the shared `.table-responsive` / `.admin-datatable-table-wrap` horizontal scrollbar
 
 ### CAVIC tables that should use this style
 - members list

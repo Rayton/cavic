@@ -372,6 +372,7 @@
             drawCallback: function() {
                 var $wrapper = $table.closest('.dataTables_wrapper');
                 $wrapper.addClass('admin-datatable-wrapper');
+                $table.closest('.table-responsive').addClass('admin-datatable-responsive');
                 $wrapper.find('.dataTables_paginate > .pagination').addClass('pagination-bordered');
                 $wrapper.find('.dataTables_filter input').attr('placeholder', 'Search records');
                 if (typeof TableExportTotals !== 'undefined') TableExportTotals.computeTotals();
@@ -382,6 +383,7 @@
             initComplete: function() {
                 var $wrapper = $table.closest('.dataTables_wrapper');
                 $wrapper.addClass('admin-datatable-wrapper');
+                $table.closest('.table-responsive').addClass('admin-datatable-responsive');
                 $wrapper.find('.dataTables_filter input').attr('placeholder', 'Search records');
                 $wrapper.find('.dt-buttons').addClass('admin-dt-buttons-ready');
                 if (typeof userInitComplete === 'function') {

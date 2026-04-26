@@ -21,30 +21,95 @@
 
 @section('content')
 <style>
-.wallets-month-table { font-size: 0.875rem; }
-.wallets-month-table th, .wallets-month-table td { vertical-align: middle !important; }
 #custom-date-fields { display: none; }
+.wallets-console-card {
+	border-radius: 20px;
+	border: 1px solid var(--cavic-border, #E7E9E4);
+	box-shadow: var(--shadow-soft, 0 8px 24px rgba(31, 41, 55, 0.04));
+	overflow: visible;
+}
+.wallets-console-card .card-header {
+	padding: 1.05rem 1.25rem;
+	background: var(--cavic-surface, #fff);
+	border-bottom: 1px solid var(--cavic-border, #E7E9E4);
+}
+.wallets-page-title {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0;
+	color: var(--cavic-text, #2E3338);
+	font-size: 1.2rem;
+	font-weight: 700;
+}
+.wallets-page-title i {
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: var(--cavic-primary-soft, #E7F1F0);
+	color: var(--cavic-primary, #3F686D);
+	font-size: 1rem;
+}
+.wallets-page-subtitle {
+	margin: 0.25rem 0 0 3rem;
+	color: var(--cavic-text-soft, #6F787F);
+	font-size: 0.82rem;
+}
+.wallets-filter-panel {
+	padding: 1rem;
+	margin-bottom: 1rem;
+	border: 1px solid var(--cavic-border, #E7E9E4);
+	border-radius: 16px;
+	background: #fbfcfb;
+}
+.wallets-filter-panel .form-group {
+	margin-bottom: 0;
+}
+.wallets-filter-panel .control-label {
+	color: var(--cavic-text, #2E3338);
+	font-size: 0.78rem;
+	font-weight: 700;
+}
+.wallets-filter-panel .form-control {
+	min-height: 40px;
+	border-radius: 12px;
+	border-color: var(--cavic-border, #E7E9E4);
+}
+.wallets-filter-panel .btn {
+	min-height: 40px;
+	border-radius: 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+}
 .wallets-import-tools {
-	gap: 10px;
-	padding: 10px 12px;
-	margin-bottom: 12px;
-	border: 1px solid #e4e9f2;
-	border-radius: 10px;
-	background: linear-gradient(180deg, #fbfcff 0%, #f4f7fc 100%);
+	gap: 0.75rem;
+	padding: 0.78rem 0.9rem;
+	margin-bottom: 0.9rem;
+	border: 1px solid var(--cavic-border, #E7E9E4);
+	border-radius: 16px;
+	background: #fbfcfb;
 }
 .wallets-template-btn {
-	border-color: #546ea7;
-	color: #334f88;
-	background: #ffffff;
-	font-weight: 500;
+	min-height: 40px;
+	border-color: rgba(63, 104, 109, 0.22);
+	color: var(--cavic-primary-dark, #32555A);
+	background: var(--cavic-surface, #fff);
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.48rem;
 }
 .wallets-template-btn:hover {
-	background: #eef3ff;
-	border-color: #4b63a0;
-	color: #2f467a;
+	background: var(--cavic-primary-soft, #E7F1F0);
+	border-color: rgba(63, 104, 109, 0.34);
+	color: var(--cavic-primary-dark, #32555A);
 }
 .wallets-import-form {
-	gap: 8px;
+	gap: 0.75rem;
 }
 .wallets-file-wrap {
 	position: relative;
@@ -53,24 +118,87 @@
 	flex: 1 1 280px;
 }
 .wallets-import-form .wallets-file-input {
-	height: 38px;
-	padding: 0 12px;
-	border: 1px dashed #9cb0d8;
-	border-radius: 8px;
+	height: 40px;
+	padding: 0;
+	border: 1px dashed rgba(63, 104, 109, 0.32);
+	border-radius: 12px;
 	background: #fff;
-	color: #5b6780;
+	color: var(--cavic-text-soft, #6F787F);
 	font-size: 13px;
+	font-weight: 600;
+	line-height: 40px;
+	overflow: hidden;
+	cursor: pointer;
 }
 .wallets-import-form .wallets-file-input:focus {
-	border-color: #5a7cc4;
-	box-shadow: 0 0 0 0.12rem rgba(90, 124, 196, 0.22);
+	border-color: var(--cavic-primary, #3F686D);
+	box-shadow: 0 0 0 0.12rem rgba(63, 104, 109, 0.16);
+}
+.wallets-import-form .wallets-file-input::file-selector-button {
+	height: 40px;
+	margin: 0 0.75rem 0 0;
+	padding: 0 1rem;
+	border: 0;
+	border-right: 1px solid rgba(63, 104, 109, 0.18);
+	background: var(--cavic-primary-soft, #E7F1F0);
+	color: var(--cavic-primary-dark, #32555A);
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.wallets-import-form .wallets-file-input::-webkit-file-upload-button {
+	height: 40px;
+	margin: 0 0.75rem 0 0;
+	padding: 0 1rem;
+	border: 0;
+	border-right: 1px solid rgba(63, 104, 109, 0.18);
+	background: var(--cavic-primary-soft, #E7F1F0);
+	color: var(--cavic-primary-dark, #32555A);
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.wallets-import-form .wallets-file-input:hover::file-selector-button,
+.wallets-import-form .wallets-file-input:hover::-webkit-file-upload-button {
+	background: var(--cavic-primary, #3F686D);
+	color: #fff;
 }
 .wallets-import-form .wallets-import-btn {
-	height: 38px;
+	min-height: 40px;
 	padding: 0 14px;
-	font-weight: 500;
+	border-radius: 12px;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+.wallets-month-table th, .wallets-month-table td {
+	vertical-align: middle !important;
+}
+.wallets-month-table {
+	width: 100% !important;
+}
+.wallets-month-table th {
+	position: relative;
+}
+.wallets-wide-table {
+	min-width: 1440px;
+}
+.wallets-compact-table {
+	min-width: 760px;
+}
+.dashboard-proof-datatable-card .table-responsive {
+	overflow-x: auto;
+}
+.admin-shell-v2 .dashboard-proof-datatable-card .wallets-month-table th:last-child,
+.admin-shell-v2 .dashboard-proof-datatable-card .wallets-month-table td:last-child {
+	width: auto;
+	text-align: right;
 }
 @media (max-width: 767px) {
+	.wallets-page-subtitle {
+		margin-left: 0;
+	}
 	.wallets-file-wrap {
 		min-width: 100%;
 		max-width: 100%;
@@ -85,14 +213,15 @@
 </style>
 <div class="row">
 	<div class="col-12">
-		<div class="card">
+		<div class="card wallets-console-card">
 			<div class="card-header">
-				<span class="panel-title">{{ _lang('Wallets') }}</span>
+				<h1 class="wallets-page-title"><i class="fas fa-wallet"></i><span>{{ _lang('Wallets') }}</span></h1>
+				<p class="wallets-page-subtitle">{{ _lang('Review wallet movement by member, month, account type, and import batch.') }}</p>
 			</div>
 
 			<div class="card-body">
 				{{-- Filters --}}
-				<form method="get" action="{{ request()->url() }}" id="wallets-filter-form" class="mb-4">
+				<form method="get" action="{{ request()->url() }}" id="wallets-filter-form" class="wallets-filter-panel">
 					<div class="row align-items-end">
 						<div class="col-xl-3 col-lg-4">
 							<div class="form-group">
@@ -121,7 +250,7 @@
 							</div>
 						</div>
 						<div class="col-xl-2 col-lg-4">
-							<button type="submit" class="btn btn-primary btn-xs"><i class="ti-filter"></i>&nbsp;{{ _lang('Apply') }}</button>
+							<button type="submit" class="btn btn-primary btn-xs"><i class="ti-filter"></i><span>{{ _lang('Apply') }}</span></button>
 						</div>
 					</div>
 				</form>
@@ -132,7 +261,7 @@
 					<div class="tab-pane fade show active" id="tab-loans" role="tabpanel">
 						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
 							<a href="{{ route('wallets.template', ['tab' => 'loans']) }}" class="btn btn-xs wallets-template-btn">
-								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+								<i class="ti-download"></i><span>{{ _lang('Download Import Template') }}</span>
 							</a>
 							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
 								@csrf
@@ -140,11 +269,12 @@
 								<div class="wallets-file-wrap">
 									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
 								</div>
-								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i><span>{{ _lang('Import') }}</span></button>
 							</form>
 						</div>
-						<div class="table-responsive">
-							<table id="wallets_table_loans" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Loans">
+						<div class="dashboard-proof-datatable-card">
+							<div class="table-responsive">
+							<table id="wallets_table_loans" class="table table-bordered table-striped wallets-month-table wallets-wide-table wallets-export-table dashboard-table-compact mb-0" data-export-filename="Wallets_Loans">
 								<thead>
 									<tr>
 										<th>{{ _lang('ID') }}</th>
@@ -174,6 +304,7 @@
 									@endforeach
 								</tbody>
 							</table>
+							</div>
 						</div>
 					</div>
 
@@ -182,7 +313,7 @@
 					<div class="tab-pane fade" id="tab-{{ $accountType['id'] }}" role="tabpanel">
 						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
 							<a href="{{ route('wallets.template', ['tab' => 'account', 'product_id' => $accountType['product_id']]) }}" class="btn btn-xs wallets-template-btn">
-								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+								<i class="ti-download"></i><span>{{ _lang('Download Import Template') }}</span>
 							</a>
 							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
 								@csrf
@@ -191,11 +322,12 @@
 								<div class="wallets-file-wrap">
 									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
 								</div>
-								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i><span>{{ _lang('Import') }}</span></button>
 							</form>
 						</div>
-						<div class="table-responsive">
-							<table id="wallets_table_{{ $accountType['id'] }}" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_{{ preg_replace('/[^a-zA-Z0-9_-]/', '_', $accountType['name']) }}">
+						<div class="dashboard-proof-datatable-card">
+							<div class="table-responsive">
+							<table id="wallets_table_{{ $accountType['id'] }}" class="table table-bordered table-striped wallets-month-table wallets-wide-table wallets-export-table dashboard-table-compact mb-0" data-export-filename="Wallets_{{ preg_replace('/[^a-zA-Z0-9_-]/', '_', $accountType['name']) }}">
 								<thead>
 									<tr>
 										<th>{{ _lang('ID') }}</th>
@@ -226,6 +358,7 @@
 									@endforeach
 								</tbody>
 							</table>
+							</div>
 						</div>
 					</div>
 					@endforeach
@@ -234,7 +367,7 @@
 					<div class="tab-pane fade" id="tab-transactions" role="tabpanel">
 						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
 							<a href="{{ route('wallets.template', ['tab' => 'transactions']) }}" class="btn btn-xs wallets-template-btn">
-								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+								<i class="ti-download"></i><span>{{ _lang('Download Import Template') }}</span>
 							</a>
 							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
 								@csrf
@@ -242,11 +375,12 @@
 								<div class="wallets-file-wrap">
 									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
 								</div>
-								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i><span>{{ _lang('Import') }}</span></button>
 							</form>
 						</div>
-						<div class="table-responsive">
-							<table id="wallets_table_transactions" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Transactions">
+						<div class="dashboard-proof-datatable-card">
+							<div class="table-responsive">
+							<table id="wallets_table_transactions" class="table table-bordered table-striped wallets-month-table wallets-wide-table wallets-export-table dashboard-table-compact mb-0" data-export-filename="Wallets_Transactions">
 								<thead>
 									<tr>
 										<th>{{ _lang('ID') }}</th>
@@ -276,6 +410,7 @@
 									@endforeach
 								</tbody>
 							</table>
+							</div>
 						</div>
 					</div>
 
@@ -283,7 +418,7 @@
 					<div class="tab-pane fade" id="tab-contributions" role="tabpanel">
 						<div class="d-flex flex-wrap align-items-center justify-content-between wallets-import-tools">
 							<a href="{{ route('wallets.template', ['tab' => 'contributions']) }}" class="btn btn-xs wallets-template-btn">
-								<i class="ti-download"></i>&nbsp;{{ _lang('Download Import Template') }}
+								<i class="ti-download"></i><span>{{ _lang('Download Import Template') }}</span>
 							</a>
 							<form method="post" action="{{ route('wallets.import') }}" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center wallets-import-form">
 								@csrf
@@ -291,11 +426,12 @@
 								<div class="wallets-file-wrap">
 									<input type="file" name="file" class="form-control wallets-file-input" accept=".xlsx" required>
 								</div>
-								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i>&nbsp;{{ _lang('Import') }}</button>
+								<button type="submit" class="btn btn-primary btn-xs wallets-import-btn"><i class="ti-import"></i><span>{{ _lang('Import') }}</span></button>
 							</form>
 						</div>
-						<div class="table-responsive">
-							<table id="wallets_table_contributions" class="table table-bordered wallets-month-table wallets-export-table" data-export-filename="Wallets_Monthly_Contributions_Deductions">
+						<div class="dashboard-proof-datatable-card">
+							<div class="table-responsive">
+							<table id="wallets_table_contributions" class="table table-bordered table-striped wallets-month-table wallets-compact-table wallets-export-table dashboard-table-compact mb-0" data-export-filename="Wallets_Monthly_Contributions_Deductions">
 								<thead>
 									<tr>
 										<th>{{ _lang('ID') }}</th>
@@ -340,6 +476,7 @@
 									@endforeach
 								</tbody>
 							</table>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -400,18 +537,96 @@ $(document).ready(function() {
 		if ($.fn.DataTable.isDataTable('#' + tableId)) return;
 		var fname = getExportFilename(exportFilename);
 		window.cavicAdminDataTable('#' + tableId, {
-			responsive: true,
+			responsive: false,
 			bAutoWidth: false,
 			ordering: true,
 			lengthChange: true,
+			pageLength: 10,
 			buttons: [
-				{ extend: 'colvis', text: '<i class="ti-layout-column2"></i><span>Columns</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost' },
 				{ extend: 'excel', text: '<i class="ti-download"></i><span>' + btnLang.excel + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname, title: exportFilename || 'Wallets' },
 				{ extend: 'csv', text: '<i class="ti-download"></i><span>' + btnLang.csv + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname },
 				{ extend: 'pdf', text: '<i class="ti-download"></i><span>' + btnLang.pdf + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', filename: fname, title: exportFilename || 'Wallets' },
 				{ extend: 'print', text: '<i class="ti-printer"></i><span>' + btnLang.print + '</span>', className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost', title: exportFilename || 'Wallets' }
 			],
-			language: lang
+			language: $.extend(true, {}, lang, {
+				search: '',
+				searchPlaceholder: '{{ _lang('Search wallets') }}',
+				lengthMenu: '_MENU_',
+				info: '{{ _lang('Viewing') }} _START_-_END_ {{ _lang('of') }} _TOTAL_',
+				infoEmpty: '{{ _lang('Viewing 0-0 of 0') }}'
+			}),
+			initComplete: function () {
+				var api = this.api();
+				var $wrapper = $(api.table().container());
+				var $left = $wrapper.find('.admin-datatable-top-left');
+				var $right = $wrapper.find('.admin-datatable-top-right');
+				var $top = $wrapper.find('.admin-datatable-top');
+				var $length = $left.find('.dataTables_length').detach();
+				var $search = $right.find('.dataTables_filter').detach();
+				var $buttons = $left.find('.dt-buttons').detach();
+
+				var safeTableId = tableId.replace(/[^a-zA-Z0-9_-]/g, '-');
+				var $toolbarLeft = $('<div class="dashboard-proof-top-left"></div>');
+				var $toolbarCenter = $('<div class="dashboard-proof-top-center"></div>');
+				var $toolbarRight = $('<div class="dashboard-proof-top-right"></div>');
+				var $columnsDropdown = $(
+					'<div class="dropdown dashboard-columns-dropdown">' +
+						'<button type="button" class="btn btn-xs admin-dt-btn admin-dt-btn-ghost dashboard-columns-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+							'<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span><i class="fas fa-chevron-down dashboard-columns-chevron"></i>' +
+						'</button>' +
+						'<div class="dropdown-menu dropdown-menu-right dashboard-columns-menu"></div>' +
+					'</div>'
+				);
+				var $columnsMenu = $columnsDropdown.find('.dashboard-columns-menu');
+
+				api.columns().every(function (index) {
+					var column = this;
+					var label = $(column.header()).text().trim();
+
+					if (!label) {
+						return;
+					}
+
+					var itemId = safeTableId + '-column-toggle-' + index;
+					var $item = $(
+						'<label class="dropdown-item dashboard-columns-item" for="' + itemId + '">' +
+							'<span class="dashboard-columns-label">' + label + '</span>' +
+							'<input type="checkbox" class="dashboard-columns-checkbox" id="' + itemId + '"' + (column.visible() ? ' checked' : '') + '>' +
+						'</label>'
+					);
+
+					$item.on('click', function (event) {
+						event.stopPropagation();
+					});
+
+					$item.find('.dashboard-columns-checkbox').on('change', function () {
+						column.visible($(this).is(':checked'));
+						api.columns.adjust();
+					});
+
+					$columnsMenu.append($item);
+				});
+
+				$columnsMenu.on('click', function (event) {
+					event.stopPropagation();
+				});
+
+				$buttons.addClass('dashboard-proof-export-buttons');
+
+				$toolbarLeft.append(
+					$('<div class="dashboard-toolbar-item dashboard-toolbar-item-length"></div>').append($length)
+				);
+				$toolbarCenter.append(
+					$('<div class="dashboard-toolbar-item dashboard-toolbar-item-export"></div>').append($buttons)
+				);
+				$toolbarRight
+					.append($('<div class="dashboard-toolbar-item"></div>').append($columnsDropdown))
+					.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-search"></div>').append($search));
+
+				$top.empty().append($toolbarLeft, $toolbarCenter, $toolbarRight);
+				$search.find('input').attr('placeholder', '{{ _lang('Search wallets') }}');
+				api.columns.adjust();
+			}
 		});
 	}
 

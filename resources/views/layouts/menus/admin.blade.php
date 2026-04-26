@@ -13,6 +13,7 @@ $finance_queue_total = $deposit_requests_count + $withdraw_requests_count;
 @endphp
 
 @include('layouts.menus.admin.dashboard')
+@include('layouts.menus.admin.wallets')
 @include('layouts.menus.admin.action-center')
 @include('layouts.menus.admin.members')
 @include('layouts.menus.admin.loans')

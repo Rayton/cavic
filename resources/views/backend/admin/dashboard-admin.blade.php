@@ -593,105 +593,111 @@
                 <div class="col-lg-7 mb-4 mb-lg-0">
                     <div class="dashboard-detail-section">
                         <div class="workspace-section-title">{{ _lang('Collector-ready Call List') }}</div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered dashboard-table-compact mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="pl-3">{{ _lang('Loan ID') }}</th>
-                                        <th>{{ _lang('Borrower') }}</th>
-                                        <th>{{ _lang('Phone') }}</th>
-                                        <th>{{ _lang('Queue') }}</th>
-                                        <th>{{ _lang('Last Follow-up') }}</th>
-                                        <th class="pr-3">{{ _lang('Next Action') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse(($collector_call_list ?? collect()) as $item)
+                        <div class="dashboard-proof-datatable-card">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped dashboard-table-compact mb-0">
+                                    <thead>
                                         <tr>
-                                            <td class="pl-3">{{ $item->loan_id }}</td>
-                                            <td>{{ $item->borrower_name }}</td>
-                                            <td>{{ trim($item->contact_phone) != '' ? $item->contact_phone : _lang('N/A') }}</td>
-                                            <td><span class="workspace-status-chip {{ $item->queue_theme }}">{{ $item->queue_label }}</span></td>
-                                            <td>
-                                                @if($item->last_outcome_label)
-                                                    <span class="workspace-status-chip {{ $item->last_outcome_theme }}">{{ $item->last_outcome_label }}</span>
-                                                @else
-                                                    <span class="text-muted small">{{ _lang('No log yet') }}</span>
-                                                @endif
-                                            </td>
-                                            <td class="pr-3">{{ $item->next_action }}</td>
+                                            <th class="pl-3">{{ _lang('Loan ID') }}</th>
+                                            <th>{{ _lang('Borrower') }}</th>
+                                            <th>{{ _lang('Phone') }}</th>
+                                            <th>{{ _lang('Queue') }}</th>
+                                            <th>{{ _lang('Last Follow-up') }}</th>
+                                            <th class="pr-3">{{ _lang('Next Action') }}</th>
                                         </tr>
-                                    @empty
-                                        <tr><td colspan="6" class="text-center text-muted py-2">{{ _lang('No collector call items found') }}</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @forelse(($collector_call_list ?? collect()) as $item)
+                                            <tr>
+                                                <td class="pl-3">{{ $item->loan_id }}</td>
+                                                <td>{{ $item->borrower_name }}</td>
+                                                <td>{{ trim($item->contact_phone) != '' ? $item->contact_phone : _lang('N/A') }}</td>
+                                                <td><span class="workspace-status-chip {{ $item->queue_theme }}">{{ $item->queue_label }}</span></td>
+                                                <td>
+                                                    @if($item->last_outcome_label)
+                                                        <span class="workspace-status-chip {{ $item->last_outcome_theme }}">{{ $item->last_outcome_label }}</span>
+                                                    @else
+                                                        <span class="text-muted small">{{ _lang('No log yet') }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="pr-3">{{ $item->next_action }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="6" class="text-center text-muted py-2">{{ _lang('No collector call items found') }}</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-5">
                     <div class="dashboard-detail-section mb-4">
                         <div class="workspace-section-title">{{ _lang('Upcoming Reminder Queue') }}</div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered dashboard-table-compact mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="pl-3">{{ _lang('Loan ID') }}</th>
-                                        <th>{{ _lang('Borrower') }}</th>
-                                        <th>{{ _lang('Due In') }}</th>
-                                        <th>{{ _lang('Last Follow-up') }}</th>
-                                        <th class="pr-3">{{ _lang('Reminder') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse(($upcoming_reminder_queue ?? collect()) as $item)
+                        <div class="dashboard-proof-datatable-card">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped dashboard-table-compact mb-0">
+                                    <thead>
                                         <tr>
-                                            <td class="pl-3">{{ $item->loan_id }}</td>
-                                            <td>{{ $item->borrower_name }}</td>
-                                            <td>{{ $item->days_until }} {{ _lang('days') }}</td>
-                                            <td>
-                                                @if($item->last_outcome_label)
-                                                    <span class="workspace-status-chip {{ $item->last_outcome_theme }}">{{ $item->last_outcome_label }}</span>
-                                                @else
-                                                    <span class="text-muted small">{{ _lang('No log yet') }}</span>
-                                                @endif
-                                            </td>
-                                            <td class="pr-3"><span class="workspace-status-chip {{ $item->reminder_theme }}">{{ $item->reminder_label }}</span></td>
+                                            <th class="pl-3">{{ _lang('Loan ID') }}</th>
+                                            <th>{{ _lang('Borrower') }}</th>
+                                            <th>{{ _lang('Due In') }}</th>
+                                            <th>{{ _lang('Last Follow-up') }}</th>
+                                            <th class="pr-3">{{ _lang('Reminder') }}</th>
                                         </tr>
-                                    @empty
-                                        <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No reminder items found') }}</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @forelse(($upcoming_reminder_queue ?? collect()) as $item)
+                                            <tr>
+                                                <td class="pl-3">{{ $item->loan_id }}</td>
+                                                <td>{{ $item->borrower_name }}</td>
+                                                <td>{{ $item->days_until }} {{ _lang('days') }}</td>
+                                                <td>
+                                                    @if($item->last_outcome_label)
+                                                        <span class="workspace-status-chip {{ $item->last_outcome_theme }}">{{ $item->last_outcome_label }}</span>
+                                                    @else
+                                                        <span class="text-muted small">{{ _lang('No log yet') }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="pr-3"><span class="workspace-status-chip {{ $item->reminder_theme }}">{{ $item->reminder_label }}</span></td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No reminder items found') }}</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="dashboard-detail-section">
                         <div class="workspace-section-title">{{ _lang('Promise Follow-up Queue') }}</div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Promise_Follow_Up_Queue">
-                                <thead>
-                                    <tr>
-                                        <th class="pl-3">{{ _lang('Loan ID') }}</th>
-                                        <th>{{ _lang('Borrower') }}</th>
-                                        <th>{{ _lang('Promise Date') }}</th>
-                                        <th>{{ _lang('Status') }}</th>
-                                        <th class="pr-3">{{ _lang('Action') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse(($promise_follow_up_queue ?? collect()) as $item)
+                        <div class="dashboard-proof-datatable-card">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Promise_Follow_Up_Queue">
+                                    <thead>
                                         <tr>
-                                            <td class="pl-3">{{ $item->loan_id }}</td>
-                                            <td>{{ $item->borrower_name }}</td>
-                                            <td>{{ $item->promised_payment_date }}</td>
-                                            <td><span class="workspace-status-chip {{ $item->promise_status_theme }}">{{ $item->promise_status_label }}</span></td>
-                                            <td class="pr-3">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
+                                            <th class="pl-3">{{ _lang('Loan ID') }}</th>
+                                            <th>{{ _lang('Borrower') }}</th>
+                                            <th>{{ _lang('Promise Date') }}</th>
+                                            <th>{{ _lang('Status') }}</th>
+                                            <th class="pr-3" data-no-export="1">{{ _lang('Action') }}</th>
                                         </tr>
-                                    @empty
-                                        <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No promise follow-up items found') }}</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @forelse(($promise_follow_up_queue ?? collect()) as $item)
+                                            <tr>
+                                                <td class="pl-3">{{ $item->loan_id }}</td>
+                                                <td>{{ $item->borrower_name }}</td>
+                                                <td>{{ $item->promised_payment_date }}</td>
+                                                <td><span class="workspace-status-chip {{ $item->promise_status_theme }}">{{ $item->promise_status_label }}</span></td>
+                                                <td class="pr-3">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Log Follow-up'), 'url' => route('loan_collection_follow_ups.create', $item->repayment_id), 'icon' => 'ti-write', 'class' => 'ajax-modal', 'data_title' => _lang('Log Collection Follow-up')]]])</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No promise follow-up items found') }}</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -702,89 +708,95 @@
             <div class="row">
                 <div class="col-lg-4 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Branch Follow-up Performance') }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Branch_Follow_Up_Performance">
-                            <thead>
-                                <tr>
-                                    <th class="pl-3">{{ _lang('Branch') }}</th>
-                                    <th>{{ _lang('Open Queue') }}</th>
-                                    <th>{{ _lang('Touched') }}</th>
-                                    <th>{{ _lang('Resolved') }}</th>
-                                    <th class="pr-3">{{ _lang('Completion') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse(($branch_follow_up_performance ?? collect()) as $branch)
+                    <div class="dashboard-proof-datatable-card">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Branch_Follow_Up_Performance">
+                                <thead>
                                     <tr>
-                                        <td class="pl-3">{{ $branch->name }}</td>
-                                        <td>{{ $branch->open_queue }}</td>
-                                        <td>{{ $branch->touched_today }}</td>
-                                        <td>{{ $branch->resolved_in_range }}</td>
-                                        <td class="pr-3"><span class="workspace-status-chip {{ $branch->completion_rate >= 70 ? 'active' : ($branch->completion_rate >= 40 ? 'review' : 'critical') }}">{{ $branch->completion_rate }}%</span></td>
+                                        <th class="pl-3">{{ _lang('Branch') }}</th>
+                                        <th>{{ _lang('Open Queue') }}</th>
+                                        <th>{{ _lang('Touched') }}</th>
+                                        <th>{{ _lang('Resolved') }}</th>
+                                        <th class="pr-3">{{ _lang('Completion') }}</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No branch follow-up data available') }}</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse(($branch_follow_up_performance ?? collect()) as $branch)
+                                        <tr>
+                                            <td class="pl-3">{{ $branch->name }}</td>
+                                            <td>{{ $branch->open_queue }}</td>
+                                            <td>{{ $branch->touched_today }}</td>
+                                            <td>{{ $branch->resolved_in_range }}</td>
+                                            <td class="pr-3"><span class="workspace-status-chip {{ $branch->completion_rate >= 70 ? 'active' : ($branch->completion_rate >= 40 ? 'review' : 'critical') }}">{{ $branch->completion_rate }}%</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="5" class="text-center text-muted py-2">{{ _lang('No branch follow-up data available') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Collector Follow-up Performance') }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Collector_Follow_Up_Performance">
-                            <thead>
-                                <tr>
-                                    <th class="pl-3">{{ _lang('User') }}</th>
-                                    <th>{{ _lang('Logs') }}</th>
-                                    <th>{{ _lang('Cases') }}</th>
-                                    <th>{{ _lang('Promises') }}</th>
-                                    <th>{{ _lang('Resolved') }}</th>
-                                    <th class="pr-3">{{ _lang('Escalated') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse(($collector_follow_up_performance ?? collect()) as $collector)
+                    <div class="dashboard-proof-datatable-card">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Collector_Follow_Up_Performance">
+                                <thead>
                                     <tr>
-                                        <td class="pl-3">{{ $collector->name }}</td>
-                                        <td>{{ $collector->logs_count }}</td>
-                                        <td>{{ $collector->cases_touched }}</td>
-                                        <td>{{ $collector->promised_count }}</td>
-                                        <td>{{ $collector->resolved_count }}</td>
-                                        <td class="pr-3">{{ $collector->escalated_count }}</td>
+                                        <th class="pl-3">{{ _lang('User') }}</th>
+                                        <th>{{ _lang('Logs') }}</th>
+                                        <th>{{ _lang('Cases') }}</th>
+                                        <th>{{ _lang('Promises') }}</th>
+                                        <th>{{ _lang('Resolved') }}</th>
+                                        <th class="pr-3">{{ _lang('Escalated') }}</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="6" class="text-center text-muted py-2">{{ _lang('No collector follow-up data available') }}</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse(($collector_follow_up_performance ?? collect()) as $collector)
+                                        <tr>
+                                            <td class="pl-3">{{ $collector->name }}</td>
+                                            <td>{{ $collector->logs_count }}</td>
+                                            <td>{{ $collector->cases_touched }}</td>
+                                            <td>{{ $collector->promised_count }}</td>
+                                            <td>{{ $collector->resolved_count }}</td>
+                                            <td class="pr-3">{{ $collector->escalated_count }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="6" class="text-center text-muted py-2">{{ _lang('No collector follow-up data available') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="workspace-section-title">{{ _lang('Recent Resolutions') }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Recent_Resolutions">
-                            <thead>
-                                <tr>
-                                    <th class="pl-3">{{ _lang('Loan ID') }}</th>
-                                    <th>{{ _lang('Borrower') }}</th>
-                                    <th>{{ _lang('Paid On') }}</th>
-                                    <th class="pr-3">{{ _lang('Resolution') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($recentResolvedCases as $item)
+                    <div class="dashboard-proof-datatable-card">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact mb-0" data-export-filename="Dashboard_Recent_Resolutions">
+                                <thead>
                                     <tr>
-                                        <td class="pl-3">{{ $item->loan_id }}</td>
-                                        <td>{{ $item->borrower_name }}</td>
-                                        <td>{{ $item->payment_date }}</td>
-                                        <td class="pr-3"><span class="workspace-status-chip {{ $item->resolution_theme }}">{{ $item->resolution_label }}</span></td>
+                                        <th class="pl-3">{{ _lang('Loan ID') }}</th>
+                                        <th>{{ _lang('Borrower') }}</th>
+                                        <th>{{ _lang('Paid On') }}</th>
+                                        <th class="pr-3">{{ _lang('Resolution') }}</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="4" class="text-center text-muted py-2">{{ _lang('No resolved follow-up cases found') }}</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse($recentResolvedCases as $item)
+                                        <tr>
+                                            <td class="pl-3">{{ $item->loan_id }}</td>
+                                            <td>{{ $item->borrower_name }}</td>
+                                            <td>{{ $item->payment_date }}</td>
+                                            <td class="pr-3"><span class="workspace-status-chip {{ $item->resolution_theme }}">{{ $item->resolution_label }}</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="text-center text-muted py-2">{{ _lang('No resolved follow-up cases found') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -794,64 +806,68 @@
             <div class="row">
                 <div class="col-md-6 mb-4 mb-md-0">
                     <div class="workspace-section-title">{{ _lang('Active Loan Balances') }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-export dashboard-table-compact">
-                            <thead>
-                                <tr>
-                                    <th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-3">{{ _lang('Currency') }}</th>
-                                    <th class="text-nowrap" data-sum="1">{{ _lang('Applied Amount') }}</th>
-                                    <th class="text-nowrap" data-sum="1">{{ _lang('Paid Amount') }}</th>
-                                    <th class="text-nowrap" data-sum="1">{{ _lang('Due Amount') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(count($loan_balances) == 0)
-                                    <tr><td colspan="4"><p class="text-center text-muted mb-0 py-2">{{ _lang('No Data Available') }}</p></td></tr>
-                                @endif
-                                @foreach($loan_balances as $loan_balance)
+                    <div class="dashboard-proof-datatable-card">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact" data-export-filename="Dashboard_Active_Loan_Balances">
+                                <thead>
                                     <tr>
-                                        <td class="pl-3">{{ $loan_balance->currency->name }}</td>
-                                        <td>{{ decimalPlace($loan_balance->total_amount, currency($loan_balance->currency->name)) }}</td>
-                                        <td>{{ decimalPlace($loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
-                                        <td>{{ decimalPlace($loan_balance->total_amount - $loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
+                                        <th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-3">{{ _lang('Currency') }}</th>
+                                        <th class="text-nowrap" data-sum="1">{{ _lang('Applied Amount') }}</th>
+                                        <th class="text-nowrap" data-sum="1">{{ _lang('Paid Amount') }}</th>
+                                        <th class="text-nowrap" data-sum="1">{{ _lang('Due Amount') }}</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td></tr></tfoot>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @if(count($loan_balances) == 0)
+                                        <tr><td colspan="4"><p class="text-center text-muted mb-0 py-2">{{ _lang('No Data Available') }}</p></td></tr>
+                                    @endif
+                                    @foreach($loan_balances as $loan_balance)
+                                        <tr>
+                                            <td class="pl-3">{{ $loan_balance->currency->name }}</td>
+                                            <td>{{ decimalPlace($loan_balance->total_amount, currency($loan_balance->currency->name)) }}</td>
+                                            <td>{{ decimalPlace($loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
+                                            <td>{{ decimalPlace($loan_balance->total_amount - $loan_balance->total_paid, currency($loan_balance->currency->name)) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td></tr></tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="workspace-section-title">{{ _lang('Due Loan Payments') }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-export dashboard-table-compact">
-                            <thead>
-                                <tr>
-                                    <th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-3">{{ _lang('Loan ID') }}</th>
-                                    <th class="text-nowrap">{{ _lang('Member No') }}</th>
-                                    <th class="text-nowrap">{{ _lang('Member') }}</th>
-                                    <th class="text-nowrap">{{ _lang('Last Payment Date') }}</th>
-                                    <th class="text-nowrap">{{ _lang('Due Repayments') }}</th>
-                                    <th class="text-nowrap text-right pr-3" data-sum="1">{{ _lang('Total Due') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(count($due_repayments) == 0)
-                                    <tr><td colspan="6"><p class="text-center text-muted mb-0 py-2">{{ _lang('No Data Available') }}</p></td></tr>
-                                @endif
-                                @foreach($due_repayments as $repayment)
+                    <div class="dashboard-proof-datatable-card">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact" data-export-filename="Dashboard_Due_Loan_Payments">
+                                <thead>
                                     <tr>
-                                        <td class="pl-3">{{ $repayment->loan->loan_id }}</td>
-                                        <td>{{ $repayment->loan->borrower->member_no }}</td>
-                                        <td>{{ $repayment->loan->borrower->name }}</td>
-                                        <td class="text-nowrap">{{ $repayment->repayment_date }}</td>
-                                        <td class="text-nowrap">{{ $repayment->total_due_repayment }}</td>
-                                        <td class="text-nowrap text-right pr-3">{{ decimalPlace($repayment->total_due, currency($repayment->loan->currency->name)) }}</td>
+                                        <th data-total-label="{{ _lang('Total') }}" class="text-nowrap pl-3">{{ _lang('Loan ID') }}</th>
+                                        <th class="text-nowrap">{{ _lang('Member No') }}</th>
+                                        <th class="text-nowrap">{{ _lang('Member') }}</th>
+                                        <th class="text-nowrap">{{ _lang('Last Payment Date') }}</th>
+                                        <th class="text-nowrap">{{ _lang('Due Repayments') }}</th>
+                                        <th class="text-nowrap text-right pr-3" data-sum="1">{{ _lang('Total Due') }}</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td class="text-right"></td></tr></tfoot>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @if(count($due_repayments) == 0)
+                                        <tr><td colspan="6"><p class="text-center text-muted mb-0 py-2">{{ _lang('No Data Available') }}</p></td></tr>
+                                    @endif
+                                    @foreach($due_repayments as $repayment)
+                                        <tr>
+                                            <td class="pl-3">{{ $repayment->loan->loan_id }}</td>
+                                            <td>{{ $repayment->loan->borrower->member_no }}</td>
+                                            <td>{{ $repayment->loan->borrower->name }}</td>
+                                            <td class="text-nowrap">{{ $repayment->repayment_date }}</td>
+                                            <td class="text-nowrap">{{ $repayment->total_due_repayment }}</td>
+                                            <td class="text-nowrap text-right pr-3">{{ decimalPlace($repayment->total_due, currency($repayment->loan->currency->name)) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td class="text-right"></td></tr></tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
