@@ -163,6 +163,7 @@ class AdminWalletController extends Controller
 
         // Loans tab: per member, per month = sum of Loan_Repayment amount
         $loansMonthly = $this->getLoansMonthlyTotals($startStr, $endStr);
+        $loanWalletSummaries = $this->getLoanWalletSummaries();
 
         // Per account type: per member, per month = sum of credit (dr_cr='cr') for that savings_product_id
         $accountTypeMonthly = [];
@@ -184,6 +185,7 @@ class AdminWalletController extends Controller
             'loansMonthly',
             'accountTypeMonthly',
             'transactionsMonthly',
+            'loanWalletSummaries',
             'start',
             'end'
         ));
@@ -1250,6 +1252,57 @@ class AdminWalletController extends Controller
             }
             $out[$r->member_id][$key] = (float) $r->total;
         }
+        return $out;
+    }
+
+    /**
+     * Loan summary fields displayed before repayment months on the wallet Loans tab.
+     */
+    protected function getLoanWalletSummaries(): array
+    {
+        $loans = Loan::with('loan_product')
+            ->where('status', '!=', 3)
+            ->orderBy('borrower_id')
+            ->orderByDesc('id')
+            ->get(['id', 'borrower_id', 'loan_product_id', 'applied_amount', 'total_payable', 'total_paid']);
+
+        $out = [];
+
+        foreach ($loans as $loan) {
+            $memberId = (int) $loan->borrower_id;
+            if ($memberId <= 0) {
+                continue;
+            }
+
+            if (!isset($out[$memberId])) {
+                $out[$memberId] = [
+                    'loan_types' => [],
+                    'total_loan_amount' => 0,
+                    'interest' => 0,
+                    'balance' => 0,
+                ];
+            }
+
+            $loanType = trim((string) optional($loan->loan_product)->name);
+            if ($loanType !== '' && !in_array($loanType, $out[$memberId]['loan_types'], true)) {
+                $out[$memberId]['loan_types'][] = $loanType;
+            }
+
+            $appliedAmount = (float) ($loan->applied_amount ?? 0);
+            $totalPayable = (float) ($loan->total_payable ?? 0);
+            $totalPaid = (float) ($loan->total_paid ?? 0);
+
+            $out[$memberId]['total_loan_amount'] += $appliedAmount;
+            $out[$memberId]['interest'] += max(0, $totalPayable - $appliedAmount);
+            $out[$memberId]['balance'] += max(0, $appliedAmount - $totalPaid);
+        }
+
+        foreach ($out as $memberId => $summary) {
+            $out[$memberId]['loan_type'] = !empty($summary['loan_types'])
+                ? implode(', ', $summary['loan_types'])
+                : _lang('N/A');
+        }
+
         return $out;
     }
 

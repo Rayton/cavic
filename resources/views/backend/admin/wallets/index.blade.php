@@ -182,7 +182,7 @@
 	position: relative;
 }
 .wallets-wide-table {
-	min-width: 1440px;
+	min-width: 1880px;
 }
 .wallets-compact-table {
 	min-width: 760px;
@@ -279,6 +279,10 @@
 									<tr>
 										<th>{{ _lang('ID') }}</th>
 										<th>{{ _lang('Name') }}</th>
+										<th>{{ _lang('Loan Type') }}</th>
+										<th class="text-right">{{ _lang('Total Loan Amount') }}</th>
+										<th class="text-right">{{ _lang('Interest') }}</th>
+										<th class="text-right">{{ _lang('Balance') }}</th>
 										@foreach($months as $m)
 										<th class="text-right">{{ $m['label'] }}</th>
 										@endforeach
@@ -291,10 +295,20 @@
 										$rowTotal = 0;
 										$monthKeys = array_map(function($m) { return $m['year'] . '-' . str_pad($m['month'], 2, '0', STR_PAD_LEFT); }, $months);
 										$memberData = $loansMonthly[$member->id] ?? [];
+										$loanSummary = $loanWalletSummaries[$member->id] ?? [
+											'loan_type' => _lang('N/A'),
+											'total_loan_amount' => 0,
+											'interest' => 0,
+											'balance' => 0,
+										];
 									@endphp
 									<tr>
 										<td>{{ $member->id }}</td>
 										<td>{{ $member->first_name }} {{ $member->last_name }}</td>
+										<td>{{ $loanSummary['loan_type'] }}</td>
+										<td class="text-right">{{ number_format($loanSummary['total_loan_amount'], 0) }}</td>
+										<td class="text-right">{{ number_format($loanSummary['interest'], 0) }}</td>
+										<td class="text-right">{{ number_format($loanSummary['balance'], 0) }}</td>
 										@foreach($monthKeys as $key)
 											@php $val = $memberData[$key] ?? 0; $rowTotal += $val; @endphp
 											<td class="text-right">{{ number_format($val, 0) }}</td>
