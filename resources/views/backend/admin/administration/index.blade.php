@@ -110,7 +110,7 @@
                     <tbody>
                         <tr><th>{{ _lang('Company Name') }}</th><td>{{ $settingsSummary['company_name'] ?? _lang('Not Set') }}</td></tr>
                         <tr><th>{{ _lang('Timezone') }}</th><td>{{ $settingsSummary['timezone'] ?? 'UTC' }}</td></tr>
-                        <tr><th>{{ _lang('Date Format') }}</th><td>{{ $settingsSummary['date_format'] ?? 'Y-m-d' }}</td></tr>
+                        <tr><th>{{ _lang('Date Format') }}</th><td>{{ $settingsSummary['date_format'] ?? get_date_format() }}</td></tr>
                         <tr><th>{{ _lang('Base Currency') }}</th><td>{{ $settingsSummary['currency'] ?? 'USD' }}</td></tr>
                         <tr><th>{{ _lang('Email Verification') }}</th><td>{{ $settingsSummary['email_verification'] ?? _lang('Disabled') }}</td></tr>
                     </tbody>

@@ -547,7 +547,7 @@ Date range filters should use the shared CAVIC workspace control rather than raw
 
 Required behavior:
 - visible label should describe the field, for example `Date Range`, not repeat the selected date
-- visible input should use readable display dates such as `Apr 26, 2026` or `Apr 1, 2026 - Apr 26, 2026`
+- visible input should use the system date format `d/m/YYYY`, for example `26/04/2026` or `01/04/2026 - 26/04/2026`
 - submitted values should remain hidden ISO fields, for example `from_date=2026-04-01` and `to_date=2026-04-26`
 - single-day ranges should display as one date instead of duplicating the same date twice
 - picker should initialize after page assets are loaded so workspace pages attach reliably

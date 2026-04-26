@@ -40,7 +40,7 @@ class CollectionFollowUpInsightsService
             'end' => $rangeEnd,
             'from_date' => $rangeStart->toDateString(),
             'to_date' => $rangeEnd->toDateString(),
-            'display_value' => $rangeStart->format('Y-m-d') . ' - ' . $rangeEnd->format('Y-m-d'),
+            'display_value' => $rangeStart->format(get_date_format()) . ' - ' . $rangeEnd->format(get_date_format()),
             'label' => $rangeStart->isSameDay($rangeEnd)
                 ? $rangeStart->format(get_date_format())
                 : $rangeStart->format(get_date_format()) . ' - ' . $rangeEnd->format(get_date_format()),

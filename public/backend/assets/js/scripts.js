@@ -1819,7 +1819,7 @@ function init_datepicker() {
 	var date_format = ["Y-m-d", "d-m-Y", "d/m/Y", "m-d-Y", "m.d.Y", "m/d/Y", "d.m.Y", "d/M/Y", "M/d/Y", "d M, Y"];
 	var picker_date_format = ["YYYY-MM-DD", "DD-MM-YYYY", "DD/MM/YYYY", "MM-DD-YYYY", "MM.DD.YYYY", "MM/DD/YYYY", "DD.MM.YYYY", "DD/MMM/YYYY", "MMM/DD/YYYY", "DD MMM, YYYY"];
 
-	var fake_format = picker_date_format[date_format.indexOf(_date_format)];
+	var fake_format = picker_date_format[date_format.indexOf(_date_format)] || 'DD/MM/YYYY';
 
 	//Set Default date
 	if ($(".datepicker").length) {
@@ -1839,12 +1839,17 @@ function init_datepicker() {
 				$(this).after('<span class="fake_datepicker"></span>');
 				$(this).next('.fake_datepicker').css('margin-top', "-45.2px");
 			}
-			$(this).next('.fake_datepicker').html(moment($(this).val()).format(fake_format));
+			var dateValue = $(this).val();
+			var displayDate = moment(dateValue, ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'DD/MM/YYYY'], true);
+			if (!displayDate.isValid()) {
+				displayDate = moment(dateValue);
+			}
+			$(this).next('.fake_datepicker').html(displayDate.isValid() ? displayDate.format(fake_format) : '');
 		})
 	}
 
 	$('.datepicker').on('apply.daterangepicker', function (ev, picker) {
-		$(this).next('.fake_datepicker').html(moment($(this).val()).format(fake_format));
+		$(this).next('.fake_datepicker').html(picker.startDate.format(fake_format));
 	});
 
 	$(document).on('click', '.fake_datepicker', function () {

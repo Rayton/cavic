@@ -230,7 +230,7 @@
                                 <td class="text-center">
                                     @if($repayment['status'] == 0 && $loan->next_payment->id == $repayment->id)
                                         <a href="{{ route('loans.loan_payment', $repayment->loan_id) }}" class="btn btn-primary btn-xs">{{ _lang('Pay Now') }}</a>
-                                    @elseif($repayment['status'] == 0 && date('Y-m-d') > $repayment->repayment_date)
+                                    @elseif($repayment['status'] == 0 && date('Y-m-d') > $repayment->getRawOriginal('repayment_date'))
                                         <span class="btn btn-secondary btn-xs disabled">{{ _lang('No Action') }}</span>
                                     @else
                                         <span class="btn btn-success btn-xs px-4 disabled">{{ _lang('Paid') }}</span>

@@ -95,19 +95,30 @@
             return;
         }
 
+        var startDate = moment($('#{{ $filterId }}-from').val(), 'YYYY-MM-DD', true);
+        var endDate = moment($('#{{ $filterId }}-to').val(), 'YYYY-MM-DD', true);
+
+        if (!startDate.isValid()) {
+            startDate = moment();
+        }
+
+        if (!endDate.isValid()) {
+            endDate = startDate.clone();
+        }
+
         input.daterangepicker({
             autoUpdateInput: true,
             parentEl: 'body',
             alwaysShowCalendars: true,
             locale: {
-                format: 'MMM D, YYYY',
+                format: 'DD/MM/YYYY',
                 separator: ' - ',
                 applyLabel: '{{ _lang('Apply') }}',
                 cancelLabel: '{{ _lang('Cancel') }}',
                 customRangeLabel: '{{ _lang('Custom Range') }}'
             },
-            startDate: $('#{{ $filterId }}-from').val(),
-            endDate: $('#{{ $filterId }}-to').val(),
+            startDate: startDate,
+            endDate: endDate,
             ranges: {
                 '{{ _lang('Today') }}': [moment(), moment()],
                 '{{ _lang('Yesterday') }}': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
@@ -120,10 +131,10 @@
 
         function setDisplay(startDate, endDate) {
             var sameDay = startDate.isSame(endDate, 'day');
-            input.val(sameDay ? startDate.format('MMM D, YYYY') : startDate.format('MMM D, YYYY') + ' - ' + endDate.format('MMM D, YYYY'));
+            input.val(sameDay ? startDate.format('DD/MM/YYYY') : startDate.format('DD/MM/YYYY') + ' - ' + endDate.format('DD/MM/YYYY'));
         }
 
-        setDisplay(moment($('#{{ $filterId }}-from').val(), 'YYYY-MM-DD'), moment($('#{{ $filterId }}-to').val(), 'YYYY-MM-DD'));
+        setDisplay(startDate, endDate);
 
         input.on('show.daterangepicker', function (ev, picker) {
             picker.container.addClass('cavic-date-range-picker');

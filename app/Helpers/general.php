@@ -1278,19 +1278,7 @@ if (! function_exists('has_limit')) {
 
 if (! function_exists('get_date_format')) {
     function get_date_format() {
-        if (isset(request()->tenant->id)) {
-            $date_format = get_tenant_option('date_format', get_option('date_format', 'Y-m-d'));
-            return $date_format;
-        }
-
-        $date_format = Cache::get('date_format');
-
-        if ($date_format == '') {
-            $date_format = get_option('date_format', 'Y-m-d');
-            \Cache::put('date_format', $date_format);
-        }
-
-        return $date_format;
+        return 'd/m/Y';
     }
 }
 

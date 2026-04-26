@@ -132,17 +132,8 @@
 							<div class="form-group row">
 								<label class="col-xl-3 col-form-label">{{ _lang('Date Format') }}</label>
 								<div class="col-xl-9">
-									<select class="form-control auto-select" name="date_format" data-selected="{{ get_setting($settings, 'date_format', 'Y-m-d') }}" required>
-										<option value="Y-m-d">{{ date('Y-m-d') }}</option>
-										<option value="d-m-Y">{{ date('d-m-Y') }}</option>
+									<select class="form-control auto-select" name="date_format" data-selected="{{ get_date_format() }}" required>
 										<option value="d/m/Y">{{ date('d/m/Y') }}</option>
-										<option value="m-d-Y">{{ date('m-d-Y') }}</option>
-										<option value="m.d.Y">{{ date('m.d.Y') }}</option>
-										<option value="m/d/Y">{{ date('m/d/Y') }}</option>
-										<option value="d.m.Y">{{ date('d.m.Y') }}</option>
-										<option value="d/M/Y">{{ date('d/M/Y') }}</option>
-										<option value="d/M/Y">{{ date('M/d/Y') }}</option>
-										<option value="d M, Y">{{ date('d M, Y') }}</option>
 									</select>
 								</div>
 							</div>
@@ -679,4 +670,3 @@
 })(jQuery);
 </script>
 @endsection
-
