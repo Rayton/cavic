@@ -542,6 +542,22 @@ The image uses compact filter dropdowns like “Monthly”.
 Use a reusable filter bar partial:
 - `resources/views/backend/admin/partials/filter-bar.blade.php`
 
+### Date range picker standard
+Date range filters should use the shared CAVIC workspace control rather than raw browser inputs.
+
+Required behavior:
+- visible label should describe the field, for example `Date Range`, not repeat the selected date
+- visible input should use readable display dates such as `Apr 26, 2026` or `Apr 1, 2026 - Apr 26, 2026`
+- submitted values should remain hidden ISO fields, for example `from_date=2026-04-01` and `to_date=2026-04-26`
+- single-day ranges should display as one date instead of duplicating the same date twice
+- picker should initialize after page assets are loaded so workspace pages attach reliably
+
+Visual rules:
+- input uses a calendar icon, rounded 14px control, CAVIC teal focus ring, and white surface
+- Apply and Reset actions should match workspace button styling and align with the filter controls
+- popup calendar uses rounded 20px panel, soft border, subtle shadow, teal selected dates, pale teal in-range dates, and compact range presets
+- popup must render above cards/tables and remain usable on mobile with viewport-aware width
+
 ---
 
 ## 6.7 Empty states

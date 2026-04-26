@@ -36,11 +36,15 @@
                     @php
                         $fromDate = $dateRange['from_date'] ?? request('from_date', now()->toDateString());
                         $toDate = $dateRange['to_date'] ?? request('to_date', $fromDate);
-                        $displayValue = $dateRange['display_value'] ?? ($fromDate . ' - ' . $toDate);
+                        $fieldLabel = $dateRange['field_label'] ?? _lang('Date Range');
+                        $displayValue = $dateRange['label'] ?? ($fromDate . ' - ' . $toDate);
                     @endphp
-                    <div class="form-group mb-2 mb-lg-0 mr-lg-2">
-                        <label class="small text-muted d-block mb-1">{{ $dateRange['label'] ?? _lang('Date Range') }}</label>
-                        <input type="text" id="{{ $filterId }}" class="form-control form-control-sm" value="{{ $displayValue }}" autocomplete="off" style="min-width: 240px;">
+                    <div class="form-group workspace-date-range-group mb-2 mb-lg-0 mr-lg-2">
+                        <label class="workspace-filter-label d-block mb-1" for="{{ $filterId }}">{{ $fieldLabel }}</label>
+                        <div class="workspace-date-range-control">
+                            <i class="far fa-calendar-alt"></i>
+                            <input type="text" id="{{ $filterId }}" class="form-control form-control-sm workspace-date-range-input" value="{{ $displayValue }}" autocomplete="off" readonly>
+                        </div>
                         <input type="hidden" name="from_date" id="{{ $filterId }}-from" value="{{ $fromDate }}">
                         <input type="hidden" name="to_date" id="{{ $filterId }}-to" value="{{ $toDate }}">
                     </div>
@@ -62,8 +66,8 @@
                     @endif
                 @endforeach
 
-                <button type="submit" class="btn btn-outline-primary btn-sm mr-lg-2 mb-2 mb-lg-0">{{ _lang('Apply') }}</button>
-                <a href="{{ $resetUrl ?? url()->current() }}" class="btn btn-light btn-sm mr-lg-2 mb-2 mb-lg-0">{{ _lang('Reset') }}</a>
+                <button type="submit" class="btn btn-outline-primary btn-sm workspace-filter-btn mr-lg-2 mb-2 mb-lg-0"><i class="ti-check mr-1"></i>{{ _lang('Apply') }}</button>
+                <a href="{{ $resetUrl ?? url()->current() }}" class="btn btn-light btn-sm workspace-filter-btn workspace-filter-reset mr-lg-2 mb-2 mb-lg-0"><i class="ti-reload mr-1"></i>{{ _lang('Reset') }}</a>
 
                 @foreach($buttons as $button)
                     <a href="{{ $button['url'] ?? '#' }}" class="btn {{ $button['class'] ?? 'btn-outline-primary btn-sm' }} mr-lg-2 mb-2 mb-lg-0">
@@ -80,7 +84,12 @@
 
 @if($dateRange)
 <script>
-    (function ($) {
+    window.addEventListener('load', function () {
+        var $ = window.jQuery;
+        if (!$) {
+            return;
+        }
+
         var input = $('#{{ $filterId }}');
         if (!input.length || typeof input.daterangepicker !== 'function') {
             return;
@@ -88,8 +97,14 @@
 
         input.daterangepicker({
             autoUpdateInput: true,
+            parentEl: 'body',
+            alwaysShowCalendars: true,
             locale: {
-                format: 'YYYY-MM-DD'
+                format: 'MMM D, YYYY',
+                separator: ' - ',
+                applyLabel: '{{ _lang('Apply') }}',
+                cancelLabel: '{{ _lang('Cancel') }}',
+                customRangeLabel: '{{ _lang('Custom Range') }}'
             },
             startDate: $('#{{ $filterId }}-from').val(),
             endDate: $('#{{ $filterId }}-to').val(),
@@ -103,11 +118,22 @@
             }
         });
 
+        function setDisplay(startDate, endDate) {
+            var sameDay = startDate.isSame(endDate, 'day');
+            input.val(sameDay ? startDate.format('MMM D, YYYY') : startDate.format('MMM D, YYYY') + ' - ' + endDate.format('MMM D, YYYY'));
+        }
+
+        setDisplay(moment($('#{{ $filterId }}-from').val(), 'YYYY-MM-DD'), moment($('#{{ $filterId }}-to').val(), 'YYYY-MM-DD'));
+
+        input.on('show.daterangepicker', function (ev, picker) {
+            picker.container.addClass('cavic-date-range-picker');
+        });
+
         input.on('apply.daterangepicker', function (ev, picker) {
             $('#{{ $filterId }}-from').val(picker.startDate.format('YYYY-MM-DD'));
             $('#{{ $filterId }}-to').val(picker.endDate.format('YYYY-MM-DD'));
-            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+            setDisplay(picker.startDate, picker.endDate);
         });
-    })(jQuery);
+    });
 </script>
 @endif
