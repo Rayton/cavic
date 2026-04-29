@@ -25,7 +25,8 @@
     .member-detail-modal .member-modal-avatar { width: 48px; height: 48px; border-radius: 14px; object-fit: cover; border: 1px solid var(--cavic-border, #e7e9e4); }
     .member-detail-modal .member-modal-title { font-size: 1rem; font-weight: 800; margin: 0; }
     .member-detail-modal .member-modal-subtitle { color: var(--cavic-text-soft, #6f787f); font-size: .78rem; }
-    .member-detail-modal .member-modal-tabs { border-bottom: 1px solid var(--cavic-border, #e7e9e4); gap: .25rem; margin-bottom: .85rem; overflow-x: auto; flex-wrap: nowrap; }
+    .member-detail-modal .member-modal-tabs { border-bottom: 1px solid var(--cavic-border, #e7e9e4); gap: .25rem; margin-bottom: .85rem; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; scrollbar-width: none; -ms-overflow-style: none; }
+    .member-detail-modal .member-modal-tabs::-webkit-scrollbar { display: none; width: 0; height: 0; }
     .member-detail-modal .member-modal-tabs .nav-link { border: 0; border-bottom: 2px solid transparent; color: var(--cavic-text-soft, #6f787f); font-size: .78rem; font-weight: 800; padding: .45rem .65rem; white-space: nowrap; }
     .member-detail-modal .member-modal-tabs .nav-link.active { color: var(--cavic-primary-dark, #32555a); border-bottom-color: var(--cavic-primary, #3f686d); background: transparent; }
     .member-detail-modal .member-compact-card { border: 1px solid var(--cavic-border, #e7e9e4); border-radius: 12px; background: #fff; overflow: hidden; }

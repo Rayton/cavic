@@ -26,11 +26,15 @@
 @include('backend.admin.partials.workspace-styles')
 <style>
     .workspace-mini-table td, .workspace-mini-table th { vertical-align: middle; }
-    .member-workspace-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-    .member-workspace-link-card { display: flex; align-items: center; justify-content: space-between; min-height: 86px; padding: 1rem 1.1rem; border: 1px solid var(--cavic-border, #e7e9e4) !important; border-radius: 14px !important; background: var(--cavic-surface, #fff); color: var(--cavic-text, #2e3338); font-weight: 700; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
-    .member-workspace-link-card:hover { border-color: rgba(63, 104, 109, .35) !important; background: var(--cavic-primary-soft, #e7f1f0); color: var(--cavic-primary-dark, #32555a); transform: translateY(-1px); }
-    .member-workspace-link-card .link-meta { display: block; margin-top: .2rem; color: var(--cavic-text-soft, #6f787f); font-size: .78rem; font-weight: 500; }
-    .member-workspace-link-card i { color: var(--cavic-primary, #3f686d); }
+    .member-workspace-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+    .member-workspace-link-card { display: grid; grid-template-columns: 42px minmax(0, 1fr) 26px; align-items: center; gap: .85rem; min-height: 82px; padding: .95rem 1rem; border: 1px solid var(--cavic-border, #e7e9e4) !important; border-radius: 16px !important; background: linear-gradient(180deg, var(--cavic-surface, #fff), #fbfcfa); color: var(--cavic-text, #2e3338); text-decoration: none !important; transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease; }
+    .member-workspace-link-card:hover, .member-workspace-link-card:focus { border-color: rgba(63, 104, 109, .34) !important; background: var(--cavic-surface, #fff); color: var(--cavic-text, #2e3338); box-shadow: 0 10px 26px rgba(31, 41, 55, .06); transform: translateY(-1px); outline: none; }
+    .member-workspace-link-card .link-icon { width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: var(--cavic-primary-soft, #e7f1f0); color: var(--cavic-primary-dark, #32555a); font-size: 1.05rem; }
+    .member-workspace-link-card .link-copy { min-width: 0; }
+    .member-workspace-link-card .link-title { display: block; overflow-wrap: anywhere; color: var(--cavic-text, #2e3338); font-size: .92rem; font-weight: 800; line-height: 1.2; }
+    .member-workspace-link-card .link-meta { display: block; margin-top: .22rem; color: var(--cavic-text-soft, #6f787f); font-size: .77rem; font-weight: 500; line-height: 1.35; }
+    .member-workspace-link-card .link-arrow { width: 26px; height: 26px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(63, 104, 109, .16); color: var(--cavic-primary, #3f686d); font-size: .72rem; transition: background .18s ease, transform .18s ease; }
+    .member-workspace-link-card:hover .link-arrow, .member-workspace-link-card:focus .link-arrow { background: var(--cavic-primary-soft, #e7f1f0); transform: translateX(2px); }
     #leaders .table-row-actions > .btn.dropdown-toggle.btn-xs { width: 34px; height: 34px; min-height: 34px; border-radius: 12px; }
     #leaders .table-row-actions .dropdown-menu { min-width: 168px; padding: .25rem; border-radius: 12px; }
     #leaders .table-row-actions .dropdown-item { min-height: 32px; padding: .35rem .55rem; gap: .45rem; border-radius: 8px; font-size: .78rem; line-height: 1.15; }
@@ -293,12 +297,14 @@
         <div class="tab-pane fade" id="setup">
             <div class="member-workspace-link-grid">
                 <a class="member-workspace-link-card ajax-modal" href="{{ route('members.import') }}" data-title="{{ _lang('Bulk Import Members') }}" data-fullscreen="true">
-                    <span>{{ _lang('Bulk Import Members') }}<span class="link-meta">{{ _lang('Upload member records from XLSX') }}</span></span>
-                    <i class="ti-import"></i>
+                    <span class="link-icon"><i class="ti-import"></i></span>
+                    <span class="link-copy"><span class="link-title">{{ _lang('Bulk Import Members') }}</span><span class="link-meta">{{ _lang('Upload member records from XLSX') }}</span></span>
+                    <span class="link-arrow"><i class="fas fa-chevron-right"></i></span>
                 </a>
                 <a class="member-workspace-link-card ajax-modal" href="{{ route('custom_fields.index', ['members']) }}" data-title="{{ _lang('Member Custom Fields') }}">
-                    <span>{{ _lang('Custom Fields') }}<span class="link-meta">{{ _lang('Configure extra member profile fields') }}</span></span>
-                    <i class="ti-layout-list-thumb"></i>
+                    <span class="link-icon"><i class="ti-layout-list-thumb"></i></span>
+                    <span class="link-copy"><span class="link-title">{{ _lang('Custom Fields') }}</span><span class="link-meta">{{ _lang('Configure extra member profile fields') }}</span></span>
+                    <span class="link-arrow"><i class="fas fa-chevron-right"></i></span>
                 </a>
             </div>
         </div>
