@@ -51,11 +51,13 @@
 								   class="btn btn-primary btn-xs ajax-modal">
 									<i class="ti-pencil-alt"></i>&nbsp;{{ _lang('Edit') }}
 								</a>
-								<a href="{{ route('leaders.destroy', ['tenant' => request()->tenant->slug, 'id' => $leader->id]) }}" 
-								   class="btn btn-danger btn-xs confirm-alert" 
-								   data-message="{{ _lang('Are you sure?') }}">
-									<i class="ti-trash"></i>&nbsp;{{ _lang('Delete') }}
-								</a>
+								<form action="{{ route('leaders.destroy', ['tenant' => request()->tenant->slug, 'id' => $leader->id]) }}" method="post" class="d-inline">
+									@csrf
+									<input name="_method" type="hidden" value="DELETE">
+									<button type="submit" class="btn btn-danger btn-xs btn-remove">
+										<i class="ti-trash"></i>&nbsp;{{ _lang('Delete') }}
+									</button>
+								</form>
 							</td>
 						</tr>
 						@endforeach
@@ -101,11 +103,13 @@
 								   class="btn btn-primary btn-xs ajax-modal">
 									<i class="ti-pencil-alt"></i>&nbsp;{{ _lang('Edit') }}
 								</a>
-								<a href="{{ route('leaders.destroy', ['tenant' => request()->tenant->slug, 'id' => $leader->id]) }}" 
-								   class="btn btn-danger btn-xs confirm-alert" 
-								   data-message="{{ _lang('Are you sure?') }}">
-									<i class="ti-trash"></i>&nbsp;{{ _lang('Delete') }}
-								</a>
+								<form action="{{ route('leaders.destroy', ['tenant' => request()->tenant->slug, 'id' => $leader->id]) }}" method="post" class="d-inline">
+									@csrf
+									<input name="_method" type="hidden" value="DELETE">
+									<button type="submit" class="btn btn-danger btn-xs btn-remove">
+										<i class="ti-trash"></i>&nbsp;{{ _lang('Delete') }}
+									</button>
+								</form>
 							</td>
 						</tr>
 						@endforeach

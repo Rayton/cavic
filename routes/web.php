@@ -12,6 +12,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RouteUtilityController;
 use App\Http\Controllers\Select2Controller;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\InterestController;
@@ -99,11 +100,9 @@ $ev = env('APP_INSTALLED', true) == true && get_option('email_verification', 0) 
 Route::group(['middleware' => ['install']], function () use ($ev) {
 
     Route::prefix('admin')->group(function () {
-        Route::get('/', function () {
-            return redirect()->route('admin.login');
-        });
+        Route::get('/', [RouteUtilityController::class, 'adminRoot']);
         Route::get('/login', [LoginController::class, 'showAdminLoginForm'])->name('admin.login');
-        Route::post('/login', [LoginController::class, 'login'])->name('admin.login');
+        Route::post('/login', [LoginController::class, 'login']);
         Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');
         Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('admin.password.email');
         Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('admin.password.reset');
@@ -112,9 +111,9 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
 
     Route::prefix('{tenant}')->middleware('tenant')->group(function () {
         Route::get('/members_signup', [RegisterController::class, 'showMembersSignupForm'])->name('tenant.members_signup');
-        Route::post('/members_signup', [RegisterController::class, 'members_signup'])->name('tenant.members_signup');
+        Route::post('/members_signup', [RegisterController::class, 'members_signup']);
         Route::get('/login', [LoginController::class, 'showTenantLoginForm'])->name('tenant.login');
-        Route::post('/login', [LoginController::class, 'login'])->name('tenant.login');
+        Route::post('/login', [LoginController::class, 'login']);
         Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('tenant.password.request');
         Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('tenant.password.email');
         Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('tenant.password.reset');
@@ -186,7 +185,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
                 Route::get('backups', [BackupController::class, 'index'])->name('backup.index');
                 Route::get('backups/create', [BackupController::class, 'create_backup'])->name('backup.create')->middleware("demo:GET");
                 Route::get('backups/restore', [BackupController::class, 'show_restore_form'])->name('backup.restore');
-                Route::post('backups/restore', [BackupController::class, 'restore_backup'])->name('backup.restore');
+                Route::post('backups/restore', [BackupController::class, 'restore_backup']);
                 Route::get('backups/{file}/download', [BackupController::class, 'download'])->name('backup.download')->middleware("demo:GET");
                 Route::delete('backups/{file}/destroy', [BackupController::class, 'destroy'])->name('backup.destroy');
 
@@ -538,48 +537,11 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
         });
     });
 
-    Route::get('switch_language', function () {
-        if (isset($_GET['language'])) {
-            session(['language' => $_GET['language']]);
-            return back();
-        }
-    })->name('switch_language');
+    Route::get('switch_language', [RouteUtilityController::class, 'switchLanguage'])->name('switch_language');
 
-    Route::get('switch_branch', function () {
-        if (isset($_GET['branch']) && isset($_GET['branch_id'])) {
-            session(['branch' => $_GET['branch'], 'branch_id' => $_GET['branch_id']]);
-        } else {
-            request()->session()->forget(['branch', 'branch_id']);
-        }
-        return back();
-    })->name('switch_branch');
+    Route::get('switch_branch', [RouteUtilityController::class, 'switchBranch'])->name('switch_branch');
 
-    Route::get('switch_tenant', function () {
-        if (!auth()->check()) {
-            return back();
-        }
-
-        $currentUser = auth()->user();
-
-        if (!isset($_GET['tenant_slug'])) {
-            return back();
-        }
-
-        $targetTenant = \App\Models\Tenant::where('slug', $_GET['tenant_slug'])->first();
-        if (!$targetTenant) {
-            return back()->with('error', _lang('Tenant not found'));
-        }
-
-        // Logout current user
-        auth()->logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        // Redirect to target tenant login page with email pre-filled
-        $loginUrl = url('/' . $targetTenant->slug . '/login?email=' . urlencode($currentUser->email));
-
-        return redirect($loginUrl);
-    })->name('switch_tenant');
+    Route::get('switch_tenant', [RouteUtilityController::class, 'switchTenant'])->name('switch_tenant');
 
     Route::get('tenants/check-tenant-slug/{ignoreId?}', [TenantController::class, 'checkSlug'])->name('check-slug');
 
@@ -599,9 +561,7 @@ Route::group(['middleware' => ['install']], function () use ($ev) {
     if (env('APP_INSTALLED', true)) {
         Route::get('/{slug?}', [WebsiteController::class, 'index']);
     } else {
-        Route::get('/', function () {
-            echo "Installation";
-        });
+        Route::get('/', [RouteUtilityController::class, 'installationPlaceholder']);
     }
 });
 

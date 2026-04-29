@@ -35,7 +35,7 @@
 									<td class='email'>{{ $member->email }}</td>
 									<td class='branch_id'>{{ $member->branch->name }}</td>
 									<td class="text-center">
-										<a class="btn btn-primary btn-xs" href="{{ route('members.show',$member->id ) }}"><i class="fas fa-eye"></i> {{ _lang('Details') }}</a>
+										<a class="btn btn-primary btn-xs ajax-modal" data-title="{{ _lang('Member Details') }}" data-size="lg" href="{{ route('members.show',$member->id ) }}"><i class="fas fa-eye"></i> {{ _lang('Details') }}</a>
 										<a class="btn btn-success btn-xs ajax-modal" href="{{ route('members.accept_request',$member->id ) }}" data-title="{{ _lang('Approve Member Request') }}"><i class="fas fa-check-circle"></i> {{ _lang('Approve') }}</a>
 										<a class="btn btn-danger btn-xs btn-remove-2" href="{{ route('members.reject_request',$member->id ) }}"><i class="fas fa-times-circle"></i> {{ _lang('Reject') }}</a>
 									</td>

@@ -21,9 +21,14 @@ class MemberDocumentController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($tenant, $id) {
+    public function index($tenant, $id, Request $request) {
         $assets          = ['datatable'];
         $memberdocuments = MemberDocument::where('member_id', $id)->orderBy('id', 'desc')->get();
+
+        if ($request->ajax()) {
+            return view('backend.admin.member_documents.modal.list', compact('memberdocuments', 'id'));
+        }
+
         return view('backend.admin.member_documents.list', compact('memberdocuments', 'id', 'assets'));
     }
 
@@ -36,7 +41,8 @@ class MemberDocumentController extends Controller {
         if (! $request->ajax()) {
             return back();
         } else {
-            return view('backend.admin.member_documents.modal.create', compact('id'));
+            $context = $request->query('context', 'list');
+            return view('backend.admin.member_documents.modal.create', compact('id', 'context'));
         }
     }
 
@@ -78,12 +84,19 @@ class MemberDocumentController extends Controller {
         $memberdocument->save();
 
         //Prefix Output
+        $memberdocument->load('member');
+        $context = $request->input('document_context') === 'quick_view' ? 'quick_view' : 'list';
+        $row = view('backend.admin.member_documents.modal.row', compact('memberdocument', 'context'))->render();
+        $memberdocument->user_id = $memberdocument->member
+            ? $memberdocument->member->first_name . ' ' . $memberdocument->member->last_name
+            : _lang('N/A');
+        $memberdocument->created_at = date('d M, Y H:i:s', strtotime($memberdocument->created_at));
         $memberdocument->document = '<a target="_blank" href="' . asset('public/uploads/documents/' . $memberdocument->document) . '">' . $memberdocument->document . '</a>';
 
         if (! $request->ajax()) {
             return redirect()->route('member_documents.create')->with('success', _lang('Saved Successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_table']);
+            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_modal_table', 'row' => $row]);
         }
 
     }
@@ -99,7 +112,8 @@ class MemberDocumentController extends Controller {
         if (! $request->ajax()) {
             return back();
         } else {
-            return view('backend.admin.member_documents.modal.edit', compact('memberdocument', 'id'));
+            $context = $request->query('context', 'list');
+            return view('backend.admin.member_documents.modal.edit', compact('memberdocument', 'id', 'context'));
         }
     }
 
@@ -143,12 +157,19 @@ class MemberDocumentController extends Controller {
         $memberdocument->save();
 
         //Prefix Output
+        $memberdocument->load('member');
+        $context = $request->input('document_context') === 'quick_view' ? 'quick_view' : 'list';
+        $row = view('backend.admin.member_documents.modal.row', compact('memberdocument', 'context'))->render();
+        $memberdocument->user_id = $memberdocument->member
+            ? $memberdocument->member->first_name . ' ' . $memberdocument->member->last_name
+            : _lang('N/A');
+        $memberdocument->created_at = date('d M, Y H:i:s', strtotime($memberdocument->created_at));
         $memberdocument->document = '<a target="_blank" href="' . asset('public/uploads/documents/' . $memberdocument->document) . '">' . $memberdocument->document . '</a>';
 
         if (! $request->ajax()) {
             return back()->with('success', _lang('Updated Successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_table']);
+            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_modal_table', 'row' => $row]);
         }
 
     }

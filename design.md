@@ -303,7 +303,7 @@ All major admin workspace tabs should be placed in the same top strip pattern no
 #### Members
 - All Members
 - Onboarding / Requests
-- KYC & Documents
+- Documents
 - Branches
 - Leaders
 - Import
@@ -452,6 +452,8 @@ Use the table reference image (`datatable1.png` in the project root) as the cons
 - soft outlined action controls with the brand color, not unrelated framework colors
 - a compact overflow-style action affordance on the far right where appropriate
 - airy dropdown menus for row actions
+- row action dropdowns are modal-first: actions such as View, Details, Edit, Documents, Approve, Reject, and short operational reviews should open in `#main_modal` or `#secondary_modal` instead of navigating away
+- full-page row action links should be treated as fallback/direct links only, or reserved for genuinely long workflows that need the whole screen
 - subtle selected-row emphasis without heavy fills
 - minimal grid noise and stronger readability for the content itself
 
@@ -783,6 +785,10 @@ Per project rules, the reference style should also influence modal design.
 - stacked modal flows should use a higher secondary layer than the main modal, for example `#main_modal` at `5000` and `#secondary_modal` at `5020`
 
 ### Use modals for
+- all action-dropdown items by default, so the admin app feels quick and responsive without unnecessary full-page navigation
+- short create/edit/detail/review flows launched from tables, cards, workspace queues, and action menus
+- member row actions such as quick details, edit member, and member documents when launched from Members workspace or member list action dropdowns; preserve full-page member routes as direct-link fallbacks
+- member view dialogs should use a compact `modal-lg` tabbed layout that includes profile details, account overview, transactions, loans, documents, email, and SMS without requiring navigation to a standalone page
 - branches
 - leaders
 - currency
@@ -796,12 +802,16 @@ Per project rules, the reference style should also influence modal design.
 - request detail previews
 
 ### Keep full pages for
-- member create/edit/view
-- loan create/edit/view
+- direct route fallbacks for users who open URLs manually or need a shareable page
+- long multi-step create workflows that are not launched from an action dropdown
+- loan create/edit/view when the workflow requires full-screen review, large forms, collateral/guarantor context, or extensive supporting data
 - reports center
 - settings center
-- bulk import
+- bulk import by default, except member bulk import may use a large/fullscreen modal when launched from member list or workspace actions while preserving the direct full-page route fallback
 - transaction create/edit
+
+### Action Dropdown Rule
+Every table or workspace action dropdown should prefer dialogs over standalone pages. If an action can be completed, reviewed, approved, edited, previewed, or lightly configured in a focused overlay, open it via `ajax-modal`/`ajax-modal-2`. Use full pages only when the user explicitly navigates to the module, opens a direct link, or enters a workflow too large for a modal.
 
 ---
 

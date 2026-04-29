@@ -20,7 +20,7 @@ class LeaderController extends Controller
     public function index(Request $request, $tenant)
     {
         $assets = ['datatable'];
-        $leaders = Leader::with('member')
+        $leaders = Leader::with('member.branch')
             ->orderBy('position', 'asc')
             ->orderBy('id', 'asc')
             ->get();
@@ -28,6 +28,10 @@ class LeaderController extends Controller
         // Group leaders by position
         $secretaries = $leaders->where('position', Leader::POSITION_SECRETARY);
         $chairmen = $leaders->where('position', Leader::POSITION_CHAIRMAN);
+
+        if ($request->ajax()) {
+            return view('backend.admin.leader.modal.list', compact('leaders', 'secretaries', 'chairmen'));
+        }
 
         return view('backend.admin.leader.list', compact('leaders', 'secretaries', 'chairmen', 'assets'));
     }

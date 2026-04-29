@@ -1,8 +1,9 @@
-<form method="post" class="ajax-submit" autocomplete="off" action="{{ route('member_documents.update', $id) }}" enctype="multipart/form-data">
+<form method="post" class="ajax-screen-submit" autocomplete="off" action="{{ route('member_documents.update', $id) }}" enctype="multipart/form-data">
 	@csrf
 	<input name="_method" type="hidden" value="PATCH">
 	<div class="row px-2">					
 		<input type="hidden" name="member_id" value="{{ $memberdocument->member_id }}">
+		<input type="hidden" name="document_context" value="{{ $context ?? 'list' }}">
 
 		<div class="col-md-12">
 			<div class="form-group">

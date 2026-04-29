@@ -26,6 +26,11 @@ class CustomFieldController extends Controller {
         $customFields = CustomField::where('table', $table)
             ->orderBy("id", "asc")
             ->get();
+
+        if ($request->ajax()) {
+            return view('backend.admin.custom_field.modal.list', compact('customFields', 'table'));
+        }
+
         return view('backend.admin.custom_field.list', compact('customFields', 'table', 'assets'));
     }
 

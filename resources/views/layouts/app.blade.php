@@ -111,12 +111,91 @@
 		@endif
 
 		@include('layouts.others.languages')
+        <style>
+            #route-loading-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 7000;
+                width: 0;
+                height: 3px;
+                background: #3f686d;
+                box-shadow: 0 0 10px rgba(63, 104, 109, .45);
+                opacity: 0;
+                transition: width .35s ease, opacity .15s ease;
+            }
+            body.route-is-loading #route-loading-bar {
+                width: 82%;
+                opacity: 1;
+            }
+        </style>
+        <script>
+            window.CavicRouteLoader = {
+                show: function () {
+                    document.documentElement.classList.add('route-is-loading');
+                    if (document.body) {
+                        document.body.classList.add('route-is-loading');
+                    }
+                },
+                hide: function () {
+                    document.documentElement.classList.remove('route-is-loading');
+                    if (document.body) {
+                        document.body.classList.remove('route-is-loading');
+                    }
+                }
+            };
+            document.addEventListener('click', function (event) {
+                var link = event.target.closest ? event.target.closest('a[href]') : null;
+                if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+                if (link.target && link.target !== '_self') return;
+                if (link.hasAttribute('download')) return;
+                if (link.classList.contains('ajax-modal') || link.classList.contains('ajax-modal-2') || link.classList.contains('ajax-action') || link.classList.contains('btn-remove')) return;
+                if (link.getAttribute('data-toggle') || link.getAttribute('data-dismiss')) return;
+
+                var href = link.getAttribute('href');
+                if (!href || href === '#' || href.indexOf('javascript:') === 0 || href.charAt(0) === '#') return;
+
+                var url;
+                try {
+                    url = new URL(href, window.location.href);
+                } catch (e) {
+                    return;
+                }
+                if (url.origin !== window.location.origin) return;
+                if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+
+                window.CavicRouteLoader.show();
+            }, true);
+            document.addEventListener('submit', function (event) {
+                var form = event.target;
+                if (!form || event.defaultPrevented || form.classList.contains('ajax-submit') || form.classList.contains('ajax-screen-submit')) {
+                    return;
+                }
+                window.CavicRouteLoader.show();
+            }, true);
+            window.addEventListener('pageshow', function () {
+                window.CavicRouteLoader.hide();
+            });
+        </script>
     </head>
 
     @php
         $authUser = auth()->user();
         $userType = $authUser?->user_type;
         $isAdminWorkspace = $userType === 'admin';
+        $canSwitchBranches = $authUser && ($authUser->user_type == 'admin' || $authUser->all_branch_access == 1);
+        $layoutBranches = collect();
+        $defaultBranchName = get_option('default_branch_name', 'Main Branch');
+
+        if ($canSwitchBranches) {
+            $branchCacheKey = 'layout_branches:' . (app()->bound('tenant') ? app('tenant')->id : 'global');
+            $layoutBranches = \Illuminate\Support\Facades\Cache::remember($branchCacheKey, now()->addMinutes(5), function () {
+                return \App\Models\Branch::orderBy('name')->get(['id', 'name']);
+            });
+        }
+
         $tenantDisplayName = app()->bound('tenant')
             ? app('tenant')->name
             : get_option('site_title', config('app.name'));
@@ -169,6 +248,7 @@
     @endphp
 
     <body class="backend-app user-type-{{ $userType ?? 'guest' }} {{ $isAdminWorkspace ? 'admin-shell-v2' : '' }}">
+        <div id="route-loading-bar" aria-hidden="true"></div>
 		<!-- Main Modal -->
 		<div id="main_modal" class="modal" tabindex="-1" role="dialog">
 		    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -238,20 +318,27 @@
 				@if(auth()->check() && (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'customer'))
 					@php
 						$user = auth()->user();
-						$mainTenant = \App\Models\Tenant::find($user->tenant_id);
-						$memberTenant = null;
-						if ($user->user_type == 'customer') {
-							$member = \App\Models\Member::where('user_id', $user->id)->first();
-							if ($member && $member->member_tenant_id) {
-								$memberTenant = \App\Models\Tenant::find($member->member_tenant_id);
+						$tenantSwitcher = \Illuminate\Support\Facades\Cache::remember('tenant_switcher:' . $user->id, now()->addMinutes(5), function () use ($user) {
+							$mainTenant = \App\Models\Tenant::find($user->tenant_id);
+							$memberTenant = null;
+
+							if ($user->user_type == 'customer' || ($user->user_type == 'admin' && $user->tenant_owner == 1)) {
+								$memberTenantId = \App\Models\Member::withoutGlobalScopes(['status'])
+									->where('user_id', $user->id)
+									->value('member_tenant_id');
+
+								if ($memberTenantId) {
+									$memberTenant = \App\Models\Tenant::find($memberTenantId);
+								}
 							}
-						} elseif ($user->user_type == 'admin' && $user->tenant_owner == 1) {
-							// For admin users, check if they have a member record with a member tenant
-							$member = \App\Models\Member::where('user_id', $user->id)->first();
-							if ($member && $member->member_tenant_id) {
-								$memberTenant = \App\Models\Tenant::find($member->member_tenant_id);
-							}
-						}
+
+							return [
+								'mainTenant' => $mainTenant,
+								'memberTenant' => $memberTenant,
+							];
+						});
+						$mainTenant = $tenantSwitcher['mainTenant'];
+						$memberTenant = $tenantSwitcher['memberTenant'];
 						// Only get current tenant if it's bound (for tenant routes)
 						$currentTenant = app()->bound('tenant') ? app('tenant') : $mainTenant;
 						$hasMultipleTenants = ($mainTenant && $memberTenant) || ($user->user_type == 'admin' && $memberTenant);
@@ -328,22 +415,20 @@
 									</div>
 								</li>
 
-								@if(auth()->user()->user_type == 'customer')
-									@php $notifications = Auth::user()->member->notifications->take(15); @endphp
-									@php $unreadNotification = Auth::user()->member->unreadNotifications(); @endphp
-								@else
-									@php $notifications = Auth::user()->notifications->take(15); @endphp
-									@php $unreadNotification = Auth::user()->unreadNotifications(); @endphp
-								@endif
+								@php
+									$notificationOwner = auth()->user()->user_type == 'customer' ? Auth::user()->member : Auth::user();
+									$notifications = $notificationOwner->notifications()->latest()->limit(15)->get();
+									$unreadNotificationCount = $notificationOwner->unreadNotifications()->count();
+								@endphp
 
 								<li class="dropdown d-none d-sm-inline-block">
 									<i class="ti-bell dropdown-toggle" data-toggle="dropdown">
-										<span>{{ $unreadNotification->count() }}</span>
+										<span>{{ $unreadNotificationCount }}</span>
 									</i>
 									<div class="dropdown-menu bell-notify-box notify-box">
 										<span class="notify-title text-center">
-											@if($unreadNotification->count() > 0)
-											{{ _lang('You have').' '.$unreadNotification->count().' '._lang('new notifications') }}
+											@if($unreadNotificationCount > 0)
+											{{ _lang('You have').' '.$unreadNotificationCount.' '._lang('new notifications') }}
 											@else
 											{{ _lang("You don't have any new notification") }}
 											@endif
@@ -426,15 +511,15 @@
 							<div class="admin-dashboard-top-tabs-wrap d-flex align-items-center justify-content-between flex-wrap gap-2">
 								@yield('workspace_top_tabs')
 
-								@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+								@if($canSwitchBranches)
 								<div class="dropdown admin-dashboard-branch-switcher">
 									<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="dashboardBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
 									</a>
 									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dashboardBranchSwitcher">
 										<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
-										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
-										@foreach( \App\Models\Branch::all() as $branch )
+										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ $defaultBranchName }}">{{ $defaultBranchName }}</a>
+										@foreach($layoutBranches as $branch)
 										<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
 										@endforeach
 									</div>
@@ -455,15 +540,15 @@
 									<a href="{{ route('deposit.manual_methods') }}" class="btn btn-primary btn-sm btn-deposit-header">{{ _lang('Deposit') }}</a>
 									@endif
 									@endif
-									@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+									@if($canSwitchBranches)
 									<div class="dropdown">
 										<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
 										</a>
 										<div class="dropdown-menu dropdown-menu-right" aria-labelledby="selectLanguage">
 											<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
-											<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
-											@foreach( \App\Models\Branch::all() as $branch )
+											<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ $defaultBranchName }}">{{ $defaultBranchName }}</a>
+											@foreach($layoutBranches as $branch)
 											<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
 											@endforeach
 										</div>
@@ -482,7 +567,7 @@
 							<h4 class="mb-1">{{ $resolvedPageTitle }}</h4>
 							@include('layouts.others.breadcrumbs')
 						</div>
-						@if(auth()->user()->user_type == 'admin' || auth()->user()->all_branch_access == 1)
+						@if($canSwitchBranches)
 						<div class="col-sm-4 d-flex justify-content-sm-end mt-2 mt-sm-0">
 							<div class="dropdown">
 								<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="pageBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -490,8 +575,8 @@
 								</a>
 								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="pageBranchSwitcher">
 									<a class="dropdown-item" href="{{ route('switch_branch') }}">{{ _lang('All Branch') }}</a>
-									<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ get_option('default_branch_name', 'Main Branch') }}">{{ get_option('default_branch_name', 'Main Branch') }}</a>
-									@foreach( \App\Models\Branch::all() as $branch )
+									<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id=default&branch={{ $defaultBranchName }}">{{ $defaultBranchName }}</a>
+									@foreach($layoutBranches as $branch)
 									<a class="dropdown-item" href="{{ route('switch_branch') }}?branch_id={{ $branch->id }}&branch={{ $branch->name }}">{{ $branch->name }}</a>
 									@endforeach
 								</div>

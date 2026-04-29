@@ -8,7 +8,7 @@
 				<span class="panel-title">{{ _lang('Member List') }}</span>
 
 				<div class="ml-auto">
-					<a class="btn btn-dark btn-xs" href="{{ route('members.import') }}"><i class="ti-import mr-1"></i>{{ _lang('Bulk Import') }}</a>
+					<a class="btn btn-dark btn-xs ajax-modal" href="{{ route('members.import') }}" data-title="{{ _lang('Bulk Import Members') }}" data-fullscreen="true"><i class="ti-import mr-1"></i>{{ _lang('Bulk Import') }}</a>
 					<a class="btn btn-primary btn-xs ajax-modal" href="{{ route('members.create') }}" data-title="{{ _lang('Add New Member') }}" data-fullscreen="true"><i class="ti-plus mr-1"></i>{{ _lang('Add New') }}</a>
 				</div>
 			</div>

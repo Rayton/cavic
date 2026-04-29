@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 if (! function_exists('_lang')) {
     function _lang($string = '') {
+        static $languageCache = [];
 
         $target_lang = get_language();
 
@@ -19,14 +20,18 @@ if (! function_exists('_lang')) {
             $target_lang = "language";
         }
 
-        if (file_exists(resource_path() . "/language/$target_lang.php")) {
-            include resource_path() . "/language/$target_lang.php";
-        } else {
-            include resource_path() . "/language/language.php";
+        if (! isset($languageCache[$target_lang])) {
+            $language = [];
+            if (file_exists(resource_path() . "/language/$target_lang.php")) {
+                include resource_path() . "/language/$target_lang.php";
+            } else {
+                include resource_path() . "/language/language.php";
+            }
+            $languageCache[$target_lang] = $language;
         }
 
-        if (array_key_exists($string, $language)) {
-            return $language[$string];
+        if (array_key_exists($string, $languageCache[$target_lang])) {
+            return $languageCache[$target_lang][$string];
         } else {
             return $string;
         }
@@ -35,6 +40,7 @@ if (! function_exists('_lang')) {
 
 if (! function_exists('_dlang')) {
     function _dlang($string = '') {
+        static $languageCache = [];
 
         //Get Target language
         $target_lang = get_language();
@@ -43,14 +49,18 @@ if (! function_exists('_dlang')) {
             $target_lang = 'language';
         }
 
-        if (file_exists(resource_path() . "/language/$target_lang.php")) {
-            include resource_path() . "/language/$target_lang.php";
-        } else {
-            include resource_path() . "/language/language.php";
+        if (! isset($languageCache[$target_lang])) {
+            $language = [];
+            if (file_exists(resource_path() . "/language/$target_lang.php")) {
+                include resource_path() . "/language/$target_lang.php";
+            } else {
+                include resource_path() . "/language/language.php";
+            }
+            $languageCache[$target_lang] = $language;
         }
 
-        if (array_key_exists($string, $language)) {
-            return $language[$string];
+        if (array_key_exists($string, $languageCache[$target_lang])) {
+            return $languageCache[$target_lang][$string];
         } else {
             return $string;
         }
@@ -226,24 +236,46 @@ if (! function_exists('get_setting')) {
 
 if (! function_exists('get_tenant_option')) {
     function get_tenant_option($name, $optional = '', $tenantId = '') {
-        global $$name;
-
-        if (${$name} != null) {
-            return $$name;
-        }
+        static $tenantOptions = [];
+        static $tenantOptionSets = [];
 
         if ($tenantId == '') {
             if (isset(request()->tenant->id)) {
-                $setting = \App\Models\TenantSetting::withoutGlobalScopes()->where('name', $name)
-                    ->where('tenant_id', request()->tenant->id)
-                    ->first();
-            } else {
-                $setting = \App\Models\TenantSetting::where('name', $name)->first();
+                $tenantId = request()->tenant->id;
             }
-        } else {
+        }
+
+        $cacheTenantId = $tenantId ?: 'default';
+        $cacheKey = $cacheTenantId . ':' . $name;
+        if (array_key_exists($cacheKey, $tenantOptions)) {
+            return $tenantOptions[$cacheKey];
+        }
+
+        if ($tenantId != '') {
+            if (! array_key_exists($tenantId, $tenantOptionSets)) {
+                $tenantOptionSets[$tenantId] = Cache::remember("tenant_options:$tenantId", now()->addMinutes(5), function () use ($tenantId) {
+                    return \App\Models\TenantSetting::withoutGlobalScopes()
+                        ->where('tenant_id', $tenantId)
+                        ->pluck('value', 'name')
+                        ->toArray();
+                });
+            }
+
+            $value = array_key_exists($name, $tenantOptionSets[$tenantId])
+                ? $tenantOptionSets[$tenantId][$name]
+                : $optional;
+
+            $tenantOptions[$cacheKey] = $value;
+
+            return $value;
+        }
+
+        if (isset(request()->tenant->id)) {
             $setting = \App\Models\TenantSetting::withoutGlobalScopes()->where('name', $name)
-                ->where('tenant_id', $tenantId)
+                ->where('tenant_id', request()->tenant->id)
                 ->first();
+        } else {
+            $setting = \App\Models\TenantSetting::where('name', $name)->first();
         }
 
         if ($setting) {
@@ -252,7 +284,7 @@ if (! function_exists('get_tenant_option')) {
             $value = $optional;
         }
 
-        ${$name} = $value;
+        $tenantOptions[$cacheKey] = $value;
 
         return $value;
     }
@@ -281,6 +313,8 @@ if (! function_exists('update_tenant_option')) {
             $data['created_at'] = \Carbon\Carbon::now();
             \App\Models\TenantSetting::insert($data);
         }
+
+        Cache::forget("tenant_options:$tenantId");
     }
 }
 
@@ -421,9 +455,15 @@ if (! function_exists('load_language')) {
 
 if (! function_exists('get_language_list')) {
     function get_language_list() {
+        static $languages = null;
+
+        if ($languages !== null) {
+            return $languages;
+        }
+
         $path  = resource_path() . "/language";
         $files = scandir($path);
-        $array = [];
+        $languages = [];
 
         foreach ($files as $file) {
             $name = pathinfo($file, PATHINFO_FILENAME);
@@ -431,10 +471,10 @@ if (! function_exists('get_language_list')) {
                 continue;
             }
 
-            $array[] = $name;
+            $languages[] = $name;
 
         }
-        return $array;
+        return $languages;
     }
 }
 
@@ -452,9 +492,18 @@ if (! function_exists('process_string')) {
 
 if (! function_exists('permission_list')) {
     function permission_list() {
+        static $permissionList = [];
+
+        $roleId = Auth::user()->role_id;
+        if (array_key_exists($roleId, $permissionList)) {
+            return $permissionList[$roleId];
+        }
+
         $permission_list = \App\Models\AccessControl::where("role_id", Auth::user()->role_id)
             ->pluck('permission')->toArray();
-        return $permission_list;
+        $permissionList[$roleId] = $permission_list;
+
+        return $permissionList[$roleId];
     }
 }
 
@@ -521,49 +570,62 @@ if (! function_exists('general_ledger_link')) {
 //Request Count
 if (! function_exists('request_count')) {
     function request_count($request, $html = false, $class = "sidebar-notification-count") {
+        static $counts = [];
+
         $userId             = auth()->id();
         $notification_count = 0;
+        $cacheKey           = (app()->bound('tenant') ? app('tenant')->id : 'global') . ':' . $userId . ':' . $request;
 
-        if ($request == 'unread_contact_message') {
-            $notification_count = \App\Models\ContactMessage::where('status', 0)->count();
-        }
+        if (array_key_exists($cacheKey, $counts)) {
+            $notification_count = $counts[$cacheKey];
+        } else {
+            $notification_count = Cache::remember("request_count:$cacheKey", now()->addSeconds(30), function () use ($request, $userId) {
+                if ($request == 'unread_contact_message') {
+                    return \App\Models\ContactMessage::where('status', 0)->count();
+                }
 
-        if ($request == 'users') {
-            $notification_count = User::count();
-        }
+                if ($request == 'users') {
+                    return User::count();
+                }
 
-        if ($request == 'messages') {
-            $notification_count = Message::where('recipient_id', $userId)
-                ->where('status', 'unread')
-                ->count();
-        }
+                if ($request == 'messages') {
+                    return Message::where('recipient_id', $userId)
+                        ->where('status', 'unread')
+                        ->count();
+                }
 
-        if ($request == 'pending_payments') {
-            $notification_count = SubscriptionPayment::where('status', 0)->count();
-        }
+                if ($request == 'pending_payments') {
+                    return SubscriptionPayment::where('status', 0)->count();
+                }
 
-        if ($request == 'pending_loans') {
-            $notification_count = \App\Models\Loan::where('status', 0)->count();
-        }
+                if ($request == 'pending_loans') {
+                    return \App\Models\Loan::where('status', 0)->count();
+                }
 
-        if ($request == 'deposit_requests') {
-            $notification_count = \App\Models\DepositRequest::where('status', 0)->count();
-        }
+                if ($request == 'deposit_requests') {
+                    return \App\Models\DepositRequest::where('status', 0)->count();
+                }
 
-        if ($request == 'withdraw_requests') {
-            $notification_count = \App\Models\WithdrawRequest::where('status', 0)->count();
-        }
+                if ($request == 'withdraw_requests') {
+                    return \App\Models\WithdrawRequest::where('status', 0)->count();
+                }
 
-        if ($request == 'member_requests') {
-            $notification_count = \App\Models\Member::withoutGlobalScopes(['status'])->where('status', 0)->count();
-        }
+                if ($request == 'member_requests') {
+                    return \App\Models\Member::withoutGlobalScopes(['status'])->where('status', 0)->count();
+                }
 
-        if ($request == 'upcomming_repayments') {
-            $startDate          = Carbon::today();
-            $endDate            = Carbon::today()->addDays(7);
-            $notification_count = \App\Models\LoanRepayment::whereBetween('repayment_date', [$startDate, $endDate])
-                ->where('status', 0)
-                ->count();
+                if ($request == 'upcomming_repayments') {
+                    $startDate = Carbon::today();
+                    $endDate   = Carbon::today()->addDays(7);
+                    return \App\Models\LoanRepayment::whereBetween('repayment_date', [$startDate, $endDate])
+                        ->where('status', 0)
+                        ->count();
+                }
+
+                return 0;
+            });
+
+            $counts[$cacheKey] = $notification_count;
         }
 
         if ($html == false) {
@@ -773,6 +835,11 @@ if (! function_exists('time_from_seconds')) {
 /* Intelligent Functions */
 if (! function_exists('get_language')) {
     function get_language($force = false) {
+        static $requestLanguage = null;
+
+        if (! $force && $requestLanguage !== null) {
+            return $requestLanguage;
+        }
 
         if (isset(request()->model_language)) {
             return request()->model_language;
@@ -797,6 +864,10 @@ if (! function_exists('get_language')) {
             }
 
         }
+        if (! $force) {
+            $requestLanguage = $language;
+        }
+
         return $language;
     }
 }
@@ -1203,7 +1274,11 @@ if (! function_exists('get_currency')) {
 
 if (! function_exists('get_currency_symbol')) {
     function get_currency_symbol($currency_code) {
-        include app_path() . '/Helpers/currency_symbol.php';
+        static $currency_symbols = null;
+
+        if ($currency_symbols === null) {
+            include app_path() . '/Helpers/currency_symbol.php';
+        }
 
         if (array_key_exists($currency_code, $currency_symbols)) {
             return $currency_symbols[$currency_code];

@@ -9,7 +9,7 @@
         ['label' => _lang('Account Overview'), 'target' => '#account_overview'],
         ['label' => _lang('Transactions'), 'target' => '#transaction-history'],
         ['label' => _lang('Loans'), 'target' => '#member_loans'],
-        ['label' => _lang('KYC Documents'), 'target' => '#kyc_documents'],
+        ['label' => _lang('Documents'), 'target' => '#kyc_documents'],
         ['label' => _lang('Send Email'), 'target' => '#email'],
         ['label' => _lang('Send SMS'), 'target' => '#sms'],
         ['label' => _lang('Edit Member Details'), 'url' => route('members.edit', $member->id)],
@@ -233,7 +233,7 @@
                         </div>
                     </div>
                 </div>
-            </div><!--End KYC Documents Tab-->
+            </div><!--End Documents Tab-->
 
 			<div id="email" class="tab-pane">
                 <div class="card">

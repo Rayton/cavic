@@ -254,35 +254,37 @@ class DashboardController extends Controller {
                 $repaymentRelations[] = 'latestFollowUp.createdBy';
             }
 
-            $overdueRepaymentsForBuckets = LoanRepayment::with($repaymentRelations)
-                ->whereDate('repayment_date', '<', $date)
-                ->where('status', 0)
-                ->get();
-
             $todayCarbon = Carbon::today();
+            $overdueBaseQuery = LoanRepayment::where('repayment_date', '<', $date)
+                ->where('status', 0);
+
             $data['collection_buckets'] = [
                 [
                     'label' => _lang('1-7 Days Late'),
-                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
-                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
-                        return $daysLate >= 1 && $daysLate <= 7;
-                    })->count(),
+                    'count' => (clone $overdueBaseQuery)
+                        ->whereBetween('repayment_date', [$todayCarbon->copy()->subDays(7)->toDateString(), $todayCarbon->copy()->subDay()->toDateString()])
+                        ->count(),
                 ],
                 [
                     'label' => _lang('8-30 Days Late'),
-                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
-                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
-                        return $daysLate >= 8 && $daysLate <= 30;
-                    })->count(),
+                    'count' => (clone $overdueBaseQuery)
+                        ->whereBetween('repayment_date', [$todayCarbon->copy()->subDays(30)->toDateString(), $todayCarbon->copy()->subDays(8)->toDateString()])
+                        ->count(),
                 ],
                 [
                     'label' => _lang('31+ Days Late'),
-                    'count' => $overdueRepaymentsForBuckets->filter(function ($repayment) use ($todayCarbon) {
-                        $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
-                        return $daysLate >= 31;
-                    })->count(),
+                    'count' => (clone $overdueBaseQuery)
+                        ->where('repayment_date', '<=', $todayCarbon->copy()->subDays(31)->toDateString())
+                        ->count(),
                 ],
             ];
+
+            $overdueRepaymentsForBuckets = LoanRepayment::with($repaymentRelations)
+                ->where('repayment_date', '<', $date)
+                ->where('status', 0)
+                ->orderBy('repayment_date')
+                ->limit(200)
+                ->get();
 
             $data['collection_priority_queue'] = $overdueRepaymentsForBuckets->map(function ($repayment) use ($todayCarbon, $followUpsEnabled) {
                 $daysLate = Carbon::parse($repayment->getRawOriginal('repayment_date'))->diffInDays($todayCarbon);
@@ -305,13 +307,17 @@ class DashboardController extends Controller {
             })->sortByDesc('days_late')->take(6)->values();
 
             $dueTodayRepayments = LoanRepayment::with($repaymentRelations)
-                ->whereDate('repayment_date', $date)
+                ->where('repayment_date', $date)
                 ->where('status', 0)
+                ->orderByDesc('amount_to_pay')
+                ->limit(150)
                 ->get();
 
             $upcomingRepayments = LoanRepayment::with($repaymentRelations)
                 ->whereBetween('repayment_date', [Carbon::today()->addDay()->toDateString(), Carbon::today()->addDays(7)->toDateString()])
                 ->where('status', 0)
+                ->orderBy('repayment_date')
+                ->limit(150)
                 ->get();
 
             $data['collection_queue_counts'] = [
@@ -384,6 +390,7 @@ class DashboardController extends Controller {
 
             $activeLoanPortfolio = Loan::with('currency')
                 ->where('status', 1)
+                ->select(['id', 'currency_id', 'applied_amount', 'total_paid'])
                 ->get();
 
             $portfolioOutstandingBase = $activeLoanPortfolio->sum(function ($loan) use ($baseCurrency) {
@@ -411,22 +418,26 @@ class DashboardController extends Controller {
                 ->where('type', 'Deposit')
                 ->where('status', 2)
                 ->whereBetween('trans_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])
+                ->select(['id', 'savings_account_id', 'amount'])
                 ->get();
             $previousMonthDeposits = Transaction::with('account.savings_type.currency')
                 ->where('type', 'Deposit')
                 ->where('status', 2)
                 ->whereBetween('trans_date', [$previousMonthStart->toDateString(), $previousMonthEnd->toDateString()])
+                ->select(['id', 'savings_account_id', 'amount'])
                 ->get();
 
             $currentMonthWithdrawals = Transaction::with('account.savings_type.currency')
                 ->where('type', 'Withdraw')
                 ->where('status', 2)
                 ->whereBetween('trans_date', [$currentMonthStart->toDateString(), Carbon::today()->toDateString()])
+                ->select(['id', 'savings_account_id', 'amount'])
                 ->get();
             $previousMonthWithdrawals = Transaction::with('account.savings_type.currency')
                 ->where('type', 'Withdraw')
                 ->where('status', 2)
                 ->whereBetween('trans_date', [$previousMonthStart->toDateString(), $previousMonthEnd->toDateString()])
+                ->select(['id', 'savings_account_id', 'amount'])
                 ->get();
 
             $currentMonthDepositBase = $this->sumTransactionsInBaseCurrency($currentMonthDeposits, $baseCurrency);
@@ -506,7 +517,9 @@ class DashboardController extends Controller {
             })->sortByDesc('pressure_score')->take(5)->values();
 
             // Interest analysis (system-wide): total interest payable vs paid for all active loans
-            $activeLoans = Loan::where('status', 1)->get();
+            $activeLoans = Loan::where('status', 1)
+                ->select(['id', 'applied_amount', 'total_payable'])
+                ->get();
             $totalInterestPayable = 0;
             foreach ($activeLoans as $loan) {
                 $totalPayable = (float) ($loan->total_payable ?? $loan->applied_amount ?? 0);

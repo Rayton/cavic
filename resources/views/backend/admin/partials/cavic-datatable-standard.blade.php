@@ -8,11 +8,6 @@
         overflow-y: visible;
     }
 
-    .cavic-datatable-card .cavic-data-table,
-    .cavic-datatable-card .dashboard-table-compact {
-        min-width: 760px;
-    }
-
     .cavic-datatable-card .dashboard-table-compact thead th,
     .cavic-datatable-card .dashboard-table-compact tbody td {
         padding-top: .52rem;
@@ -36,7 +31,13 @@
     }
 
     .cavic-datatable-card .admin-datatable-top {
-        margin-bottom: .7rem;
+        display: flex !important;
+        flex-flow: row wrap !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .65rem .8rem !important;
+        margin-bottom: 1rem;
+        padding: .45rem 0;
     }
 
     .cavic-datatable-card .admin-datatable-table-wrap {
@@ -44,19 +45,139 @@
         border-radius: 0;
     }
 
+    .cavic-datatable-card .dashboard-proof-top-left,
+    .cavic-datatable-card .dashboard-proof-top-center,
+    .cavic-datatable-card .dashboard-proof-top-right {
+        display: inline-flex !important;
+        align-items: center;
+        flex-wrap: nowrap !important;
+        gap: .55rem;
+        min-width: 0;
+    }
+
+    .cavic-datatable-card .dashboard-proof-top-left {
+        flex: 0 0 auto;
+    }
+
     .cavic-datatable-card .dashboard-proof-top-center {
+        flex: 0 0 auto;
         justify-content: center;
     }
 
+    .cavic-datatable-card .dashboard-proof-top-right {
+        justify-content: flex-end;
+        flex: 0 1 auto;
+        margin-left: auto;
+    }
+
+    .cavic-datatable-card .dashboard-toolbar-item,
+    .cavic-datatable-card .dashboard-proof-top-right > * {
+        display: inline-flex;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .cavic-datatable-card .dashboard-toolbar-item-length,
+    .cavic-datatable-card .dashboard-toolbar-item-export,
+    .cavic-datatable-card .dashboard-toolbar-item-columns {
+        flex: 0 0 auto;
+    }
+
+    .cavic-datatable-card .dashboard-proof-top-right .dashboard-toolbar-item-search {
+        flex: 0 1 340px;
+        width: clamp(220px, 24vw, 340px);
+        max-width: 340px;
+        min-width: 0;
+    }
+
+    .cavic-datatable-card .dashboard-proof-top-right .dashboard-toolbar-item-columns,
+    .cavic-datatable-card .dashboard-proof-top-right .dashboard-columns-dropdown {
+        flex: 0 0 auto;
+    }
+
+    .cavic-datatable-card .dataTables_length,
+    .cavic-datatable-card .dataTables_length label,
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter,
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter label,
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter input {
+        width: 100%;
+        margin: 0;
+    }
+
+    .cavic-datatable-card .dataTables_length label,
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter label {
+        display: flex;
+        align-items: center;
+        font-size: 0;
+    }
+
+    .cavic-datatable-card .dataTables_length select {
+        width: 76px;
+        margin: 0 !important;
+    }
+
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter input {
+        margin: 0 !important;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .cavic-datatable-card .dashboard-proof-top-right .dataTables_filter input,
+    .cavic-datatable-card .dashboard-columns-trigger,
+    .cavic-datatable-card .dataTables_length select {
+        height: 40px;
+        min-height: 40px;
+    }
+
+    .cavic-datatable-card .dashboard-proof-export-buttons,
+    .cavic-datatable-card .dashboard-toolbar-item-export .dt-buttons {
+        display: inline-flex !important;
+        align-items: center;
+        flex-wrap: nowrap !important;
+        gap: .5rem;
+        min-width: 0;
+    }
+
     .cavic-datatable-card .dashboard-proof-export-buttons .admin-dt-btn {
-        min-height: 30px;
-        padding: .32rem .62rem;
+        height: 40px;
+        min-height: 40px;
+        min-width: 86px;
+        padding: .35rem .75rem;
     }
 
     .cavic-datatable-card .dashboard-columns-menu {
         z-index: 1085;
         max-height: min(420px, 70vh);
         overflow-y: auto;
+    }
+
+    @media (max-width: 767px) {
+        .cavic-datatable-card .admin-datatable-top {
+            gap: .55rem !important;
+        }
+
+        .cavic-datatable-card .dashboard-proof-top-right {
+            flex: 1 1 100%;
+            margin-left: 0;
+            justify-content: flex-start;
+        }
+
+        .cavic-datatable-card .dashboard-proof-top-right .dashboard-toolbar-item-search {
+            flex: 1 1 160px;
+            width: auto;
+            max-width: 100%;
+        }
+
+        .cavic-datatable-card .dashboard-proof-export-buttons .admin-dt-btn {
+            min-width: 76px;
+            padding-left: .6rem;
+            padding-right: .6rem;
+        }
+
+        .cavic-datatable-card .dashboard-columns-trigger {
+            padding-left: .65rem;
+            padding-right: .65rem;
+        }
     }
 </style>
 
@@ -145,7 +266,7 @@
         $toolbarLeft.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-length"></div>').append($length));
         $toolbarCenter.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-export"></div>').append($buttons));
         $toolbarRight
-            .append($('<div class="dashboard-toolbar-item"></div>').append($columnsDropdown))
+            .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-columns"></div>').append($columnsDropdown))
             .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-search"></div>').append($search));
 
         $top.empty().append($toolbarLeft, $toolbarCenter, $toolbarRight);
@@ -174,7 +295,8 @@
 
             $table.attr('id', $table.attr('id') || (prefix.toLowerCase() + '-table-' + index));
             $table.attr('data-export-filename', exportTitle);
-            $table.css('min-width', Math.max(760, columnCount * 132) + 'px');
+            var compactWidth = columnCount <= 4 ? 560 : (columnCount === 5 ? 660 : 760);
+            $table.css('min-width', Math.max(compactWidth, columnCount * 118) + 'px');
             window.cavicPrepareEmptyTable($table);
 
             window.cavicAdminDataTable('#' + $table.attr('id'), {

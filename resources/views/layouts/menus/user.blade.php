@@ -24,7 +24,7 @@ $permissions = permission_list();
 		@endif
 
 		@if (in_array('members.import',$permissions))
-		<li class="nav-item"><a class="nav-link" href="{{ route('members.import') }}">{{ _lang('Bulk Import') }}</a></li>
+		<li class="nav-item"><a class="nav-link ajax-modal" href="{{ route('members.import') }}" data-title="{{ _lang('Bulk Import Members') }}" data-fullscreen="true">{{ _lang('Bulk Import') }}</a></li>
 		@endif
 
 		@if (in_array('custom_fields.index',$permissions))

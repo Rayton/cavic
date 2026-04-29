@@ -82,9 +82,9 @@ class MemberController extends Controller
                 . '<button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">' . _lang('Action')
                 . '&nbsp;</button>'
                 . '<div class="dropdown-menu">'
-                . '<a class="dropdown-item" href="' . route('members.edit', $member->id) . '"><i class="ti-pencil-alt"></i> ' . _lang('Edit') . '</a>'
-                . '<a class="dropdown-item" href="' . route('members.show', $member->id) . '"><i class="ti-eye"></i>  ' . _lang('View') . '</a>'
-                . '<a class="dropdown-item" href="' . route('member_documents.index', $member->id) . '"><i class="ti-files"></i>  ' . _lang('Documents') . '</a>'
+                . '<a class="dropdown-item ajax-modal" data-title="' . _lang('Update Member') . '" data-fullscreen="true" href="' . route('members.edit', $member->id) . '"><i class="ti-pencil-alt"></i> ' . _lang('Edit') . '</a>'
+                . '<a class="dropdown-item ajax-modal" data-title="' . _lang('Member Details') . '" href="' . route('members.show', $member->id) . '"><i class="ti-eye"></i>  ' . _lang('View') . '</a>'
+                . '<a class="dropdown-item ajax-modal" data-title="' . _lang('Member Documents') . '" data-fullscreen="true" href="' . route('member_documents.index', $member->id) . '"><i class="ti-files"></i>  ' . _lang('Documents') . '</a>'
                 . '<form action="' . route('members.destroy', $member->id) . '" method="post">'
                 . csrf_field()
                 . '<input name="_method" type="hidden" value="DELETE">'
@@ -320,7 +320,15 @@ class MemberController extends Controller
      */
     public function show(Request $request, $tenant, $id)
     {
-        $member       = Member::withoutGlobalScopes(['status'])->find($id);
+        $member       = Member::withoutGlobalScopes(['status'])
+            ->with([
+                'branch',
+                'user',
+                'documents',
+                'loans.loan_product',
+                'loans.currency',
+            ])
+            ->find($id);
         $assets       = ['datatable'];
         $customFields = CustomField::where('table', 'members')
             ->where('status', 1)
@@ -328,7 +336,16 @@ class MemberController extends Controller
             ->get();
 
         if ($request->ajax()) {
-            return view('backend.admin.member.modal.quick_view', compact('member', 'id', 'customFields'));
+            $accounts = get_account_details($member->id);
+            $transactions = Transaction::with(['account', 'account.savings_type', 'account.savings_type.currency'])
+                ->where('member_id', $member->id)
+                ->orderBy('trans_date', 'desc')
+                ->limit(26)
+                ->get();
+            $hasMoreTransactions = $transactions->count() > 25;
+            $transactions = $transactions->take(25);
+
+            return view('backend.admin.member.modal.quick_view', compact('member', 'id', 'customFields', 'accounts', 'transactions', 'hasMoreTransactions'));
         }
 
         return view('backend.admin.member.view', compact('member', 'id', 'customFields', 'assets'));
@@ -580,7 +597,7 @@ class MemberController extends Controller
         if (! $request->ajax()) {
             return back()->with('success', _lang('Email Send Sucessfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Email Send Sucessfully'), 'data' => $contact]);
+            return response()->json(['result' => 'success', 'action' => 'send', 'message' => _lang('Email Send Sucessfully')]);
         }
     }
 
@@ -607,6 +624,10 @@ class MemberController extends Controller
         $message = $request->input("message");
 
         if (get_tenant_option('sms_gateway') == 'none') {
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Sorry, SMS Gateway is disabled !')]);
+            }
+
             return back()->with('error', _lang('Sorry, SMS Gateway is disabled !'));
         }
 
@@ -624,7 +645,7 @@ class MemberController extends Controller
         if (! $request->ajax()) {
             return back()->with('success', _lang('SMS Send Sucessfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('SMS Send Sucessfully'), 'data' => $contact]);
+            return response()->json(['result' => 'success', 'action' => 'send', 'message' => _lang('SMS Send Sucessfully')]);
         }
     }
 
@@ -717,6 +738,10 @@ class MemberController extends Controller
     public function import(Request $request)
     {
         if ($request->isMethod('get')) {
+            if ($request->ajax()) {
+                return view('backend.admin.member.modal.import');
+            }
+
             return view('backend.admin.member.import');
         } else if ($request->isMethod('post')) {
             @ini_set('max_execution_time', 0);
@@ -727,6 +752,10 @@ class MemberController extends Controller
             ]);
 
             if ($validator->fails()) {
+                if ($request->ajax()) {
+                    return response()->json(['result' => 'error', 'message' => $validator->errors()->all()]);
+                }
+
                 return back()->withErrors($validator)->withInput();
             }
 
@@ -755,8 +784,22 @@ class MemberController extends Controller
             DB::commit();
 
             if ($new_rows == 0) {
+                if ($request->ajax()) {
+                    return response()->json(['result' => 'error', 'message' => _lang('Nothing Imported, Data may already exists !')]);
+                }
+
                 return back()->with('error', _lang('Nothing Imported, Data may already exists !'));
             }
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'result'  => 'success',
+                    'action'  => 'import',
+                    'message' => $new_rows . ' ' . _lang('Rows Imported Sucessfully'),
+                    'table'   => '#members_table',
+                ]);
+            }
+
             return back()->with('success', $new_rows . ' ' . _lang('Rows Imported Sucessfully'));
         }
     }

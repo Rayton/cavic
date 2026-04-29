@@ -125,7 +125,7 @@
                                 <td class="text-center">
                                     @include('backend.admin.partials.table-actions', [
                                         'items' => [
-                                            ['label' => _lang('Quick View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Member Request Summary')],
+                                            ['label' => _lang('Quick View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Member Request Summary'), 'data_size' => 'lg'],
                                             ['label' => _lang('Approve'), 'url' => route('members.accept_request', $member->id), 'icon' => 'ti-check', 'class' => 'ajax-modal', 'data_title' => _lang('Approve Member Request')],
                                             ['label' => _lang('Reject'), 'url' => route('members.reject_request', $member->id), 'icon' => 'ti-close', 'class' => 'ajax-action', 'data_confirm' => _lang('Reject this member request?')],
                                         ],
