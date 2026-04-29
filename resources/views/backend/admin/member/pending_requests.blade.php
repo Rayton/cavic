@@ -4,13 +4,13 @@
 
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card no-export">
+		<div class="card cavic-datatable-card dashboard-proof-datatable-card">
 		    <div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Member Requests') }}</span>
 			</div>
 			<div class="card-body p-0">
 				<div class="table-responsive">
-					<table id="members_table" class="table">
+					<table id="member_requests_table" class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_Requests">
 						<thead>
 							<tr>
 								<th class="text-center">{{ _lang('Photo') }}</th>
@@ -19,7 +19,7 @@
 								<th>{{ _lang('Last Name') }}</th>
 								<th>{{ _lang('Email') }}</th>
 								<th>{{ _lang('Branch') }}</th>
-								<th class="text-center">{{ _lang('Action') }}</th>
+								<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -44,11 +44,17 @@
 						</tbody>
 					</table>
 				</div>
-				<div class="float-right">
-					{{ $members->links() }}
-				</div>
 			</div>
 		</div>
 	</div>
 </div>
+@endsection
+
+@section('js-script')
+@include('backend.admin.partials.cavic-datatable-standard')
+<script>
+	(function ($) {
+		window.cavicInitStaticDataTables('.cavic-data-table', 'Members');
+	})(window.jQuery || window.$);
+</script>
 @endsection

@@ -3,19 +3,20 @@
 @section('content')
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card no-export">
+		<div class="card cavic-datatable-card dashboard-proof-datatable-card">
 		    <div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('All Branch') }}</span>
 				<a class="btn btn-primary btn-xs ml-auto ajax-modal" data-title="{{ _lang('Add New Branch') }}" href="{{ route('branches.create') }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add New') }}</a>
 			</div>
 			<div class="card-body">
-				<table id="branches_table" class="table data-table">
+				<div class="table-responsive">
+				<table id="branches_table" class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_Branches">
 					<thead>
 					    <tr>
 						    <th>{{ _lang('Name') }}</th>
 							<th>{{ _lang('Contact Email') }}</th>
 							<th>{{ _lang('Contact Phone') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 					    </tr>
 					</thead>
 					<tbody>
@@ -47,8 +48,18 @@
 					    @endforeach
 					</tbody>
 				</table>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
+@endsection
+
+@section('js-script')
+@include('backend.admin.partials.cavic-datatable-standard')
+<script>
+	(function ($) {
+		window.cavicInitStaticDataTables('.cavic-data-table', 'Member_Branches');
+	})(window.jQuery || window.$);
+</script>
 @endsection

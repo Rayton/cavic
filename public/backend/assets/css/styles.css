@@ -6932,6 +6932,38 @@ body div.dt-button-collection .buttons-columnVisibility.active::after {
     accent-color: var(--cavic-primary);
 }
 
+.admin-shell-v2 .cavic-datatable-card .table-responsive {
+    border: 1px solid var(--cavic-border);
+    border-radius: 18px;
+    background: var(--cavic-surface);
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact {
+    min-width: 760px;
+}
+
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact thead th,
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact tbody td {
+    padding-top: 0.52rem;
+    padding-bottom: 0.52rem;
+}
+
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact thead th {
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact .workspace-status-chip {
+    white-space: nowrap;
+}
+
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact th:last-child,
+.admin-shell-v2 .cavic-datatable-card .dashboard-table-compact td:last-child {
+    white-space: nowrap;
+}
+
 .admin-shell-v2 .table .btn-light.btn-xs,
 .admin-shell-v2 .table .btn-outline-primary.btn-xs,
 .admin-shell-v2 .table .btn-primary.btn-xs,

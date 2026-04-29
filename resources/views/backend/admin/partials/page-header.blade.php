@@ -27,7 +27,13 @@
             @if(! empty($actions))
                 <div class="workspace-page-actions text-lg-right">
                     @foreach($actions as $action)
-                        <a href="{{ $action['url'] ?? '#' }}" class="btn {{ $action['class'] ?? 'btn-outline-primary btn-sm' }} {{ ! $loop->last ? 'mr-2' : '' }} mb-2">
+                        <a
+                            href="{{ $action['url'] ?? '#' }}"
+                            class="btn {{ $action['class'] ?? 'btn-outline-primary btn-sm' }} {{ ! $loop->last ? 'mr-2' : '' }} mb-2"
+                            @if(! empty($action['data_title'])) data-title="{{ $action['data_title'] }}" @endif
+                            @if(array_key_exists('data_fullscreen', $action)) data-fullscreen="{{ $action['data_fullscreen'] ? 'true' : 'false' }}" @endif
+                            @if(array_key_exists('data_reload', $action)) data-reload="{{ $action['data_reload'] ? 'true' : 'false' }}" @endif
+                        >
                             {{ $action['label'] ?? _lang('Open') }}
                         </a>
                     @endforeach

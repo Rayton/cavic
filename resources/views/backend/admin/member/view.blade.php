@@ -22,13 +22,14 @@
 	<div class="col-lg-12">
 		<div class="tab-content">
 			<div id="member_details" class="tab-pane active">
-				<div class="card">
+				<div class="card cavic-datatable-card">
 					<div class="card-header">
 						<span class="header-title">{{ _lang('Member Details') }}</span>
 					</div>
 
 					<div class="card-body">
-						<table class="table table-bordered">
+						<div class="table-responsive">
+						<table class="table table-bordered table-striped dashboard-table-compact mb-0">
 							<tr>
 								<td colspan="2" class="profile_picture text-center">
 									<img src="{{ profile_picture($member->photo) }}" class="thumb-image-md">
@@ -65,19 +66,20 @@
 							<tr><td>{{ _lang('Address') }}</td><td>{{ $member->address }}</td></tr>
 							<tr><td>{{ _lang('Credit Source') }}</td><td>{{ $member->credit_source }}</td></tr>
 						</table>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<div id="account_overview" class="tab-pane">
-                <div class="card">
+                <div class="card cavic-datatable-card dashboard-proof-datatable-card">
                     <div class="card-header">
                         <span class="header-title">{{ _lang('Account Overview') }}</span>
                     </div>
 
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-bordered">
+                            <table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_Account_Overview">
                                 <thead>
                                     <tr>
                                         <th class="text-nowrap pl-4">{{ _lang('Account Number') }}</th>
@@ -107,13 +109,14 @@
 			</div>
 
 			<div id="transaction-history" class="tab-pane">
-                <div class="card">
+                <div class="card cavic-datatable-card dashboard-proof-datatable-card">
                     <div class="card-header">
                         <span class="header-title">{{ _lang('Transactions') }}</span>
                     </div>
 
                     <div class="card-body">
-						<table id="transactions_table" class="table table-bordered">
+						<div class="table-responsive">
+						<table id="transactions_table" class="table table-bordered table-striped table-export dashboard-table-compact" data-export-filename="Member_Transactions">
 							<thead>
 								<tr>
 									<th>{{ _lang('Date') }}</th>
@@ -123,24 +126,26 @@
 									<th>{{ _lang('Debit/Credit') }}</th>
 									<th>{{ _lang('Type') }}</th>
 									<th>{{ _lang('Status') }}</th>
-									<th class="text-center">{{ _lang('Action') }}</th>
+									<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 								</tr>
 							</thead>
 							<tbody>
 							</tbody>
 						</table>
+						</div>
 					</div>
 				</div>
 			</div><!--End Transaction Table-->
 
 			<div id="member_loans" class="tab-pane">
-                <div class="card">
+                <div class="card cavic-datatable-card dashboard-proof-datatable-card">
                     <div class="card-header">
                         <span class="header-title">{{ _lang('Loans') }}</span>
                     </div>
 
                     <div class="card-body">
-						<table id="loans_table" class="table table-bordered data-table">
+						<div class="table-responsive">
+						<table id="loans_table" class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_Loans">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Loan ID') }}</th>
@@ -176,25 +181,27 @@
                                 @endforeach
                             </tbody>
                         </table>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<div id="kyc_documents" class="tab-pane">
-                <div class="card">
+                <div class="card cavic-datatable-card dashboard-proof-datatable-card">
                     <div class="card-header d-flex align-items-center">
                         <span class="header-title">{{ _lang('Documents of').' '.$member->first_name.' '.$member->last_name }}</span>
                         <a class="btn btn-primary btn-xs ml-auto ajax-modal" data-title="{{ _lang('Add New Document') }}" href="{{ route('member_documents.create', $member->id) }}"><i class="ti-plus"></i>&nbsp;{{ _lang('Add New') }}</a>
                     </div>
 
                     <div class="card-body">
-                        <table class="table table-bordered data-table">
+                        <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_KYC_Documents">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Document Name') }}</th>
                                     <th>{{ _lang('Document File') }}</th>
                                     <th>{{ _lang('Submitted At') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -223,6 +230,7 @@
                             @endforeach
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div><!--End KYC Documents Tab-->
@@ -310,6 +318,7 @@
 @endsection
 
 @section('js-script')
+@include('backend.admin.partials.cavic-datatable-standard')
 <script>
 (function ($) {
 	"use strict";
@@ -326,36 +335,63 @@
 			{ data : 'dr_cr', name : 'dr_cr' },
 			{ data : 'type', name : 'type' },
 			{ data : 'status', name : 'status' },
-			{ data : "action", name : "action" },
+			{ data : "action", name : "action", orderable: false, searchable: false },
 		],
 		responsive: true,
 		"bStateSave": true,
 		"bAutoWidth":false,
 		"ordering": false,
+		pageLength: 10,
+		lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+		buttons: [
+			{
+				extend: 'pdf',
+				text: '<i class="ti-download"></i><span>{{ _lang('PDF') }}</span>',
+				className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+				filename: 'Member_Transactions',
+				title: 'Member Transactions',
+				exportOptions: { columns: window.cavicDataTableExportColumns }
+			},
+			{
+				extend: 'excel',
+				text: '<i class="ti-download"></i><span>{{ _lang('Excel') }}</span>',
+				className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+				filename: 'Member_Transactions',
+				title: 'Member Transactions',
+				exportOptions: { columns: window.cavicDataTableExportColumns }
+			},
+			{
+				extend: 'csv',
+				text: '<i class="ti-download"></i><span>{{ _lang('CSV') }}</span>',
+				className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
+				filename: 'Member_Transactions',
+				exportOptions: { columns: window.cavicDataTableExportColumns }
+			}
+		],
 		"language": {
-		   "decimal":        "",
 		   "emptyTable":     "{{ _lang('No Data Found') }}",
-		   "info":           "{{ _lang('Showing') }} _START_ {{ _lang('to') }} _END_ {{ _lang('of') }} _TOTAL_ {{ _lang('Entries') }}",
-		   "infoEmpty":      "{{ _lang('Showing 0 To 0 Of 0 Entries') }}",
-		   "infoFiltered":   "(filtered from _MAX_ total entries)",
-		   "infoPostFix":    "",
-		   "thousands":      ",",
-		   "lengthMenu":     "{{ _lang('Show') }} _MENU_ {{ _lang('Entries') }}",
+		   "info":           "{{ _lang('Viewing') }} _START_-_END_ {{ _lang('of') }} _TOTAL_",
+		   "infoEmpty":      "{{ _lang('Viewing 0-0 of 0') }}",
+		   "lengthMenu":     "_MENU_",
 		   "loadingRecords": "{{ _lang('Loading...') }}",
 		   "processing":     "{{ _lang('Processing...') }}",
-		   "search":         "{{ _lang('Search') }}",
+		   "search":         "",
+		   "searchPlaceholder": "{{ _lang('Search records') }}",
 		   "zeroRecords":    "{{ _lang('No matching records found') }}",
 		   "paginate": {
-			  "first":      "{{ _lang('First') }}",
-			  "last":       "{{ _lang('Last') }}",
               "previous":   "<i class='fas fa-angle-left'></i>",
-        	  "next" :      "<i class='fas fa-angle-right'></i>",
+        	  "next" :      "<i class='fas fa-angle-right'></i>"
 		  }
 		},
         drawCallback: function () {
 			$(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+		},
+		initComplete: function () {
+			window.cavicBuildDataTableToolbar(this.api(), $('#transactions_table'));
 		}
 	});
+
+	window.cavicInitStaticDataTables('.cavic-data-table', 'Member_Profile');
 
     $("a[data-toggle=\"tab\"]").on("shown.bs.tab", function (e) {
         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
@@ -364,5 +400,3 @@
 })(jQuery);
 </script>
 @endsection
-
-

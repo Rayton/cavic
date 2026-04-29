@@ -105,7 +105,9 @@ class MemberController extends Controller
         $data            = [];
         $data['members'] = Member::where('status', 0)
             ->withoutGlobalScopes(['status'])
-            ->paginate(10);
+            ->latest('id')
+            ->get();
+        $data['assets'] = ['datatable'];
         return view('backend.admin.member.pending_requests', $data);
     }
 
@@ -122,6 +124,11 @@ class MemberController extends Controller
             ->get();
 
         $memberNo = get_tenant_option('starting_member_no');
+
+        if ($request->ajax()) {
+            return view('backend.admin.member.modal.create', compact('customFields', 'memberNo'));
+        }
+
         return view('backend.admin.member.create', compact('customFields', 'memberNo'));
     }
 

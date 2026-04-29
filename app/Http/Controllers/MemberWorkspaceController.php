@@ -66,6 +66,7 @@ class MemberWorkspaceController extends Controller
 
         return view('backend.admin.member.workspace', [
             'page_title' => _lang('Members'),
+            'assets' => ['datatable'],
             'memberStats' => [
                 'members' => Member::count(),
                 'pending' => Member::withoutGlobalScopes(['status'])->where('status', 0)->count(),

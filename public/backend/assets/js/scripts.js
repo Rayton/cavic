@@ -1006,6 +1006,23 @@
 		return false;
 	});
 
+	function syncMemberCreatePortalFields($form) {
+		var enabled = $form.find('.member-create-client-login').is(':checked');
+		$form.find('.member-create-client-login-card input, .member-create-client-login-card select')
+			.prop('disabled', !enabled)
+			.prop('required', enabled);
+	}
+
+	$(document).on('change', '.member-create-client-login', function () {
+		syncMemberCreatePortalFields($(this).closest('form'));
+	});
+
+	$(document).on('shown.bs.modal', '#main_modal', function () {
+		$(this).find('.member-create-modal-form').each(function () {
+			syncMemberCreatePortalFields($(this));
+		});
+	});
+
 	$("#main_modal").on('show.bs.modal', function () {
 		$('#main_modal').css("overflow-y", "hidden");
 	});

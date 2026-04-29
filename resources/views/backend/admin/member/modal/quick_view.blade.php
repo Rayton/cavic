@@ -10,7 +10,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-sm table-bordered mb-0">
+        <table class="table table-bordered table-striped dashboard-table-compact mb-0">
             <tr><td>{{ _lang('Branch') }}</td><td>{{ optional($member->branch)->name ?? _lang('N/A') }}</td></tr>
             <tr><td>{{ _lang('Email') }}</td><td>{{ $member->email ?: _lang('N/A') }}</td></tr>
             <tr><td>{{ _lang('Mobile') }}</td><td>{{ trim(($member->country_code ?? '') . ' ' . ($member->mobile ?? '')) ?: _lang('N/A') }}</td></tr>

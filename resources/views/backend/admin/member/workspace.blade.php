@@ -37,7 +37,7 @@
         ['label' => _lang('Members Workspace'), 'active' => true],
     ],
     'actions' => [
-        ['label' => _lang('Add Member'), 'url' => route('members.create'), 'class' => 'btn-primary btn-sm'],
+        ['label' => _lang('Add Member'), 'url' => route('members.create'), 'class' => 'btn-primary btn-sm ajax-modal', 'data_title' => _lang('Add New Member'), 'data_fullscreen' => true],
         ['label' => _lang('Bulk Import'), 'url' => route('members.import'), 'class' => 'btn-outline-primary btn-sm'],
     ],
 ])
@@ -51,11 +51,11 @@
 </div>
 </div>
 
-<div class="card workspace-section-card">
+<div class="card workspace-section-card cavic-datatable-card">
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="all-members">
             <div class="table-responsive">
-                <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Member') }}</th>
@@ -63,7 +63,7 @@
                             <th>{{ _lang('Branch') }}</th>
                             <th>{{ _lang('KYC Docs') }}</th>
                             <th>{{ _lang('Status') }}</th>
-                            <th>{{ _lang('Action') }}</th>
+                            <th data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,7 +86,7 @@
         </div>
         <div class="tab-pane fade" id="onboarding">
             <div class="table-responsive">
-                <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Member') }}</th>
@@ -94,7 +94,7 @@
                             <th>{{ _lang('Branch') }}</th>
                             <th>{{ _lang('KYC Docs') }}</th>
                             <th>{{ _lang('Status') }}</th>
-                            <th>{{ _lang('Action') }}</th>
+                            <th data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -127,14 +127,14 @@
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Members Missing KYC Documents') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Member') }}</th>
                                     <th>{{ _lang('Member No') }}</th>
                                     <th>{{ _lang('Branch') }}</th>
                                     <th>{{ _lang('Status') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,13 +163,13 @@
                 <div class="col-lg-6">
                     <div class="workspace-section-title">{{ _lang('Recent KYC Uploads') }}</div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Member') }}</th>
                                     <th>{{ _lang('Branch') }}</th>
                                     <th>{{ _lang('Document') }}</th>
-                                    <th>{{ _lang('Action') }}</th>
+                                    <th data-no-export="1">{{ _lang('Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -192,7 +192,7 @@
         </div>
         <div class="tab-pane fade" id="branches">
             <div class="table-responsive">
-                <table class="table table-sm table-bordered workspace-mini-table mb-3">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Branch') }}</th>
@@ -221,14 +221,14 @@
         </div>
         <div class="tab-pane fade" id="leaders">
             <div class="table-responsive mb-3">
-                <table class="table table-sm table-bordered workspace-mini-table mb-0">
+                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-0">
                     <thead>
                         <tr>
                             <th>{{ _lang('Leader') }}</th>
                             <th>{{ _lang('Branch') }}</th>
                             <th>{{ _lang('Position') }}</th>
                             <th>{{ _lang('Status') }}</th>
-                            <th>{{ _lang('Action') }}</th>
+                            <th data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -260,3 +260,13 @@
     </div>
 </div>
 @endsection
+
+@section('js-script')
+@include('backend.admin.partials.cavic-datatable-standard')
+<script>
+    (function ($) {
+        window.cavicInitStaticDataTables('.cavic-data-table', 'Members_Workspace');
+    })(window.jQuery || window.$);
+</script>
+@endsection
+

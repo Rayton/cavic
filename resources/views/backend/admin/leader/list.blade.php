@@ -3,7 +3,7 @@
 @section('content')
 <div class="row">
 	<div class="col-lg-12">
-		<div class="card">
+		<div class="card cavic-datatable-card dashboard-proof-datatable-card">
 			<div class="card-header d-flex align-items-center">
 				<span class="panel-title">{{ _lang('Leaders Management') }}</span>
 				<div class="ml-auto">
@@ -19,12 +19,13 @@
 				<!-- Secretaries Section -->
 				<h5 class="mb-3">{{ _lang('Secretaries') }}</h5>
 				@if($secretaries->count() > 0)
-				<table class="table table-bordered mb-4">
+				<div class="table-responsive mb-4">
+				<table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table mb-0" data-export-filename="Member_Secretaries">
 					<thead>
 						<tr>
 							<th>{{ _lang('Leader') }}</th>
 							<th>{{ _lang('Status') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -60,6 +61,7 @@
 						@endforeach
 					</tbody>
 				</table>
+				</div>
 				@else
 				<div class="alert alert-info mb-4">{{ _lang('No secretaries added yet') }}</div>
 				@endif
@@ -67,12 +69,13 @@
 				<!-- Chairmen Section -->
 				<h5 class="mb-3">{{ _lang('Chairmen') }}</h5>
 				@if($chairmen->count() > 0)
-				<table class="table table-bordered">
+				<div class="table-responsive">
+				<table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table mb-0" data-export-filename="Member_Chairmen">
 					<thead>
 						<tr>
 							<th>{{ _lang('Leader') }}</th>
 							<th>{{ _lang('Status') }}</th>
-							<th class="text-center">{{ _lang('Action') }}</th>
+							<th class="text-center" data-no-export="1">{{ _lang('Action') }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -108,6 +111,7 @@
 						@endforeach
 					</tbody>
 				</table>
+				</div>
 				@else
 				<div class="alert alert-info">{{ _lang('No chairmen added yet') }}</div>
 				@endif
@@ -115,4 +119,13 @@
 		</div>
 	</div>
 </div>
+@endsection
+
+@section('js-script')
+@include('backend.admin.partials.cavic-datatable-standard')
+<script>
+	(function ($) {
+		window.cavicInitStaticDataTables('.cavic-data-table', 'Member_Leaders');
+	})(window.jQuery || window.$);
+</script>
 @endsection
