@@ -7,7 +7,7 @@
     'tabs' => [
         ['label' => _lang('All Members'), 'target' => '#all-members', 'active' => true],
         ['label' => _lang('Onboarding / Requests'), 'target' => '#onboarding'],
-        ['label' => _lang('Documents'), 'target' => '#kyc'],
+        ['label' => _lang('Documents'), 'target' => '#documents'],
         ['label' => _lang('Branches'), 'target' => '#branches'],
         ['label' => _lang('Leaders'), 'target' => '#leaders'],
         ['label' => _lang('Import & Setup'), 'target' => '#setup'],
@@ -75,7 +75,7 @@
                             <th>{{ _lang('Member') }}</th>
                             <th>{{ _lang('Member No') }}</th>
                             <th>{{ _lang('Branch') }}</th>
-                            <th>{{ _lang('KYC Docs') }}</th>
+                            <th>{{ _lang('Documents') }}</th>
                             <th>{{ _lang('Status') }}</th>
                             <th data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
@@ -114,7 +114,7 @@
                             <th>{{ _lang('Member') }}</th>
                             <th>{{ _lang('Member No') }}</th>
                             <th>{{ _lang('Branch') }}</th>
-                            <th>{{ _lang('KYC Docs') }}</th>
+                            <th>{{ _lang('Documents') }}</th>
                             <th>{{ _lang('Status') }}</th>
                             <th data-no-export="1">{{ _lang('Action') }}</th>
                         </tr>
@@ -147,7 +147,7 @@
             </div>
             <a class="btn btn-outline-primary btn-sm" href="{{ route('members.pending_requests') }}">{{ _lang('Open Full Onboarding Queue') }}</a>
         </div>
-        <div class="tab-pane fade" id="kyc">
+        <div class="tab-pane fade" id="documents">
             <div class="row">
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="workspace-section-title">{{ _lang('Members Missing Documents') }}</div>
@@ -181,14 +181,14 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="5" class="text-center text-muted">{{ _lang('No members are currently missing KYC documents') }}</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">{{ _lang('No members are currently missing documents') }}</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="workspace-section-title">{{ _lang('Recent KYC Uploads') }}</div>
+                    <div class="workspace-section-title">{{ _lang('Recent Document Uploads') }}</div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                             <thead>
@@ -208,7 +208,7 @@
                                         <td>@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('Open Member'), 'url' => route('members.show', $document->member_id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Member Details'), 'data_size' => 'lg']]])</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="text-center text-muted">{{ _lang('No recent KYC uploads found') }}</td></tr>
+                                    <tr><td colspan="4" class="text-center text-muted">{{ _lang('No recent document uploads found') }}</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

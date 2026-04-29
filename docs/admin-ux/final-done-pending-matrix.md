@@ -22,7 +22,7 @@ _Last updated: 2026-04-17_
 - Collections analytics tables made exportable
 
 ### Members workspace
-- Pending members, recent members, active borrowers, branch summary, KYC/document visibility, and leaders preview implemented
+- Pending members, recent members, active borrowers, branch summary, document visibility, and leaders preview implemented
 
 ### Loans workspace
 - Loan lifecycle pipeline visibility implemented

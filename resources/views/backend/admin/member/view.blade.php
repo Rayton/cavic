@@ -9,7 +9,7 @@
         ['label' => _lang('Account Overview'), 'target' => '#account_overview'],
         ['label' => _lang('Transactions'), 'target' => '#transaction-history'],
         ['label' => _lang('Loans'), 'target' => '#member_loans'],
-        ['label' => _lang('Documents'), 'target' => '#kyc_documents'],
+        ['label' => _lang('Documents'), 'target' => '#member_documents'],
         ['label' => _lang('Send Email'), 'target' => '#email'],
         ['label' => _lang('Send SMS'), 'target' => '#sms'],
         ['label' => _lang('Edit Member Details'), 'url' => route('members.edit', $member->id)],
@@ -186,7 +186,7 @@
 				</div>
 			</div>
 
-			<div id="kyc_documents" class="tab-pane">
+			<div id="member_documents" class="tab-pane">
                 <div class="card cavic-datatable-card dashboard-proof-datatable-card">
                     <div class="card-header d-flex align-items-center">
                         <span class="header-title">{{ _lang('Documents of').' '.$member->first_name.' '.$member->last_name }}</span>
@@ -195,7 +195,7 @@
 
                     <div class="card-body">
                         <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_KYC_Documents">
+                        <table class="table table-bordered table-striped table-export dashboard-table-compact cavic-data-table" data-export-filename="Member_Documents">
                             <thead>
                                 <tr>
                                     <th>{{ _lang('Document Name') }}</th>

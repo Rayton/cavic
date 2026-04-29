@@ -102,7 +102,7 @@ Action Center should prioritize:
 Tabs:
 - All Members
 - Onboarding / Requests
-- KYC & Documents
+- Documents
 - Branches
 - Leaders
 - Import
@@ -111,7 +111,7 @@ Tabs:
 Members workspace should support lifecycle visibility:
 - applicant / pending approval
 - active member
-- incomplete KYC
+- incomplete documents
 - dormant / inactive member
 - member with active loans
 - member with overdue exposure
@@ -300,7 +300,7 @@ Agents may use these IDs in commits, branches, or task notes.
 - UX-032 Add admin loan lifecycle pipeline and status model to workspace UX
 - UX-033 Add collections management tab inside Loans
 - UX-034 Add disbursement queue and readiness visibility
-- UX-035 Add member onboarding and KYC visibility to Members workspace
+- UX-035 Add member onboarding and document visibility to Members workspace
 - UX-036 Add teller / cash operations tab inside Finance
 - UX-037 Add reconciliation and day-end visibility inside Finance
 - UX-038 Add executive KPI dashboard layer for admin

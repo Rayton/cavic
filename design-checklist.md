@@ -150,7 +150,7 @@ Suggested KPI set:
 - [ ] Build/standardize workspace with tabs:
   - [ ] All Members
   - [ ] Onboarding / Requests
-  - [ ] KYC & Documents
+  - [ ] Documents
   - [ ] Branches
   - [ ] Leaders
   - [ ] Import

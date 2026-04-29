@@ -348,7 +348,7 @@ Make the admin dashboard branch-aware and exception-aware.
 ### Tabs
 - All Members
 - Onboarding / Requests
-- KYC & Documents
+- Documents
 - Branches
 - Leaders
 - Import
@@ -367,7 +367,7 @@ Make the admin dashboard branch-aware and exception-aware.
 
 ---
 
-## UX-032 — Add member onboarding and KYC visibility
+## UX-032 — Add member onboarding and document visibility
 **Story Points:** 5  
 **Priority:** High
 
@@ -377,7 +377,7 @@ Make member lifecycle states visible from the workspace.
 ### Lifecycle markers
 - applicant
 - pending approval
-- incomplete KYC
+- incomplete documents
 - active
 - dormant
 - active borrower
@@ -392,7 +392,7 @@ Make member lifecycle states visible from the workspace.
 - UX-031
 
 ### Acceptance Criteria
-- admins can quickly identify onboarding and KYC bottlenecks
+- admins can quickly identify onboarding and document bottlenecks
 - members with overdue exposure are easier to spot
 
 ---

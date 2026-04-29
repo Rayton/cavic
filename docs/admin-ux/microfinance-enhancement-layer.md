@@ -14,7 +14,7 @@ A great microfinance admin redesign improves:
 - loan lifecycle visibility
 - overdue and collections handling
 - disbursement readiness
-- member onboarding and KYC visibility
+- member onboarding and document visibility
 - branch-aware operations
 - cash and reconciliation awareness
 - exception-driven workflows
@@ -32,7 +32,7 @@ This enhancement layer should be applied on top of:
 ## In scope now
 - admin dashboard enhancements
 - admin action center enhancements
-- member onboarding/KYC visibility for admin
+- member onboarding/document visibility for admin
 - loan pipeline, disbursement, and collections UX for admin
 - finance/teller-like admin workflows
 - reconciliation and exception visibility
@@ -68,7 +68,7 @@ Admins should instantly see:
 - what is due today
 - what is overdue
 - what is ready for disbursement
-- what is blocked by missing KYC or approval
+- what is blocked by missing documents or approval
 - what financial exceptions require intervention
 
 ## 3.3 Make status central to UX
@@ -145,7 +145,7 @@ It should prioritize action.
 - repayment posting issue
 - request with incomplete data
 - reconciliation mismatch
-- incomplete KYC blocking activation
+- incomplete documents blocking activation
 
 ## 5.4 UX rules
 - due today and overdue should rank above less urgent items
@@ -160,7 +160,7 @@ It should prioritize action.
 Recommended lifecycle markers:
 - applicant
 - pending approval
-- incomplete KYC
+- incomplete documents
 - active
 - dormant
 - active borrower
@@ -169,7 +169,7 @@ Recommended lifecycle markers:
 ## 6.2 Required tabs or filters
 - All Members
 - Onboarding / Requests
-- KYC & Documents
+- Documents
 - Active Borrowers
 - Overdue Exposure
 - Branches
@@ -179,7 +179,7 @@ Recommended lifecycle markers:
 
 ## 6.3 Key questions the admin should answer quickly
 - Who still needs approval?
-- Who is blocked by missing KYC?
+- Who is blocked by missing documents?
 - Which members already have active loans?
 - Which members are tied to overdue accounts?
 - Which branch has onboarding issues?
@@ -330,7 +330,7 @@ Collections and repayments should use aging buckets that are visible at list lev
 
 ## 10.3 Exception banners / panels
 Where applicable, surface:
-- missing KYC
+- missing documents
 - failed posting
 - mismatch detected
 - incomplete approval chain
@@ -355,7 +355,7 @@ To raise the plan into top-tier territory, add these implementation tickets:
 - UX-032 Add admin loan lifecycle pipeline and status model to workspace UX
 - UX-033 Add collections management tab inside Loans
 - UX-034 Add disbursement queue and readiness visibility
-- UX-035 Add member onboarding and KYC visibility to Members workspace
+- UX-035 Add member onboarding and document visibility to Members workspace
 - UX-036 Add teller / cash operations tab inside Finance
 - UX-037 Add reconciliation and day-end visibility inside Finance
 - UX-038 Add executive KPI dashboard layer for admin
@@ -383,7 +383,7 @@ This enhancement layer is successful when the admin can answer these questions i
 - What is overdue?
 - What is ready to disburse?
 - What is blocked and why?
-- Is onboarding/KYC getting stuck?
+- Is onboarding/documents getting stuck?
 - Are cash and finance operations healthy?
 - Which branch or area is under pressure?
 

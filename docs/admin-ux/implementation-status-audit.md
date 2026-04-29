@@ -29,10 +29,10 @@ This audit reflects the current admin-first implementation state after the navig
 
 ### Members workspace
 - Real onboarding queue
-- KYC/documents visibility
-- Missing KYC tracking
-- Recent KYC uploads
-- Branch summary with missing KYC and borrower visibility
+- document visibility
+- Missing document tracking
+- Recent document uploads
+- Branch summary with missing documents and borrower visibility
 - Leaders preview
 
 ### Loans workspace

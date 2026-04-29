@@ -604,7 +604,6 @@ $language["Approve Member Request"]="Kubali Ombi la Mwanachama";
 $language["Member Details"]="Maelezo ya Mwanachama";
 $language["Account Overview"]="Muhtasari wa Akaunti";
 $language["Transactions"]="Miamala";
-$language["KYC Documents"]="Hati";
 $language["Send Email"]="Tuma Barua Pepe";
 $language["Send SMS"]="Tuma SMS";
 $language["Edit Member Details"]="Hariri Maelezo ya Mwanachama";

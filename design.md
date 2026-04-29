@@ -630,7 +630,7 @@ Apply the reference layout to a member lifecycle workspace.
 - summary cards:
   - Total Members
   - Pending Approval
-  - Incomplete KYC
+  - Incomplete documents
   - Dormant Members
 
 ### Body

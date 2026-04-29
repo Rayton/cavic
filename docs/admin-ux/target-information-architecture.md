@@ -108,7 +108,7 @@ Single place for operational queues and tasks requiring attention.
 - details should open in modal or large modal where possible
 - counts should match sidebar badges
 - items due today should be visually prioritized over generic pending queues
-- exceptions should include failed postings, reconciliation mismatches, incomplete KYC, or other high-friction admin blockers once implemented
+- exceptions should include failed postings, reconciliation mismatches, incomplete documents, or other high-friction admin blockers once implemented
 
 ### Primary source routes
 - `members.pending_requests`
@@ -127,7 +127,7 @@ All member-related administration in one module.
 ### Tabs
 - All Members
 - Onboarding / Requests
-- KYC & Documents
+- Documents
 - Branches
 - Leaders
 - Import
@@ -143,19 +143,19 @@ All member-related administration in one module.
 - Leaders
 - Member custom fields
 - Member documents from member detail view
-- KYC / onboarding visibility
+- Document / onboarding visibility
 
 ### UX behavior
 - `Add Member` should be primary page CTA
 - `Bulk Import` belongs inside Import tab
 - Branches and Leaders should no longer feel hidden under settings
 - Member profile remains full page with tabs
-- onboarding states should be visible, such as pending approval, incomplete KYC, active, dormant, and members with overdue loans
+- onboarding states should be visible, such as pending approval, incomplete documents, active, dormant, and members with overdue loans
 
 ### Microfinance enhancement
 Members should be more than a simple directory. The workspace should help admins answer:
 - who is still awaiting approval?
-- who has incomplete KYC?
+- who has incomplete documents?
 - which members have active or overdue loans?
 - which branch has onboarding bottlenecks?
 
@@ -643,7 +643,7 @@ The target IA is successful when:
 - add executive KPI and exception layer to Dashboard
 
 ## Phase 3
-- implement Members workspace with onboarding/KYC visibility
+- implement Members workspace with onboarding/document visibility
 - implement Loans workspace with pipeline, disbursement, and collections emphasis
 - implement Finance workspace with teller/cash ops and reconciliation visibility
 

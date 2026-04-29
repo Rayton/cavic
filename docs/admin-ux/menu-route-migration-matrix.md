@@ -157,12 +157,12 @@ When in doubt, group by operational job-to-be-done:
 | `leaders.edit` | System Settings | Members | Leaders | Modal | Yes | keep |
 | `leaders.update` | System Settings | Members | Leaders | Action | Yes | keep |
 | `leaders.destroy` | System Settings | Members | Leaders | Action | Yes | keep |
-| `member_documents.index` | Member Detail | Members | KYC & Documents | Page section | Yes | keep within member detail flow |
-| `member_documents.create` | Member Detail | Members | KYC & Documents | Modal | Yes | keep modal |
-| `member_documents.store` | Member Detail | Members | KYC & Documents | Action | Yes | keep |
-| `member_documents.edit` | Member Detail | Members | KYC & Documents | Modal | Yes | keep |
-| `member_documents.update` | Member Detail | Members | KYC & Documents | Action | Yes | keep |
-| `member_documents.destroy` | Member Detail | Members | KYC & Documents | Action | Yes | keep |
+| `member_documents.index` | Member Detail | Members | Documents | Page section | Yes | keep within member detail flow |
+| `member_documents.create` | Member Detail | Members | Documents | Modal | Yes | keep modal |
+| `member_documents.store` | Member Detail | Members | Documents | Action | Yes | keep |
+| `member_documents.edit` | Member Detail | Members | Documents | Modal | Yes | keep |
+| `member_documents.update` | Member Detail | Members | Documents | Action | Yes | keep |
+| `member_documents.destroy` | Member Detail | Members | Documents | Action | Yes | keep |
 
 ---
 

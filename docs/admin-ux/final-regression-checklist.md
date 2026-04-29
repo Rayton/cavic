@@ -88,7 +88,7 @@ The following were confirmed by CLI route checks and render smoke tests:
 
 ### 4. Members workspace
 - [ ] Pending onboarding table opens full queue correctly
-- [ ] Missing KYC / document visibility appears accurate
+- [ ] Missing document visibility appears accurate
 - [ ] Branch summary and leaders preview render correctly
 - [ ] Major list links open expected legacy pages
 
