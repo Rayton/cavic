@@ -779,6 +779,8 @@ Per project rules, the reference style should also influence modal design.
 - clear footer actions
 - clean form spacing
 - consistent widths for small / medium / large review modals
+- modal overlays must sit above DataTables controls: DataTables export menus use the shared overlay layer, the custom Columns menu may reach `z-index: 4000`, and admin modals must render above them at `z-index: 5000` or higher
+- stacked modal flows should use a higher secondary layer than the main modal, for example `#main_modal` at `5000` and `#secondary_modal` at `5020`
 
 ### Use modals for
 - branches

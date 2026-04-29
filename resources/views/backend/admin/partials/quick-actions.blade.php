@@ -16,7 +16,13 @@
             </div>
             <div class="workspace-quick-actions-list d-flex flex-wrap align-items-center">
                 @foreach($actions as $action)
-                    <a href="{{ $action['url'] ?? '#' }}" class="btn {{ $action['class'] ?? 'btn-outline-primary btn-sm' }} mr-2 mb-2">
+                    <a
+                        href="{{ $action['url'] ?? '#' }}"
+                        class="btn {{ $action['class'] ?? 'btn-outline-primary btn-sm' }} mr-2 mb-2"
+                        @if(! empty($action['data_title'])) data-title="{{ $action['data_title'] }}" @endif
+                        @if(array_key_exists('data_fullscreen', $action)) data-fullscreen="{{ $action['data_fullscreen'] ? 'true' : 'false' }}" @endif
+                        @if(array_key_exists('data_reload', $action)) data-reload="{{ $action['data_reload'] ? 'true' : 'false' }}" @endif
+                    >
                         @if(! empty($action['icon']))
                             <i class="{{ $action['icon'] }} mr-1"></i>
                         @endif

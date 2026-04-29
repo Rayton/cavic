@@ -167,9 +167,13 @@
     --mf-z-dropdown: 1000;
     --mf-z-sticky: 1020;
     --mf-z-fixed: 1030;
-    --mf-z-modal-backdrop: 1040;
-    --mf-z-modal: 1050;
-    --mf-z-popover: 1060;
-    --mf-z-tooltip: 1070;
+    --mf-z-datatable-toolbar: 1200;
+    --mf-z-datatable-dropdown: 3000;
+    --mf-z-datatable-columns: 4000;
+    --mf-z-modal-backdrop: 4990;
+    --mf-z-modal: 5000;
+    --mf-z-modal-stacked: 5020;
+    --mf-z-popover: 5100;
+    --mf-z-tooltip: 5200;
 }
 

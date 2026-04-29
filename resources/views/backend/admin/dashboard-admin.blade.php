@@ -330,7 +330,7 @@
     'title' => _lang('Operational Quick Actions'),
     'subtitle' => _lang('Keep common admin actions near the dashboard instead of adding more sidebar clutter.'),
     'actions' => [
-        ['label' => _lang('Add Member'), 'url' => route('members.create'), 'class' => 'btn-primary btn-sm', 'icon' => 'fas fa-user-plus'],
+        ['label' => _lang('Add Member'), 'url' => route('members.create'), 'class' => 'btn-primary btn-sm ajax-modal', 'icon' => 'fas fa-user-plus', 'data_title' => _lang('Add New Member'), 'data_fullscreen' => true],
         ['label' => _lang('New Loan'), 'url' => route('loans.create'), 'class' => 'btn-outline-primary btn-sm', 'icon' => 'fas fa-hand-holding-usd'],
         ['label' => _lang('New Transaction'), 'url' => route('transactions.create'), 'class' => 'btn-outline-primary btn-sm', 'icon' => 'fas fa-exchange-alt'],
         ['label' => _lang('Reports Center'), 'url' => route('reports.index'), 'class' => 'btn-outline-primary btn-sm', 'icon' => 'fas fa-chart-bar'],

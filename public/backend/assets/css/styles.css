@@ -2216,6 +2216,19 @@ p.card-text {
 
 .modal {
     background: rgb(39 60 117 / 70%);
+    z-index: 5000;
+}
+
+#main_modal {
+    z-index: 5000;
+}
+
+#secondary_modal {
+    z-index: 5020;
+}
+
+.modal-backdrop {
+    z-index: 4990;
 }
 
 .modal-header {
