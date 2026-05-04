@@ -258,12 +258,133 @@
         font-weight: 800;
         margin-left: auto;
     }
+    .action-member-hero {
+        border: 1px solid #dfe9e8;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f8fbfa 0%, #edf7f4 100%);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .action-member-title {
+        color: #213039;
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: .25rem;
+    }
+    .action-member-copy {
+        color: #66717a;
+        font-size: .84rem;
+        margin: 0;
+        max-width: 720px;
+    }
+    .action-member-score {
+        align-items: center;
+        background: #fff;
+        border: 1px solid #dce8e7;
+        border-radius: 12px;
+        display: inline-flex;
+        gap: .75rem;
+        min-width: 220px;
+        padding: .75rem .9rem;
+    }
+    .action-member-score-value {
+        color: var(--cavic-primary-dark, #32555a);
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .action-member-score-label {
+        color: #66717a;
+        font-size: .76rem;
+        font-weight: 700;
+        line-height: 1.25;
+        text-transform: uppercase;
+    }
+    .action-member-signals {
+        display: grid;
+        gap: .85rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 1rem;
+    }
+    .action-member-signal {
+        align-items: center;
+        background: #fff;
+        border: 1px solid #e2eceb;
+        border-radius: 12px;
+        display: flex;
+        gap: .75rem;
+        min-height: 88px;
+        padding: .85rem;
+    }
+    .action-member-signal-icon {
+        align-items: center;
+        background: rgba(63, 104, 109, .1);
+        border-radius: 11px;
+        color: var(--cavic-primary-dark, #32555a);
+        display: inline-flex;
+        flex: 0 0 36px;
+        height: 36px;
+        justify-content: center;
+        width: 36px;
+    }
+    .action-member-signal.warning .action-member-signal-icon { background: #ffe8bd; color: #8a5300; }
+    .action-member-signal.info .action-member-signal-icon { background: #d9eef2; color: #0c5460; }
+    .action-member-signal.success .action-member-signal-icon { background: #d9f1df; color: #155724; }
+    .action-member-signal-value {
+        color: #213039;
+        font-size: 1.2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .action-member-signal-label {
+        color: #25333b;
+        font-size: .8rem;
+        font-weight: 800;
+        margin-top: .2rem;
+    }
+    .action-member-signal-meta {
+        color: #6f787f;
+        font-size: .72rem;
+        line-height: 1.3;
+        margin-top: .15rem;
+    }
+    .action-member-table-header {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .7rem;
+        justify-content: space-between;
+        margin: .25rem 0 .65rem;
+    }
+    .action-member-name {
+        color: #25333b;
+        font-weight: 800;
+    }
+    .action-member-subline {
+        color: #7a848c;
+        font-size: .74rem;
+        font-weight: 500;
+        margin-top: .15rem;
+    }
+    .action-member-branch-chip {
+        background: #eef7f6;
+        border: 1px solid #d5e8e6;
+        border-radius: 999px;
+        color: var(--cavic-primary-dark, #32555a);
+        display: inline-flex;
+        font-size: .72rem;
+        font-weight: 800;
+        padding: .22rem .55rem;
+    }
     @media (max-width: 1199.98px) {
         .action-exception-signals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .action-member-signals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 767.98px) {
         .action-exception-score { justify-content: flex-start; margin-top: .75rem; width: 100%; }
+        .action-member-score { justify-content: flex-start; margin-top: .75rem; width: 100%; }
         .action-exception-signals,
+        .action-member-signals,
         .action-aging-grid,
         .action-pressure-grid { grid-template-columns: 1fr; }
     }
@@ -438,35 +559,75 @@
 
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'action-center-collection-range'])
 
-<div class="workspace-first-tab-stats" data-tab="#member-requests">
-<div class="row mb-4">
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Member Requests') }}</div><div class="stat-value">{{ $memberRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#member-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open queue') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Loans') }}</div><div class="stat-value">{{ $pendingLoansCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#pending-loans"><i class="fas fa-arrow-right"></i>{{ _lang('Review applications') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Due Today') }}</div><div class="stat-value">{{ $dueTodayCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#due-upcoming"><i class="fas fa-arrow-right"></i>{{ _lang('Open today\'s collections') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Deposit Requests') }}</div><div class="stat-value">{{ $depositRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#finance-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open requests') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Withdraw Requests') }}</div><div class="stat-value">{{ $withdrawRequestsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#finance-requests"><i class="fas fa-arrow-right"></i>{{ _lang('Open requests') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Overdue Repayments') }}</div><div class="stat-value">{{ $overdueRepaymentsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#exceptions"><i class="fas fa-arrow-right"></i>{{ _lang('Review collections') }}</a></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><a class="stat-link action-center-link action-center-tab-link" href="#exceptions"><i class="fas fa-arrow-right"></i>{{ _lang('Escalate critical cases') }}</a></div></div>
-    </div>
-</div>
-</div>
-
 <div class="card workspace-section-card action-center-table-actions dashboard-proof-datatable-card">
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="member-requests">
+            @php
+                $visibleMemberRequests = $memberRequests->count();
+                $memberRequestBranches = $memberRequests->map(function ($member) {
+                    return optional($member->branch)->name;
+                })->filter()->unique()->count();
+                $oldestMemberRequest = $memberRequests->sortBy('created_at')->first();
+                $oldestMemberWaiting = optional(optional($oldestMemberRequest)->created_at)->diffForHumans() ?? _lang('N/A');
+                $financeRequestsCount = $depositRequestsCount + $withdrawRequestsCount;
+                $collectionPressureCount = $dueTodayCount + $overdueRepaymentsCount;
+            @endphp
+            <div class="action-member-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <div class="action-member-title">{{ _lang('Member Onboarding Queue') }}</div>
+                        <p class="action-member-copy">{{ _lang('Pending onboarding is shown with the wider approval, finance, and collections load so the day starts with the right priorities.') }}</p>
+                    </div>
+                    <div class="action-member-score">
+                        <div>
+                            <div class="action-member-score-label">{{ _lang('Awaiting decision') }}</div>
+                            <div class="small text-muted">{{ _lang('Oldest') }}: {{ $oldestMemberWaiting }}</div>
+                        </div>
+                        <div class="action-member-score-value">{{ $memberRequestsCount }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="action-member-signals">
+                <div class="action-member-signal warning">
+                    <span class="action-member-signal-icon"><i class="fas fa-user-clock"></i></span>
+                    <div>
+                        <div class="action-member-signal-value">{{ $memberRequestsCount }}</div>
+                        <div class="action-member-signal-label">{{ _lang('Member Requests') }}</div>
+                        <div class="action-member-signal-meta">{{ $visibleMemberRequests }} {{ _lang('visible') }} | {{ $memberRequestBranches }} {{ _lang('branches') }}</div>
+                    </div>
+                </div>
+                <div class="action-member-signal info">
+                    <span class="action-member-signal-icon"><i class="fas fa-file-signature"></i></span>
+                    <div>
+                        <div class="action-member-signal-value">{{ $pendingLoansCount }}</div>
+                        <div class="action-member-signal-label">{{ _lang('Pending Loans') }}</div>
+                        <div class="action-member-signal-meta">{{ _lang('Applications waiting in the loan pipeline') }}</div>
+                    </div>
+                </div>
+                <div class="action-member-signal success">
+                    <span class="action-member-signal-icon"><i class="fas fa-wallet"></i></span>
+                    <div>
+                        <div class="action-member-signal-value">{{ $financeRequestsCount }}</div>
+                        <div class="action-member-signal-label">{{ _lang('Finance Requests') }}</div>
+                        <div class="action-member-signal-meta">{{ $depositRequestsCount }} {{ _lang('deposits') }} | {{ $withdrawRequestsCount }} {{ _lang('withdraws') }}</div>
+                    </div>
+                </div>
+                <div class="action-member-signal">
+                    <span class="action-member-signal-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div>
+                        <div class="action-member-signal-value">{{ $collectionPressureCount }}</div>
+                        <div class="action-member-signal-label">{{ _lang('Collections Pressure') }}</div>
+                        <div class="action-member-signal-meta">{{ $dueTodayCount }} {{ _lang('due today') }} | {{ $overdueRepaymentsCount }} {{ _lang('overdue') }} | {{ $criticalCollectionsCount }} {{ _lang('critical') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="action-member-table-header">
+                <div>
+                    <div class="workspace-section-title mb-1">{{ _lang('Review Queue') }}</div>
+                    <div class="small text-muted">{{ _lang('Approval readiness, contact details, and branch context in one queue.') }}</div>
+                </div>
+                <span class="workspace-status-chip pending">{{ $memberRequestsCount }} {{ _lang('pending') }}</span>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-3">
                     <thead>
@@ -481,10 +642,18 @@
                     <tbody>
                         @forelse($memberRequests as $member)
                             <tr>
-                                <td>{{ $member->name }}</td>
-                                <td>{{ $member->member_no }}</td>
-                                <td>{{ $member->branch->name }}</td>
-                                <td><span class="workspace-status-chip pending">{{ _lang('Pending Approval') }}</span></td>
+                                <td>
+                                    <div class="action-member-name">{{ $member->name }}</div>
+                                    <div class="action-member-subline">
+                                        {{ trim(($member->country_code ?? '') . ' ' . ($member->mobile ?? '')) ?: ($member->email ?? _lang('No contact listed')) }}
+                                    </div>
+                                </td>
+                                <td>{{ trim((string) $member->member_no) !== '' ? $member->member_no : _lang('Unassigned') }}</td>
+                                <td><span class="action-member-branch-chip">{{ optional($member->branch)->name ?? _lang('No Branch') }}</span></td>
+                                <td>
+                                    <span class="workspace-status-chip pending">{{ _lang('Pending Approval') }}</span>
+                                    <div class="action-member-subline">{{ optional($member->created_at)->diffForHumans() }}</div>
+                                </td>
                                 <td class="text-center">
                                     @include('backend.admin.partials.table-actions', [
                                         'items' => [

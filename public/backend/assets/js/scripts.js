@@ -913,7 +913,18 @@
 	//Ajax Modal Function
 	var previous_select;
 	var target_select;
+	function closeOpenTableActionMenus() {
+		$('.table-row-actions.show > [data-toggle="dropdown"]').dropdown('hide');
+		$('.table-row-actions').each(function () {
+			restoreFloatingTableActionMenu($(this));
+		});
+		$('.table-dropdown-open, .table-dropdown-open-card, .table-dropdown-open-modal')
+			.removeClass('table-dropdown-open table-dropdown-open-card table-dropdown-open-modal');
+	}
+
 	$(document).on("click", ".ajax-modal", function () {
+		closeOpenTableActionMenus();
+
 		var link = $(this).data("href");
 		if (typeof link == 'undefined') {
 			link = $(this).attr("href");
@@ -1199,6 +1210,8 @@
 
 	//Ajax Secondary Modal Function
 	$(document).on("click", ".ajax-modal-2", function () {
+		closeOpenTableActionMenus();
+
 		var link = $(this).attr("href");
 
 		var title = $(this).data("title");
