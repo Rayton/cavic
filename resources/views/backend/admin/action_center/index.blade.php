@@ -71,6 +71,168 @@
     .action-center-table-actions.dashboard-proof-datatable-card .dashboard-proof-top-center { justify-content: center; }
     .action-center-table-actions.dashboard-proof-datatable-card .dashboard-proof-export-buttons .admin-dt-btn { min-height: 30px; padding: .32rem .62rem; }
     .action-center-table-actions.dashboard-proof-datatable-card .dashboard-columns-menu { z-index: 1085; max-height: min(420px, 70vh); overflow-y: auto; }
+    .action-center-table-actions .card-body { padding: 1.25rem; }
+    .action-center-table-actions .row { row-gap: 1.35rem; }
+    .action-center-table-actions .workspace-section-title,
+    .action-center-table-actions h6 { margin-bottom: .65rem; }
+    .action-center-table-actions .table-responsive {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        overflow: visible;
+    }
+    .action-center-table-actions .dataTables_wrapper { max-width: 100%; overflow: visible; }
+    .action-center-table-actions .admin-datatable-top {
+        display: grid !important;
+        grid-template-columns: 86px minmax(0, 1fr) !important;
+        grid-template-areas: "length tools" !important;
+        align-items: center !important;
+        gap: .55rem !important;
+        margin: 0 !important;
+        padding: .75rem !important;
+        border: 1px solid var(--cavic-border, #e7e9e4);
+        border-bottom: 0;
+        border-radius: 14px 14px 0 0;
+        background: #fff;
+    }
+    .action-center-table-actions .dashboard-proof-top-left {
+        grid-area: length;
+        min-width: 0;
+        width: 86px;
+        justify-content: flex-start !important;
+    }
+    .action-center-table-actions .dashboard-proof-top-center { display: none !important; }
+    .action-center-table-actions .dashboard-proof-top-right {
+        grid-area: tools;
+        display: grid !important;
+        grid-template-columns: auto minmax(130px, 1fr);
+        align-items: center;
+        gap: .55rem;
+        width: 100%;
+        min-width: 0;
+        margin-left: 0 !important;
+        justify-content: stretch !important;
+    }
+    .action-center-table-actions .dashboard-toolbar-item,
+    .action-center-table-actions .dashboard-toolbar-item-search,
+    .action-center-table-actions .dashboard-proof-top-right .dataTables_filter,
+    .action-center-table-actions .dashboard-proof-top-right .dataTables_filter label {
+        min-width: 0;
+        width: 100%;
+    }
+    .action-center-table-actions .dashboard-toolbar-item-columns { width: auto; }
+    .action-center-table-actions .dashboard-proof-top-left .dataTables_length,
+    .action-center-table-actions .dashboard-proof-top-left .dataTables_length label,
+    .action-center-table-actions .dashboard-proof-top-left .dataTables_length select {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    .action-center-table-actions .dashboard-proof-top-left .dataTables_length select,
+    .action-center-table-actions .dashboard-proof-top-right .dataTables_filter input,
+    .action-center-table-actions .dashboard-columns-trigger {
+        height: 36px !important;
+        min-height: 36px !important;
+        border-radius: 10px !important;
+    }
+    .action-center-table-actions .dashboard-proof-top-right .dataTables_filter input {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+    .action-center-table-actions .dashboard-columns-trigger {
+        width: auto;
+        min-width: 112px;
+        padding: .38rem .62rem !important;
+        gap: .4rem;
+    }
+    .action-center-table-actions .admin-datatable-table-wrap {
+        border: 1px solid var(--cavic-border, #e7e9e4) !important;
+        border-radius: 0 !important;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+    .action-center-table-actions .admin-datatable-table-wrap table.dataTable {
+        margin: 0 !important;
+    }
+    .action-center-table-actions .admin-datatable-bottom {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .75rem !important;
+        padding: .65rem .75rem !important;
+        border: 1px solid var(--cavic-border, #e7e9e4);
+        border-top: 0;
+        border-radius: 0 0 14px 14px;
+        background: #fff;
+    }
+    .action-center-table-actions .dataTables_info {
+        color: var(--cavic-text-soft, #6f787f);
+        font-size: .78rem;
+        padding: 0 !important;
+        white-space: normal;
+    }
+    .action-center-table-actions .dataTables_paginate { flex: 0 0 auto; }
+    .action-center-table-actions .dataTables_paginate .pagination { margin: 0; }
+    .action-center-table-actions .dataTables_paginate .page-link {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50% !important;
+        font-size: .75rem;
+    }
+    .action-center-table-actions .workspace-mini-table { min-width: 0 !important; width: 100% !important; }
+    .action-center-table-actions .workspace-mini-table th {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 220px;
+    }
+    .action-center-table-actions .workspace-mini-table td {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        max-width: 240px;
+        overflow-wrap: anywhere;
+    }
+    .action-center-table-actions .workspace-mini-table td:first-child,
+    .action-center-table-actions .workspace-mini-table th:first-child { max-width: 180px; }
+    .action-center-table-actions .workspace-mini-table td[colspan] {
+        white-space: normal;
+        max-width: none;
+    }
+    @media (max-width: 1399.98px) {
+        .action-center-table-actions .col-lg-5,
+        .action-center-table-actions .col-lg-6,
+        .action-center-table-actions .col-lg-7 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .action-center-table-actions .card-body { padding: .85rem; }
+        .action-center-table-actions .admin-datatable-top {
+            grid-template-columns: 76px minmax(0, 1fr) !important;
+            gap: .45rem !important;
+            padding: .6rem !important;
+        }
+        .action-center-table-actions .dashboard-proof-top-left { width: 76px; }
+        .action-center-table-actions .dashboard-proof-top-right {
+            grid-template-columns: 1fr;
+        }
+        .action-center-table-actions .dashboard-columns-trigger {
+            justify-content: center;
+            width: 100%;
+        }
+        .action-center-table-actions .admin-datatable-bottom {
+            align-items: flex-start !important;
+            flex-direction: column !important;
+        }
+    }
 </style>
 
 @include('backend.admin.partials.collection-date-range-filter', ['collectionDateRange' => $collectionDateRange, 'filterId' => 'action-center-collection-range'])
@@ -628,11 +790,9 @@
             var $top = $wrapper.find('.admin-datatable-top');
             var $length = $left.find('.dataTables_length').detach();
             var $search = $right.find('.dataTables_filter').detach();
-            var $buttons = $left.find('.dt-buttons').detach();
             var unique = $table.attr('id');
 
             var $toolbarLeft = $('<div class="dashboard-proof-top-left"></div>');
-            var $toolbarCenter = $('<div class="dashboard-proof-top-center"></div>');
             var $toolbarRight = $('<div class="dashboard-proof-top-right"></div>');
             var $columnsDropdown = $(
                 '<div class="dropdown dashboard-columns-dropdown">' +
@@ -678,14 +838,12 @@
                 event.stopPropagation();
             });
 
-            $buttons.addClass('dashboard-proof-export-buttons');
             $toolbarLeft.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-length"></div>').append($length));
-            $toolbarCenter.append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-export"></div>').append($buttons));
             $toolbarRight
-                .append($('<div class="dashboard-toolbar-item"></div>').append($columnsDropdown))
+                .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-columns"></div>').append($columnsDropdown))
                 .append($('<div class="dashboard-toolbar-item dashboard-toolbar-item-search"></div>').append($search));
 
-            $top.empty().append($toolbarLeft, $toolbarCenter, $toolbarRight);
+            $top.empty().append($toolbarLeft, $toolbarRight);
             $search.find('input').attr('placeholder', '{{ _lang('Search records') }}');
         }
 
@@ -696,11 +854,12 @@
 
             $table.attr('id', $table.attr('id') || 'action-center-table-' + index);
             $table.attr('data-export-filename', exportTitle);
-            $table.css('min-width', Math.max(760, columnCount * 132) + 'px');
+            $table.css('min-width', '');
             prepareEmptyTable($table);
 
             if (typeof window.cavicAdminDataTable === 'function') {
                 window.cavicAdminDataTable('#' + $table.attr('id'), {
+                    responsive: false,
                     paging: true,
                     searching: true,
                     info: true,
@@ -708,31 +867,7 @@
                     lengthChange: true,
                     pageLength: 6,
                     lengthMenu: [[6, 10, 25, 50, 100], [6, 10, 25, 50, 100]],
-                    buttons: [
-                        {
-                            extend: 'pdf',
-                            text: '<i class="ti-download"></i><span>{{ _lang('PDF') }}</span>',
-                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
-                            filename: exportTitle,
-                            title: exportTitle,
-                            exportOptions: { columns: ':not([data-no-export="1"])' }
-                        },
-                        {
-                            extend: 'excel',
-                            text: '<i class="ti-download"></i><span>{{ _lang('Excel') }}</span>',
-                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
-                            filename: exportTitle,
-                            title: exportTitle,
-                            exportOptions: { columns: ':not([data-no-export="1"])' }
-                        },
-                        {
-                            extend: 'csv',
-                            text: '<i class="ti-download"></i><span>{{ _lang('CSV') }}</span>',
-                            className: 'btn btn-xs admin-dt-btn admin-dt-btn-ghost',
-                            filename: exportTitle,
-                            exportOptions: { columns: ':not([data-no-export="1"])' }
-                        }
-                    ],
+                    buttons: [],
                     language: {
                         info: '{{ _lang('Viewing') }} _START_-_END_ {{ _lang('of') }} _TOTAL_',
                         infoEmpty: '{{ _lang('Viewing 0-0 of 0') }}',
