@@ -8,7 +8,7 @@
 				<div class="panel-title">{{ _lang('Loan Repayment Details') }}</div>
 
 				<div class="dropdown">
-					<button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+					<button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 						<i class="fas fa-print mr-2"></i>{{ _lang('Print Receipt') }}
 					</button>
 					<div class="dropdown-menu">

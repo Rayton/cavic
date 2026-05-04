@@ -212,7 +212,7 @@
                                     <td>{{ date('d M, Y H:i:s',strtotime($document->created_at)) }}</td>
                                     <td class="text-center">
                                         <span class="dropdown">
-                                        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         {{ _lang('Action') }}
                                         </button>
                                         <form action="{{ route('member_documents.destroy', $document->id) }}" method="post">

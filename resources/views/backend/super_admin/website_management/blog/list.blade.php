@@ -28,7 +28,7 @@
 
 							<td class="text-center">
 								<span class="dropdown">
-									<button class="btn btn-outline-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<button class="btn btn-outline-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										{{ _lang('Action') }}		  
 									</button>
 									<form action="{{ route('admin.posts.destroy', $post['id']) }}" method="post">

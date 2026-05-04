@@ -5541,8 +5541,8 @@ Payment Gateway
 
 .admin-shell-v2 .sidebar-menu .extra-details.admin-sidebar-brand {
     background: transparent;
-    min-height: 80px;
-    padding: 10px 20px;
+    min-height: 128px;
+    padding: 14px 20px;
     border-bottom: 1px solid var(--cavic-border);
     display: flex;
     align-items: center;
@@ -5557,14 +5557,18 @@ Payment Gateway
 }
 
 .admin-shell-v2 .sidebar-menu .sidebar-logo {
-    max-height: 92px;
-    max-width: 92px;
+    max-height: 110px;
+    max-width: 190px;
     object-fit: contain;
     background: transparent;
     border: 0;
     box-shadow: none;
     border-radius: 0;
     padding: 0;
+}
+
+.admin-shell-v2 .sidebar-menu .sidebar-logo.admin-blue-logo {
+    width: 170px;
 }
 
 .admin-shell-v2 .admin-sidebar-intro {

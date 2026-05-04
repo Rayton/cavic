@@ -575,10 +575,82 @@
 	    $(this).find(":submit").prop('disabled', true);
 	});
 
+	var dropdownToggleSelector = '[data-bs-toggle="dropdown"]';
+
+	function getBootstrapDropdown(toggle) {
+		if (!toggle || typeof bootstrap === 'undefined' || typeof bootstrap.Dropdown === 'undefined') {
+			return null;
+		}
+
+		if (typeof bootstrap.Dropdown.getOrCreateInstance === 'function') {
+			return bootstrap.Dropdown.getOrCreateInstance(toggle);
+		}
+
+		var $toggle = $(toggle);
+		var instance = $toggle.data('bs.dropdown');
+
+		if (!instance) {
+			instance = new bootstrap.Dropdown(toggle);
+			$toggle.data('bs.dropdown', instance);
+		}
+
+		return instance;
+	}
+
+	function hideTableActionDropdown(toggle) {
+		var dropdown = getBootstrapDropdown(toggle);
+
+		if (dropdown && typeof dropdown.hide === 'function') {
+			dropdown.hide();
+			return;
+		}
+
+		if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown && typeof bootstrap.Dropdown._clearMenus === 'function') {
+			bootstrap.Dropdown._clearMenus();
+		}
+
+		var $toggle = $(toggle);
+		var $dropdown = $toggle.closest('.dropdown');
+		$toggle.attr('aria-expanded', 'false');
+		$dropdown.removeClass('show').children('.dropdown-menu').removeClass('show');
+	}
+
+	function hideOpenTableActionMenus($menus) {
+		var $openMenus = $menus && $menus.length ? $menus : $('.table-row-actions.show');
+
+		$openMenus.children(dropdownToggleSelector).each(function () {
+			hideTableActionDropdown(this);
+			restoreFloatingTableActionMenu($(this).closest('.table-row-actions'));
+		});
+	}
+
+	if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown && typeof bootstrap.Dropdown.getOrCreateInstance !== 'function') {
+		$(document).on('click', dropdownToggleSelector, function (event) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			var dropdown = getBootstrapDropdown(this);
+
+			if (dropdown && typeof dropdown.toggle === 'function') {
+				dropdown.toggle();
+			}
+		});
+
+		$(document).on('click', function (event) {
+			if ($(event.target).closest('.dropdown').length) {
+				return;
+			}
+
+			$(dropdownToggleSelector + '[aria-expanded="true"]').each(function () {
+				hideTableActionDropdown(this);
+			});
+		});
+	}
+
 	$(document).on('click', '.btn-remove-2', function () {
 		var link = $(this).attr('href');
 		var message = $(this).data("message");
-		$('.table-row-actions.show > [data-toggle="dropdown"]').dropdown('hide');
+		hideOpenTableActionMenus();
 		//Sweet Alert for delete action
 		Swal.fire({
 			title: $lang_alert_title,
@@ -604,7 +676,7 @@
 		}
 
 		var message = $(this).data("message");
-		$('.table-row-actions.show > [data-toggle="dropdown"]').dropdown('hide');
+		hideOpenTableActionMenus();
 		//Sweet Alert for delete action
 		Swal.fire({
 			title: $lang_alert_title,
@@ -626,7 +698,7 @@
 
 	function positionFloatingTableActionMenu($dropdown) {
 		var $menu = $dropdown.data('tableActionFloatingMenu') || $dropdown.children('.dropdown-menu').first();
-		var $toggle = $dropdown.children('[data-toggle="dropdown"]').first();
+		var $toggle = $dropdown.children(dropdownToggleSelector).first();
 
 		if (!$menu.length || !$toggle.length || !$toggle[0].getBoundingClientRect) {
 			return;
@@ -701,7 +773,7 @@
 	}
 
 	$(document).on('show.bs.dropdown', '.table-row-actions', function () {
-		$('.table-row-actions.show').not(this).children('[data-toggle="dropdown"]').dropdown('hide');
+		hideOpenTableActionMenus($('.table-row-actions.show').not(this));
 
 		$(this)
 			.parents('.table-responsive, .admin-datatable-table-wrap')
@@ -914,7 +986,7 @@
 	var previous_select;
 	var target_select;
 	function closeOpenTableActionMenus() {
-		$('.table-row-actions.show > [data-toggle="dropdown"]').dropdown('hide');
+		hideOpenTableActionMenus();
 		$('.table-row-actions').each(function () {
 			restoreFloatingTableActionMenu($(this));
 		});
@@ -2062,7 +2134,7 @@
 			}
 
 			$(this).after(`<div class="dropdown multi-select-box">
-				<button class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+				<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					${selectedText}
 				</button>
 				<div class="dropdown-menu">

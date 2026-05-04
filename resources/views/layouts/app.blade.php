@@ -185,6 +185,10 @@
         $authUser = auth()->user();
         $userType = $authUser?->user_type;
         $isAdminWorkspace = $userType === 'admin';
+        $adminBlueLogoPath = 'uploads/logos/cavic-logo-transparent-blue.png';
+        $adminSidebarLogo = $isAdminWorkspace && file_exists(public_path($adminBlueLogoPath))
+            ? asset('public/' . $adminBlueLogoPath)
+            : get_logo();
         $canSwitchBranches = $authUser && ($authUser->user_type == 'admin' || $authUser->all_branch_access == 1);
         $layoutBranches = collect();
         $defaultBranchName = get_option('default_branch_name', 'Main Branch');
@@ -299,7 +303,7 @@
 			<div class="sidebar-menu {{ $isAdminWorkspace ? 'admin-sidebar-v2' : '' }}" style="display: flex; flex-direction: column;">
 				<div class="extra-details {{ $isAdminWorkspace ? 'admin-sidebar-brand' : '' }}">
 					<a href="{{ $user_type == 'superadmin' ? route('admin.dashboard.index') : route('dashboard.index') }}" class="{{ $isAdminWorkspace ? 'admin-brand-link' : '' }}">
-						<img class="sidebar-logo" src="{{ get_logo() }}" alt="logo">
+						<img class="sidebar-logo {{ $isAdminWorkspace ? 'admin-blue-logo' : '' }}" src="{{ $adminSidebarLogo }}" alt="CAVIC">
 					</a>
 				</div>
 
@@ -347,7 +351,7 @@
 						<div class="tenant-switcher {{ $isAdminWorkspace ? 'admin-tenant-switcher' : '' }}">
 							<label class="tenant-switcher-label">{{ _lang('Switch Account') }}</label>
 							<div class="dropdown">
-								<button class="btn btn-sm btn-block text-left tenant-switcher-btn" type="button" id="tenantSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<button class="btn btn-sm btn-block text-left tenant-switcher-btn" type="button" id="tenantSwitcher" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<span id="current-tenant-name">{{ $currentTenant ? (strlen($currentTenant->name) > 25 ? substr($currentTenant->name, 0, 22) . '...' : $currentTenant->name) : '' }}</span>
 									<i class="ti-angle-down float-right" style="margin-top: 2px;"></i>
 								</button>
@@ -402,7 +406,7 @@
 							<ul class="notification-area float-right d-flex align-items-center">
 	                            <li class="dropdown d-none d-sm-inline-block">
 									<div class="dropdown">
-									  <a class="dropdown-toggle d-flex align-items-center admin-utility-pill" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									  <a class="dropdown-toggle d-flex align-items-center admin-utility-pill" type="button" id="selectLanguage" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										<img class="avatar avatar-xss avatar-circle mr-1" src="{{ get_language() == 'language' ? asset('public/backend/plugins/flag-icon-css/flags/1x1/us.svg') : asset('public/backend/plugins/flag-icon-css/flags/1x1/'.explode('---', get_language())[1].'.svg') }}">
 										<span class="d-none d-md-inline-block">{{ explode('---', get_language())[0] }}</span>
 										<i class="fas fa-chevron-down ml-2 admin-dropdown-chevron"></i>
@@ -422,7 +426,7 @@
 								@endphp
 
 								<li class="dropdown d-none d-sm-inline-block">
-									<i class="ti-bell dropdown-toggle" data-toggle="dropdown">
+									<i class="ti-bell dropdown-toggle" data-bs-toggle="dropdown">
 										<span>{{ $unreadNotificationCount }}</span>
 									</i>
 									<div class="dropdown-menu bell-notify-box notify-box">
@@ -453,7 +457,7 @@
 
 								<li>
 									<div class="user-profile dropdown">
-										<a class="user-name dropdown-toggle admin-user-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<a class="user-name dropdown-toggle admin-user-trigger" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											<span class="admin-user-name-text">{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? Auth::user()->name }}</span>
 											@if($hasCustomProfileImage)
 												<img class="avatar user-thumb admin-user-avatar" id="my-profile-img" src="{{ $profileAvatarUrl }}" alt="{{ $profileDisplayName }}">
@@ -513,7 +517,7 @@
 
 								@if($canSwitchBranches)
 								<div class="dropdown admin-dashboard-branch-switcher">
-									<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="dashboardBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="dashboardBranchSwitcher" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
 									</a>
 									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dashboardBranchSwitcher">
@@ -542,7 +546,7 @@
 									@endif
 									@if($canSwitchBranches)
 									<div class="dropdown">
-										<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="selectLanguage" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
 										</a>
 										<div class="dropdown-menu dropdown-menu-right" aria-labelledby="selectLanguage">
@@ -570,7 +574,7 @@
 						@if($canSwitchBranches)
 						<div class="col-sm-4 d-flex justify-content-sm-end mt-2 mt-sm-0">
 							<div class="dropdown">
-								<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="pageBranchSwitcher" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<a class="dropdown-toggle btn btn-dark btn-xs" type="button" id="pageBranchSwitcher" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									{{ session('branch') =='' ? _lang('All Branch') : session('branch') }}
 								</a>
 								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="pageBranchSwitcher">

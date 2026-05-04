@@ -5,7 +5,7 @@
 
 @if(! empty($items))
 <div class="dropdown table-row-actions">
-    <button class="btn btn-xs dropdown-toggle" type="button" id="{{ $dropdownId }}" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-xs dropdown-toggle" type="button" id="{{ $dropdownId }}" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-haspopup="true" aria-expanded="false">
         {{ _lang('Action') }}
     </button>
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="{{ $dropdownId }}">

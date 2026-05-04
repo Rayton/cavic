@@ -220,7 +220,7 @@
         var $toolbarRight = $('<div class="dashboard-proof-top-right"></div>');
         var $columnsDropdown = $(
             '<div class="dropdown dashboard-columns-dropdown">' +
-                '<button type="button" class="btn btn-xs admin-dt-btn admin-dt-btn-ghost dashboard-columns-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                '<button type="button" class="btn btn-xs admin-dt-btn admin-dt-btn-ghost dashboard-columns-trigger" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
                     '<i class="ti-layout-column2"></i><span>{{ _lang('Columns') }}</span><i class="fas fa-chevron-down dashboard-columns-chevron"></i>' +
                 '</button>' +
                 '<div class="dropdown-menu dropdown-menu-right dashboard-columns-menu"></div>' +

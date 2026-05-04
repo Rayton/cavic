@@ -234,7 +234,7 @@
                                                 <td class='amount'>{{ decimalPlace($guarantor->amount, currency($loan->currency->name)) }}</td>
                                                 <td class="text-center">
                                                 <span class="dropdown">
-                                                    <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     {{ _lang('Action') }}
                                                     </button>
                                                     <form action="{{ route('guarantors.destroy', $guarantor['id']) }}" method="post">
@@ -306,7 +306,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="dropdown">
-                                                        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             {{ _lang("Action") }}
                                                         </button>
                                                         <form action="{{ route('loan_collaterals.destroy', $loancollateral['id']) }}" method="post">
