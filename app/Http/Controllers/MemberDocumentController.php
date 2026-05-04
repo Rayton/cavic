@@ -87,16 +87,12 @@ class MemberDocumentController extends Controller {
         $memberdocument->load('member');
         $context = $request->input('document_context') === 'quick_view' ? 'quick_view' : 'list';
         $row = view('backend.admin.member_documents.modal.row', compact('memberdocument', 'context'))->render();
-        $memberdocument->user_id = $memberdocument->member
-            ? $memberdocument->member->first_name . ' ' . $memberdocument->member->last_name
-            : _lang('N/A');
-        $memberdocument->created_at = date('d M, Y H:i:s', strtotime($memberdocument->created_at));
-        $memberdocument->document = '<a target="_blank" href="' . asset('public/uploads/documents/' . $memberdocument->document) . '">' . $memberdocument->document . '</a>';
+        $data = $this->responseData($memberdocument);
 
         if (! $request->ajax()) {
             return redirect()->route('member_documents.create')->with('success', _lang('Saved Successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_modal_table', 'row' => $row]);
+            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved Successfully'), 'data' => $data, 'table' => '#member_documents_modal_table', 'row' => $row]);
         }
 
     }
@@ -160,18 +156,29 @@ class MemberDocumentController extends Controller {
         $memberdocument->load('member');
         $context = $request->input('document_context') === 'quick_view' ? 'quick_view' : 'list';
         $row = view('backend.admin.member_documents.modal.row', compact('memberdocument', 'context'))->render();
-        $memberdocument->user_id = $memberdocument->member
-            ? $memberdocument->member->first_name . ' ' . $memberdocument->member->last_name
-            : _lang('N/A');
-        $memberdocument->created_at = date('d M, Y H:i:s', strtotime($memberdocument->created_at));
-        $memberdocument->document = '<a target="_blank" href="' . asset('public/uploads/documents/' . $memberdocument->document) . '">' . $memberdocument->document . '</a>';
+        $data = $this->responseData($memberdocument);
 
         if (! $request->ajax()) {
             return back()->with('success', _lang('Updated Successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated Successfully'), 'data' => $memberdocument, 'table' => '#member_documents_modal_table', 'row' => $row]);
+            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated Successfully'), 'data' => $data, 'table' => '#member_documents_modal_table', 'row' => $row]);
         }
 
+    }
+
+    private function responseData(MemberDocument $memberdocument) {
+        return [
+            'id'         => $memberdocument->id,
+            'member_id'  => $memberdocument->member_id,
+            'user_id'    => $memberdocument->member
+                ? trim($memberdocument->member->first_name . ' ' . $memberdocument->member->last_name)
+                : _lang('N/A'),
+            'name'       => $memberdocument->name,
+            'document'   => '<a target="_blank" href="' . asset('public/uploads/documents/' . $memberdocument->document) . '">' . $memberdocument->document . '</a>',
+            'created_at' => $memberdocument->created_at
+                ? $memberdocument->created_at->format('d M, Y H:i:s')
+                : '',
+        ];
     }
 
     /**
@@ -180,12 +187,32 @@ class MemberDocumentController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($tenant, $id) {
+    public function destroy(Request $request, $tenant, $id) {
         $document = MemberDocument::find($id);
-        if (file_exists(public_path('uploads/documents/' . $document->document))) {
+
+        if (! $document) {
+            if ($request->ajax()) {
+                return response()->json(['result' => 'error', 'message' => _lang('Document not found')], 404);
+            }
+
+            return back()->with('error', _lang('Document not found'));
+        }
+
+        if ($document->document && file_exists(public_path('uploads/documents/' . $document->document))) {
             unlink(public_path('uploads/documents/' . $document->document));
         }
+
         $document->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'result'  => 'success',
+                'message' => _lang('Deleted Successfully'),
+                'id'      => $id,
+                'table'   => '#member_documents_modal_table',
+            ]);
+        }
+
         return back()->with('success', _lang('Deleted Successfully'));
     }
 }

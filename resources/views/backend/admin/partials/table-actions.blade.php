@@ -11,7 +11,7 @@
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="{{ $dropdownId }}">
         @foreach($items as $item)
             @if(($item['method'] ?? 'get') === 'delete')
-                <form action="{{ $item['url'] ?? '#' }}" method="post">
+                <form action="{{ $item['url'] ?? '#' }}" method="post" class="{{ $item['form_class'] ?? '' }}">
                     @csrf
                     <input name="_method" type="hidden" value="DELETE">
                     <button class="dropdown-item {{ $item['class'] ?? 'btn-remove' }}" type="submit">

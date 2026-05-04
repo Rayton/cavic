@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Models\CustomField;
 use App\Models\Loan;
 use App\Models\LoanApproval;
+use App\Models\LoanApproverSetting;
 use App\Models\LoanProduct;
 use App\Models\LoanRepayment;
 use App\Services\CollectionFollowUpInsightsService;
@@ -295,6 +297,26 @@ class LoanWorkspaceController extends Controller
             ];
         })->values();
 
+        $loanProducts = LoanProduct::latest('id')->get();
+        $loanCustomFields = CustomField::where('table', 'loans')->orderBy('id', 'asc')->get();
+        $loanApproverSettings = LoanApproverSetting::with('approver')
+            ->orderBy('approval_level', 'asc')
+            ->get();
+
+        foreach (LoanApproverSetting::getApprovalLevels() as $level => $levelName) {
+            if (! $loanApproverSettings->where('approval_level', $level)->first()) {
+                $setting = new LoanApproverSetting();
+                $setting->approval_level = $level;
+                $setting->approval_level_name = $levelName;
+                $setting->status = 0;
+                $setting->tenant_id = request()->tenant->id;
+                $setting->save();
+                $loanApproverSettings->push($setting->load('approver'));
+            }
+        }
+
+        $loanApproverSettings = $loanApproverSettings->sortBy('approval_level')->values();
+
         return view('backend.admin.loan.workspace', [
             'page_title' => _lang('Loans'),
             'loanStats' => [
@@ -329,6 +351,9 @@ class LoanWorkspaceController extends Controller
             'branchFollowUpPerformance' => $followUpOverview['branchPerformance'],
             'collectorFollowUpPerformance' => $followUpOverview['collectorPerformance'],
             'collectionDateRange' => $dateRange,
+            'loanProducts' => $loanProducts,
+            'loanApproverSettings' => $loanApproverSettings,
+            'loanCustomFields' => $loanCustomFields,
         ]);
     }
 }

@@ -1,4 +1,4 @@
-<form method="post" class="ajax-submit member-create-modal-form" autocomplete="off" action="{{ route('members.store') }}" enctype="multipart/form-data">
+<form method="post" class="ajax-screen-submit member-create-modal-form" autocomplete="off" action="{{ route('members.store') }}" enctype="multipart/form-data">
     @csrf
     <div class="member-create-modal">
         <div class="row">
@@ -14,12 +14,6 @@
                         <div class="form-group">
                             <label class="control-label">{{ _lang('Last Name') }}</label>
                             <input type="text" class="form-control" name="last_name" value="{{ old('last_name') }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">{{ _lang('Member No') }}</label>
-                            <input type="text" class="form-control" name="member_no" value="{{ old('member_no', $memberNo) }}" required {{ $memberNo != '' ? 'readonly' : '' }}>
                         </div>
                     </div>
                     <div class="col-md-6">

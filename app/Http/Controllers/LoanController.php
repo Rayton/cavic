@@ -761,7 +761,7 @@ class LoanController extends Controller {
         return redirect()->route('loans.index')->with('success', _lang('Deleted successfully'));
     }
 
-    public function calculator() {
+    public function calculator(Request $request) {
         $data                           = [];
         $data['first_payment_date']     = '';
         $data['apply_amount']           = '';
@@ -770,6 +770,12 @@ class LoanController extends Controller {
         $data['term']                   = '';
         $data['term_period']            = '';
         $data['late_payment_penalties'] = 0;
+        $data['calculatorContext']      = $request->get('calculator_context', 'modal');
+        $data['calculatorTarget']       = $request->get('calculator_target', '');
+        if ($request->ajax()) {
+            return view('backend.admin.loan.modal.calculator', $data);
+        }
+
         return view('backend.admin.loan.calculator', $data);
     }
 
@@ -843,6 +849,12 @@ class LoanController extends Controller {
         $data['term']                   = $request->term;
         $data['term_period']            = $request->term_period;
         $data['late_payment_penalties'] = $request->late_payment_penalties;
+        $data['calculatorContext']      = $request->get('calculator_context', 'modal');
+        $data['calculatorTarget']       = $request->get('calculator_target', '');
+
+        if ($request->ajax()) {
+            return view('backend.admin.loan.modal.calculator', $data);
+        }
 
         return view('backend.admin.loan.calculator', $data);
 

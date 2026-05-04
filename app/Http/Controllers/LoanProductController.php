@@ -34,6 +34,10 @@ class LoanProductController extends Controller {
      */
     public function create(Request $request) {
         $alert_col = 'col-lg-8 offset-lg-2';
+        if ($request->ajax()) {
+            return view('backend.admin.loan_product.modal.create', compact('alert_col'));
+        }
+
         return view('backend.admin.loan_product.create', compact('alert_col'));
     }
 
@@ -98,7 +102,9 @@ class LoanProductController extends Controller {
         if (! $request->ajax()) {
             return redirect()->route('loan_products.index')->with('success', _lang('Saved successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved successfully'), 'data' => $loanproduct, 'table' => '#loan_products_table']);
+            $loanproductRow = LoanProduct::find($loanproduct->id);
+            $row = view('backend.admin.loan_product.partials.row', ['loanproduct' => $loanproductRow])->render();
+            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved successfully'), 'data' => $loanproduct, 'row' => $row, 'table' => '#loan_products_table']);
         }
     }
 
@@ -126,6 +132,10 @@ class LoanProductController extends Controller {
     public function edit(Request $request, $tenant, $id) {
         $alert_col   = 'col-lg-8 offset-lg-2';
         $loanproduct = LoanProduct::find($id);
+        if ($request->ajax()) {
+            return view('backend.admin.loan_product.modal.edit', compact('loanproduct', 'id', 'alert_col'));
+        }
+
         return view('backend.admin.loan_product.edit', compact('loanproduct', 'id', 'alert_col'));
     }
 
@@ -191,7 +201,9 @@ class LoanProductController extends Controller {
         if (! $request->ajax()) {
             return redirect()->route('loan_products.index')->with('success', _lang('Updated successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated successfully'), 'data' => $loanproduct, 'table' => '#loan_products_table']);
+            $loanproductRow = LoanProduct::find($loanproduct->id);
+            $row = view('backend.admin.loan_product.partials.row', ['loanproduct' => $loanproductRow])->render();
+            return response()->json(['result' => 'success', 'action' => 'update', 'message' => _lang('Updated successfully'), 'data' => $loanproduct, 'row' => $row, 'table' => '#loan_products_table']);
         }
 
     }
@@ -202,9 +214,13 @@ class LoanProductController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($tenant, $id) {
+    public function destroy(Request $request, $tenant, $id) {
         $loanproduct = LoanProduct::find($id);
         $loanproduct->delete();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Deleted successfully'), 'id' => $id, 'table' => '#loan_products_table']);
+        }
+
         return redirect()->route('loan_products.index')->with('success', _lang('Deleted successfully'));
     }
 }

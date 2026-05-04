@@ -69,7 +69,7 @@ class MemberController extends Controller
 
         return Datatables::eloquent($members)
             ->editColumn('branch.name', function ($member) {
-                return $member->branch->name;
+                return optional($member->branch)->name ?: get_tenant_option('default_branch_name', 'Main Branch');
             })
             ->editColumn('photo', function ($member) {
                 $photo = $member->photo != null ? profile_picture($member->photo) : asset('public/backend/images/avatar.png');
@@ -123,13 +123,11 @@ class MemberController extends Controller
             ->orderBy("id", "asc")
             ->get();
 
-        $memberNo = get_tenant_option('starting_member_no');
-
         if ($request->ajax()) {
-            return view('backend.admin.member.modal.create', compact('customFields', 'memberNo'));
+            return view('backend.admin.member.modal.create', compact('customFields'));
         }
 
-        return view('backend.admin.member.create', compact('customFields', 'memberNo'));
+        return view('backend.admin.member.create', compact('customFields'));
     }
 
     /**
@@ -140,6 +138,11 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
+        $tenantId = app('tenant')->id;
+        $request->merge([
+            'member_no' => $this->nextMemberNoForTenant($tenantId),
+        ]);
+
         $validationRules = [
             'first_name'   => 'required',
             'last_name'    => 'required',
@@ -150,7 +153,13 @@ class MemberController extends Controller
                     return $query->where('tenant_id', app('tenant')->id);
                 }),
             ],
-            'member_no'    => 'required|unique:members|max:50',
+            'member_no'    => [
+                'required',
+                'max:50',
+                Rule::unique('members')->where(function ($query) use ($tenantId) {
+                    return $query->where('tenant_id', $tenantId);
+                }),
+            ],
             'country_code' => 'required_with:mobile',
             'photo'        => 'nullable|image',
             //User Login Attributes
@@ -203,113 +212,160 @@ class MemberController extends Controller
 
         DB::beginTransaction();
 
-        // Store custom field data
-        $customFieldsData = store_custom_field_data($customFields);
+        try {
+            // Store custom field data
+            $customFieldsData = store_custom_field_data($customFields);
 
-        //Create Login details for main tenant (customer portal)
-        $mainTenantUser = null;
-        if ($request->client_login == 1 && $request->tenant->package->member_portal == 1) {
-            $mainTenantUser                  = new User();
-            $mainTenantUser->name            = $request->input('name');
-            $mainTenantUser->email           = $request->input('login_email');
-            $mainTenantUser->password        = Hash::make($request->password);
-            $mainTenantUser->user_type       = 'customer';
-            $mainTenantUser->tenant_id       = $request->tenant->id;
-            $mainTenantUser->status          = $request->input('status');
-            $mainTenantUser->profile_picture = $photo;
-            $mainTenantUser->save();
-        }
+            //Create Login details for main tenant (customer portal)
+            $mainTenantUser = null;
+            if ($request->client_login == 1 && $request->tenant->package->member_portal == 1) {
+                $mainTenantUser                  = new User();
+                $mainTenantUser->name            = $request->input('name');
+                $mainTenantUser->email           = $request->input('login_email');
+                $mainTenantUser->password        = Hash::make($request->password);
+                $mainTenantUser->user_type       = 'customer';
+                $mainTenantUser->tenant_id       = $request->tenant->id;
+                $mainTenantUser->status          = $request->input('status');
+                $mainTenantUser->profile_picture = $photo;
+                $mainTenantUser->save();
+            }
 
-        $member             = new Member();
-        $member->first_name = $request->input('first_name');
-        $member->last_name  = $request->input('last_name');
-        if (auth()->user()->user_type == 'admin') {
-            $member->branch_id = $request->branch_id;
-        } else {
-            $member->branch_id = auth()->user()->branch_id;
-        }
-        if ($request->client_login == 1 && $mainTenantUser) {
-            $member->user_id = $mainTenantUser->id;
-        }
-        $member->email         = $request->input('email');
-        $member->country_code  = $request->input('country_code');
-        $member->mobile        = $request->input('mobile');
-        $member->business_name = $request->input('business_name');
-        $member->member_no     = get_tenant_option('starting_member_no', $request->input('member_no'));
-        $member->gender        = $request->input('gender');
-        $member->city          = $request->input('city');
-        $member->state         = $request->input('state');
-        $member->zip           = $request->input('zip');
-        $member->address       = $request->input('address');
-        $member->credit_source = $request->input('credit_source');
-        $member->photo         = $photo;
-        $member->custom_fields = json_encode($customFieldsData);
+            $member             = new Member();
+            $member->first_name = $request->input('first_name');
+            $member->last_name  = $request->input('last_name');
+            if (auth()->user()->user_type == 'admin') {
+                $member->branch_id = $request->branch_id;
+            } else {
+                $member->branch_id = auth()->user()->branch_id;
+            }
+            if ($request->client_login == 1 && $mainTenantUser) {
+                $member->user_id = $mainTenantUser->id;
+            }
+            $member->email         = $request->input('email');
+            $member->country_code  = $request->input('country_code');
+            $member->mobile        = $request->input('mobile');
+            $member->business_name = $request->input('business_name');
+            $member->member_no     = $request->input('member_no');
+            $member->gender        = $request->input('gender');
+            $member->city          = $request->input('city');
+            $member->state         = $request->input('state');
+            $member->zip           = $request->input('zip');
+            $member->address       = $request->input('address');
+            $member->credit_source = $request->input('credit_source');
+            $member->photo         = $photo;
+            $member->custom_fields = json_encode($customFieldsData);
 
-        $member->save();
+            $member->save();
 
-        // Create tenant for member
-        $mainTenant = $request->tenant;
-        $memberPackage = get_or_create_members_package();
+            // Create tenant for member
+            $mainTenant = $request->tenant;
+            $memberPackage = get_or_create_members_package();
         
-        // Generate unique slug for member tenant
-        $memberSlug = strtolower(str_replace(' ', '-', $mainTenant->slug . '-' . $member->first_name . '-' . $member->last_name));
-        $memberSlug = preg_replace('/[^a-z0-9\-]/', '', $memberSlug);
+            // Generate unique slug for member tenant
+            $memberSlug = strtolower(str_replace(' ', '-', $mainTenant->slug . '-' . $member->first_name . '-' . $member->last_name));
+            $memberSlug = preg_replace('/[^a-z0-9\-]/', '', $memberSlug);
         
-        // Ensure slug is unique
-        $originalSlug = $memberSlug;
-        $counter = 1;
-        while (Tenant::where('slug', $memberSlug)->exists()) {
-            $memberSlug = $originalSlug . '-' . $counter;
-            $counter++;
-        }
+            // Ensure slug is unique
+            $originalSlug = $memberSlug;
+            $counter = 1;
+            while (Tenant::where('slug', $memberSlug)->exists()) {
+                $memberSlug = $originalSlug . '-' . $counter;
+                $counter++;
+            }
         
-        // Create member tenant
-        $memberTenant = new Tenant();
-        $memberTenant->slug = $memberSlug;
-        $memberTenant->name = $mainTenant->name . ' - ' . $member->first_name . ' ' . $member->last_name;
-        $memberTenant->membership_type = 'member';
-        $memberTenant->package_id = $memberPackage->id;
-        $memberTenant->subscription_date = now();
-        $memberTenant->valid_to = update_membership_date($memberPackage, $memberTenant->subscription_date);
-        $memberTenant->status = 1;
-        $memberTenant->save();
+            // Create member tenant
+            $memberTenant = new Tenant();
+            $memberTenant->slug = $memberSlug;
+            $memberTenant->name = $mainTenant->name . ' - ' . $member->first_name . ' ' . $member->last_name;
+            $memberTenant->membership_type = 'member';
+            $memberTenant->package_id = $memberPackage->id;
+            $memberTenant->subscription_date = now();
+            $memberTenant->valid_to = update_membership_date($memberPackage, $memberTenant->subscription_date);
+            $memberTenant->status = 1;
+            $memberTenant->save();
         
-        // Link member to their tenant
-        $member->member_tenant_id = $memberTenant->id;
-        $member->save();
+            // Link member to their tenant
+            $member->member_tenant_id = $memberTenant->id;
+            $member->save();
         
-        // Create admin user for member tenant (always create for member tenant)
-        $memberAdminUser = new User();
-        $memberAdminUser->name = $member->first_name . ' ' . $member->last_name;
-        $memberAdminUser->email = $request->input('email') ?: ($request->input('login_email') ?: 'member' . $member->id . '@example.com');
-        // Use same password if login is enabled, otherwise generate a random one
-        if ($request->client_login == 1 && isset($mainTenantUser)) {
-            $memberAdminUser->password = $mainTenantUser->password; // Same password
-        } else {
-            $memberAdminUser->password = Hash::make('password123'); // Default password
-        }
-        $memberAdminUser->user_type = 'admin';
-        $memberAdminUser->tenant_id = $memberTenant->id;
-        $memberAdminUser->tenant_owner = 1;
-        $memberAdminUser->status = $request->input('status', 1);
-        $memberAdminUser->profile_picture = $photo;
-        $memberAdminUser->save();
+            // Create admin user for member tenant (always create for member tenant)
+            $memberAdminUser = new User();
+            $memberAdminUser->name = $member->first_name . ' ' . $member->last_name;
+            $memberAdminUser->email = $request->input('email') ?: ($request->input('login_email') ?: 'member' . $member->id . '@example.com');
+            // Use same password if login is enabled, otherwise generate a random one
+            if ($request->client_login == 1 && isset($mainTenantUser)) {
+                $memberAdminUser->password = $mainTenantUser->password; // Same password
+            } else {
+                $memberAdminUser->password = Hash::make('password123'); // Default password
+            }
+            $memberAdminUser->user_type = 'admin';
+            $memberAdminUser->tenant_id = $memberTenant->id;
+            $memberAdminUser->tenant_owner = 1;
+            $memberAdminUser->status = $request->input('status', 1);
+            $memberAdminUser->profile_picture = $photo;
+            $memberAdminUser->saveQuietly();
 
-        //Increment Member No
-        $memberNo = get_tenant_option('starting_member_no');
-        if ($memberNo != '') {
-            update_tenant_option('starting_member_no', $memberNo + 1);
+            $this->generateAccounts($member->id);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'result'  => 'error',
+                    'message' => _lang('Sorry, Error Occured !') . ' ' . _lang('Please check the member details and try again.'),
+                ], 500);
+            }
+
+            return back()->with('error', _lang('Sorry, Error Occured !'))->withInput();
         }
-
-        $this->generateAccounts($member->id);
-
-        DB::commit();
 
         if (! $request->ajax()) {
             return redirect()->route('members.show', $member->id)->with('success', _lang('Saved Successfully'));
         } else {
-            return response()->json(['result' => 'success', 'action' => 'store', 'message' => _lang('Saved Successfully'), 'data' => $member, 'table' => '#members_table']);
+            $member->load('branch')->loadCount('documents');
+
+            return response()->json([
+                'result'        => 'success',
+                'resource'      => 'members',
+                'action'        => 'store',
+                'message'       => _lang('Saved Successfully'),
+                'data'          => $member,
+                'table'         => '#members_table',
+                'stats'         => $this->memberStatsPayload(),
+                'workspace_row' => view('backend.admin.member.partials.workspace-member-row', compact('member'))->render(),
+            ]);
         }
+    }
+
+    private function memberStatsPayload()
+    {
+        return [
+            'members'          => Member::count(),
+            'pending'          => Member::withoutGlobalScopes(['status'])->where('status', 0)->count(),
+            'branches'         => \App\Models\Branch::count(),
+            'active_borrowers' => \App\Models\Loan::where('status', 1)->distinct('borrower_id')->count('borrower_id'),
+        ];
+    }
+
+    private function nextMemberNoForTenant($tenantId)
+    {
+        $nextMemberNo = (int) Member::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->max('id') + 1;
+
+        while (
+            Member::withoutGlobalScopes()
+                ->where('tenant_id', $tenantId)
+                ->where('member_no', (string) $nextMemberNo)
+                ->exists()
+        ) {
+            $nextMemberNo++;
+        }
+
+        return (string) $nextMemberNo;
     }
 
     /**

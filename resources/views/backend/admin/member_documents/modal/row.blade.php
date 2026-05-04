@@ -11,8 +11,8 @@
     <td class="text-center">
         @include('backend.admin.partials.table-actions', [
             'items' => [
-                ['label' => _lang('Edit'), 'url' => route('member_documents.edit', $memberdocument->id) . '?context=' . ($context ?? 'list'), 'icon' => 'ti-pencil-alt', 'class' => 'ajax-modal-2', 'data_title' => _lang('Update Document')],
-                ['label' => _lang('Delete'), 'url' => route('member_documents.destroy', $memberdocument->id), 'icon' => 'ti-trash', 'method' => 'delete', 'class' => 'btn-remove'],
+                ['label' => _lang('Edit'), 'url' => route('member_documents.edit', ['tenant' => request()->tenant->slug, 'member_document' => $memberdocument->id]) . '?context=' . ($context ?? 'list'), 'icon' => 'ti-pencil-alt', 'class' => 'ajax-modal-2', 'data_title' => _lang('Update Document')],
+                ['label' => _lang('Delete'), 'url' => route('member_documents.destroy', ['tenant' => request()->tenant->slug, 'member_document' => $memberdocument->id]), 'icon' => 'ti-trash', 'method' => 'delete', 'class' => 'btn-remove', 'form_class' => 'ajax-remove'],
             ],
         ])
     </td>

@@ -36,6 +36,20 @@
 @include('backend.admin.partials.workspace-styles')
 <style>
     .workspace-mini-table td, .workspace-mini-table th { vertical-align: middle; }
+    .loan-tools-layout { display: grid; grid-template-columns: minmax(210px, 260px) minmax(0, 1fr); gap: 1.5rem; }
+    .loan-tools-sidebar { border-right: 1px solid #e4ecec; padding-right: 1rem; }
+    .loan-tools-sidebar .nav-link { border-radius: 8px; color: #2d3a45; font-weight: 600; margin-bottom: .35rem; padding: .8rem .9rem; }
+    .loan-tools-sidebar .nav-link.active { background: #315f65; color: #fff; }
+    .loan-tools-sidebar .tool-meta { display: block; font-size: .74rem; font-weight: 400; line-height: 1.25; opacity: .72; }
+    .loan-tools-panel-header { align-items: center; border-bottom: 1px solid #e8eeee; display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; }
+    .loan-tools-panel-title { font-size: 1rem; font-weight: 700; margin-bottom: .15rem; }
+    .loan-tools-panel-copy { color: #6b7280; font-size: .84rem; margin: 0; }
+    .loan-tools-empty { border: 1px dashed #cbdada; border-radius: 8px; color: #6b7280; padding: 1.5rem; text-align: center; }
+    .loan-calculator-launch { background: #f7faf9; border: 1px solid #dbe6e6; border-radius: 8px; padding: 1.25rem; }
+    @media (max-width: 991.98px) {
+        .loan-tools-layout { grid-template-columns: 1fr; }
+        .loan-tools-sidebar { border-right: 0; border-bottom: 1px solid #e4ecec; padding: 0 0 1rem; }
+    }
 </style>
 
 @include('backend.admin.partials.page-header', [
@@ -47,7 +61,6 @@
         ['label' => _lang('Loans Workspace'), 'active' => true],
     ],
     'actions' => [
-        ['label' => _lang('New Loan'), 'url' => route('loans.create'), 'class' => 'btn-primary btn-sm'],
         ['label' => _lang('Post Repayment'), 'url' => route('loan_payments.create'), 'class' => 'btn-outline-primary btn-sm'],
     ],
 ])
@@ -63,7 +76,7 @@
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Overdue Repayments') }}</div><div class="stat-value">{{ $overdueRepaymentsCount }}</div><span class="text-muted small">{{ _lang('Collections follow-up required') }}</span></div></div></div>
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Critical Collections') }}</div><div class="stat-value">{{ $criticalCollectionsCount }}</div><span class="text-muted small">{{ _lang('31+ day cases needing escalation') }}</span></div></div></div>
     <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Active Loans') }}</div><div class="stat-value">{{ $activeLoansCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'active') }}">{{ _lang('Open active loans') }}</a></div></div></div>
-    <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Loan Products') }}</div><div class="stat-value">{{ $loanProductsCount }}</div><a class="stat-link" href="{{ route('loan_products.index') }}">{{ _lang('Manage products') }}</a></div></div></div>
+    <div class="col-md-6 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Loan Products') }}</div><div class="stat-value">{{ $loanProductsCount }}</div><a class="stat-link" href="#products" data-toggle="tab">{{ _lang('Manage products') }}</a></div></div></div>
 </div>
 </div>
 
@@ -620,13 +633,274 @@
             </div>
         </div>
         <div class="tab-pane fade" id="products">
-            <div class="list-group workspace-link-list">
-                <a class="list-group-item list-group-item-action" href="{{ route('loan_products.index') }}">{{ _lang('Loan Products') }}</a>
-                <a class="list-group-item list-group-item-action" href="{{ route('loan_approver_settings.index') }}">{{ _lang('Approver Settings') }}</a>
-                <a class="list-group-item list-group-item-action" href="{{ route('loans.admin_calculator') }}">{{ _lang('Loan Calculator') }}</a>
-                <a class="list-group-item list-group-item-action" href="{{ route('custom_fields.index', ['loans']) }}">{{ _lang('Custom Fields') }}</a>
+            <div class="loan-tools-layout">
+                <div class="loan-tools-sidebar">
+                    <div class="nav flex-column nav-pills" id="loan-tools-sidebar" role="tablist" aria-orientation="vertical">
+                        <a class="nav-link active" id="loan-tool-products-tab" data-toggle="pill" href="#loan-tool-products" role="tab" aria-controls="loan-tool-products" aria-selected="true">
+                            {{ _lang('Loan Products') }}
+                            <span class="tool-meta">{{ _lang('Rates, terms, fees') }}</span>
+                        </a>
+                        <a class="nav-link" id="loan-tool-approvers-tab" data-toggle="pill" href="#loan-tool-approvers" role="tab" aria-controls="loan-tool-approvers" aria-selected="false">
+                            {{ _lang('Approver Settings') }}
+                            <span class="tool-meta">{{ _lang('Approval levels') }}</span>
+                        </a>
+                        <a class="nav-link" id="loan-tool-calculator-tab" data-toggle="pill" href="#loan-tool-calculator" role="tab" aria-controls="loan-tool-calculator" aria-selected="false">
+                            {{ _lang('Loan Calculator') }}
+                            <span class="tool-meta">{{ _lang('Repayment preview') }}</span>
+                        </a>
+                        <a class="nav-link" id="loan-tool-fields-tab" data-toggle="pill" href="#loan-tool-fields" role="tab" aria-controls="loan-tool-fields" aria-selected="false">
+                            {{ _lang('Custom Fields') }}
+                            <span class="tool-meta">{{ _lang('Loan profile fields') }}</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="loan-tools-content">
+                    <div class="tab-pane fade show active" id="loan-tool-products" role="tabpanel" aria-labelledby="loan-tool-products-tab">
+                        <div class="loan-tools-panel-header">
+                            <div>
+                                <div class="loan-tools-panel-title">{{ _lang('Loan Products') }}</div>
+                                <p class="loan-tools-panel-copy">{{ _lang('Manage loan rates, ranges, fees, and product availability without leaving the workspace.') }}</p>
+                            </div>
+                            <a class="btn btn-primary btn-sm ajax-modal" href="{{ route('loan_products.create') }}" data-title="{{ _lang('Add Loan Product') }}" data-size="lg">
+                                <i class="ti-plus mr-1"></i>{{ _lang('Add Product') }}
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="loan_products_table" class="table table-bordered workspace-mini-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _lang('Name') }}</th>
+                                        <th>{{ _lang('Amount Range') }}</th>
+                                        <th>{{ _lang('Interest') }}</th>
+                                        <th>{{ _lang('Type') }}</th>
+                                        <th>{{ _lang('Max Term') }}</th>
+                                        <th>{{ _lang('Status') }}</th>
+                                        <th class="text-center">{{ _lang('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($loanProducts as $loanproduct)
+                                        @include('backend.admin.loan_product.partials.row', ['loanproduct' => $loanproduct])
+                                    @empty
+                                        <tr><td colspan="7" class="text-center text-muted">{{ _lang('No loan products found') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="loan-tool-approvers" role="tabpanel" aria-labelledby="loan-tool-approvers-tab">
+                        <div class="loan-tools-panel-header">
+                            <div>
+                                <div class="loan-tools-panel-title">{{ _lang('Approver Settings') }}</div>
+                                <p class="loan-tools-panel-copy">{{ _lang('Control who can clear each stage of the loan approval chain.') }}</p>
+                            </div>
+                            <a class="btn btn-primary btn-sm ajax-modal" href="{{ route('loan_approver_settings.create', ['tenant' => request()->tenant->slug, 'level' => 1]) }}" data-title="{{ _lang('Configure Approvers') }}">
+                                <i class="ti-plus mr-1"></i>{{ _lang('Configure') }}
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="loan_approver_settings_table" class="table table-bordered workspace-mini-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _lang('Approval Level') }}</th>
+                                        <th>{{ _lang('Approver') }}</th>
+                                        <th>{{ _lang('Status') }}</th>
+                                        <th class="text-center">{{ _lang('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($loanApproverSettings as $setting)
+                                        <tr data-id="row_{{ $setting->id }}">
+                                            <td>
+                                                <strong>{{ _lang($setting->approval_level_name) }}</strong>
+                                                <div class="small text-muted">{{ _lang('Level') }} {{ $setting->approval_level }}</div>
+                                            </td>
+                                            <td>
+                                                @if($setting->approver)
+                                                    {{ $setting->approver->name }} ({{ $setting->approver->member_no }})
+                                                @else
+                                                    <span class="text-muted">{{ _lang('Not Assigned') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($setting->status == 1)
+                                                    <span class="badge badge-success">{{ _lang('Active') }}</span>
+                                                @else
+                                                    <span class="badge badge-secondary">{{ _lang('Inactive') }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ route('loan_approver_settings.edit', ['tenant' => request()->tenant->slug, 'id' => $setting->id]) }}" data-title="{{ _lang('Edit Approver Setting') }}" class="btn btn-primary btn-xs ajax-modal">
+                                                    <i class="ti-pencil-alt mr-1"></i>{{ _lang('Edit') }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="text-center text-muted">{{ _lang('No approver settings found') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="loan-tool-calculator" role="tabpanel" aria-labelledby="loan-tool-calculator-tab">
+                        <div class="loan-tools-panel-header">
+                            <div>
+                                <div class="loan-tools-panel-title">{{ _lang('Loan Calculator') }}</div>
+                                <p class="loan-tools-panel-copy">{{ _lang('Preview repayment schedules while staying inside this workspace.') }}</p>
+                            </div>
+                        </div>
+                        <div id="loan-calculator-workspace-content" class="loan-calculator-launch">
+                            @include('backend.admin.loan.modal.calculator', [
+                                'first_payment_date' => '',
+                                'apply_amount' => '',
+                                'interest_rate' => '',
+                                'interest_type' => '',
+                                'term' => '',
+                                'term_period' => '',
+                                'late_payment_penalties' => 0,
+                                'calculatorContext' => 'workspace',
+                                'calculatorTarget' => '#loan-calculator-workspace-content',
+                            ])
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="loan-tool-fields" role="tabpanel" aria-labelledby="loan-tool-fields-tab">
+                        <div class="loan-tools-panel-header">
+                            <div>
+                                <div class="loan-tools-panel-title">{{ _lang('Loan Custom Fields') }}</div>
+                                <p class="loan-tools-panel-copy">{{ _lang('Capture additional loan details needed by CAVIC operations and reporting.') }}</p>
+                            </div>
+                            <a class="btn btn-primary btn-sm ajax-modal" data-title="{{ _lang('Add New Field') }}" href="{{ route('custom_fields.create') }}?table=loans">
+                                <i class="ti-plus mr-1"></i>{{ _lang('Add Field') }}
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="custom_fields_table" class="table table-bordered workspace-mini-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _lang('Name') }}</th>
+                                        <th>{{ _lang('Field Type') }}</th>
+                                        <th>{{ _lang('Status') }}</th>
+                                        <th class="text-center">{{ _lang('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($loanCustomFields as $customField)
+                                        <tr data-id="row_{{ $customField->id }}">
+                                            <td class="field_name">{{ $customField->field_name }}</td>
+                                            <td class="field_type">
+                                                @if($customField->field_type == 'text')
+                                                    {{ _lang('Text Box') }}
+                                                @elseif($customField->field_type == 'number')
+                                                    {{ _lang('Number') }}
+                                                @elseif($customField->field_type == 'textarea')
+                                                    {{ _lang('Textarea') }}
+                                                @elseif($customField->field_type == 'select')
+                                                    {{ _lang('Select Box') }}
+                                                @elseif($customField->field_type == 'file')
+                                                    {{ _lang('File (PNG,JPG,PDF)') }}
+                                                @else
+                                                    {{ $customField->field_type }}
+                                                @endif
+                                            </td>
+                                            <td class="status">{!! xss_clean(status($customField->status)) !!}</td>
+                                            <td class="text-center">
+                                                @include('backend.admin.partials.table-actions', [
+                                                    'items' => [
+                                                        ['label' => _lang('Edit'), 'url' => route('custom_fields.edit', ['tenant' => request()->tenant->slug, 'custom_field' => $customField->id]), 'icon' => 'ti-pencil-alt', 'class' => 'ajax-modal', 'data_title' => _lang('Update Custom Field')],
+                                                        ['label' => _lang('Delete'), 'url' => route('custom_fields.destroy', ['tenant' => request()->tenant->slug, 'custom_field' => $customField->id]), 'icon' => 'ti-trash', 'method' => 'delete', 'class' => 'btn-remove', 'form_class' => 'ajax-remove'],
+                                                    ],
+                                                ])
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="text-center text-muted">{{ _lang('No custom fields found') }}</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('js-script')
+<script>
+(function ($) {
+    "use strict";
+
+    function initLoanCalculator($scope) {
+        if (typeof init_datepicker === 'function') {
+            init_datepicker($scope);
+        }
+
+        $($scope).find('.auto-select').each(function () {
+            $(this).val($(this).data('selected')).trigger('change');
+        });
+
+        $($scope).find('.validate').parsley();
+    }
+
+    $(document).on('change', '[data-loan-calculator-interest-type]', function () {
+        var $calculator = $(this).closest('.loan-calculator-modal-content');
+        var isOneTime = $(this).val() === 'one_time';
+        var $term = $calculator.find('[data-loan-calculator-term]');
+        var $termPeriod = $calculator.find('[data-loan-calculator-term-period]');
+
+        $term.val(isOneTime ? 1 : $term.val()).prop('readonly', isOneTime);
+        $termPeriod.val(isOneTime ? '+1 day' : $termPeriod.val()).prop('disabled', isOneTime);
+    });
+
+    $(document).on('submit', '.loan-calculator-ajax-form', function (event) {
+        event.preventDefault();
+
+        var form = this;
+        var $form = $(form);
+        var $modalBody = $form.closest('.modal-body');
+        var $target = $form.data('target') ? $($form.data('target')) : $modalBody;
+        var $alertContext = $modalBody.length ? $modalBody.closest('.modal-content') : $target;
+
+        $form.find('button[type=submit]').prop('disabled', true);
+
+        $.ajax({
+            method: 'POST',
+            url: $form.attr('action'),
+            data: new FormData(form),
+            contentType: false,
+            cache: false,
+            processData: false,
+            beforeSend: function () {
+                $('#preloader').css('display', 'block');
+            },
+            success: function (response) {
+                $('#preloader').css('display', 'none');
+                $form.find('button[type=submit]').prop('disabled', false);
+
+                if (typeof response === 'object' && response.result === 'error') {
+                    var message = Array.isArray(response.message) ? response.message.join('<br>') : response.message;
+                    $alertContext.find('.alert-danger').html('<span>' + message + '</span>').removeClass('d-none');
+                    return;
+                }
+
+                $target.html(response);
+                initLoanCalculator($target);
+            },
+            error: function (request, status, error) {
+                $('#preloader').css('display', 'none');
+                $form.find('button[type=submit]').prop('disabled', false);
+                var message = request.responseJSON && request.responseJSON.message
+                    ? request.responseJSON.message
+                    : (request.responseText ? request.responseText.replace(/(<([^>]+)>)/ig, '') : (error || 'Error'));
+                $alertContext.find('.alert-danger').html('<span>' + message + '</span>').removeClass('d-none');
+            }
+        });
+    });
+})(window.jQuery || window.$);
+</script>
 @endsection

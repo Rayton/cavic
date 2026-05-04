@@ -165,9 +165,13 @@ class CustomFieldController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($tenant, $id) {
+    public function destroy(Request $request, $tenant, $id) {
         $customField = CustomField::find($id);
         $customField->delete();
+        if ($request->ajax()) {
+            return response()->json(['result' => 'success', 'message' => _lang('Deleted Successfully'), 'id' => $id, 'table' => '#custom_fields_table']);
+        }
+
         return back()->with('success', _lang('Deleted Successfully'));
     }
 }

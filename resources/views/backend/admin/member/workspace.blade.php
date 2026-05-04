@@ -58,10 +58,10 @@
 
 <div class="workspace-first-tab-stats" data-tab="#all-members">
 <div class="row mb-4">
-    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Total Members') }}</div><div class="stat-value">{{ number_format($membersCount) }}</div><span class="text-muted small">{{ _lang('Current workspace list') }}</span></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Requests') }}</div><div class="stat-value">{{ $memberRequests }}</div><a class="stat-link" href="{{ route('members.pending_requests') }}">{{ _lang('Review onboarding') }}</a></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Branches') }}</div><div class="stat-value">{{ $branchesCount }}</div><a class="stat-link" href="{{ route('branches.index') }}">{{ _lang('Manage branches') }}</a></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Active Borrowers') }}</div><div class="stat-value">{{ $activeBorrowersCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'active') }}">{{ _lang('View active loans') }}</a></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Total Members') }}</div><div class="stat-value" data-member-stat="members">{{ number_format($membersCount) }}</div><span class="text-muted small">{{ _lang('Current workspace list') }}</span></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Requests') }}</div><div class="stat-value" data-member-stat="pending">{{ $memberRequests }}</div><a class="stat-link" href="{{ route('members.pending_requests') }}">{{ _lang('Review onboarding') }}</a></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Branches') }}</div><div class="stat-value" data-member-stat="branches">{{ $branchesCount }}</div><a class="stat-link" href="{{ route('branches.index') }}">{{ _lang('Manage branches') }}</a></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Active Borrowers') }}</div><div class="stat-value" data-member-stat="active_borrowers">{{ $activeBorrowersCount }}</div><a class="stat-link" href="{{ route('loans.filter', 'active') }}">{{ _lang('View active loans') }}</a></div></div></div>
 </div>
 </div>
 
@@ -69,7 +69,7 @@
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="all-members">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
+                <table id="members_workspace_recent_table" class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table mb-3">
                     <thead>
                         <tr>
                             <th>{{ _lang('Member') }}</th>
@@ -82,23 +82,7 @@
                     </thead>
                     <tbody>
                         @forelse($recentMembers as $member)
-                            <tr>
-                                <td>{{ $member->name }}</td>
-                                <td>{{ $member->member_no }}</td>
-                                <td>{{ $member->branch->name }}</td>
-                                <td>{{ $member->documents_count }}</td>
-                                <td><span class="workspace-status-chip active">{{ _lang('Active') }}</span></td>
-                                <td>
-                                    @include('backend.admin.partials.table-actions', [
-                                        'items' => [
-                                            ['label' => _lang('Edit'), 'url' => route('members.edit', $member->id), 'icon' => 'ti-pencil-alt', 'class' => 'ajax-modal', 'data_title' => _lang('Edit Member'), 'data_fullscreen' => true],
-                                            ['label' => _lang('View'), 'url' => route('members.show', $member->id), 'icon' => 'ti-eye', 'class' => 'ajax-modal', 'data_title' => _lang('Member Details'), 'data_size' => 'lg'],
-                                            ['label' => _lang('Documents'), 'url' => route('member_documents.index', $member->id), 'icon' => 'ti-files', 'class' => 'ajax-modal', 'data_title' => _lang('Member Documents'), 'data_fullscreen' => true],
-                                            ['label' => _lang('Delete'), 'url' => route('members.destroy', $member->id), 'icon' => 'ti-trash', 'method' => 'delete', 'class' => 'btn-remove'],
-                                        ],
-                                    ])
-                                </td>
-                            </tr>
+                            @include('backend.admin.member.partials.workspace-member-row', ['member' => $member])
                         @empty
                             <tr><td colspan="6" class="text-center text-muted">{{ _lang('No members found') }}</td></tr>
                         @endforelse
@@ -317,6 +301,35 @@
 <script>
     (function ($) {
         window.cavicInitStaticDataTables('.cavic-data-table', 'Members_Workspace');
+
+        $(document).on('cavic:members-changed', function (event, payload) {
+            if (!payload) return;
+
+            if (payload.stats) {
+                $('[data-member-stat]').each(function () {
+                    var key = $(this).data('memberStat');
+                    if (typeof payload.stats[key] !== 'undefined') {
+                        $(this).text(Number(payload.stats[key]).toLocaleString());
+                    }
+                });
+            }
+
+            if (!payload.workspace_row || !$.fn.DataTable || !$.fn.DataTable.isDataTable('#members_workspace_recent_table')) {
+                return;
+            }
+
+            var table = $('#members_workspace_recent_table').DataTable();
+            var rowData = $(payload.workspace_row).children('td').map(function () {
+                return $(this).html();
+            }).get();
+            var currentRows = table.rows().data().toArray();
+
+            table.search('');
+            table.columns().search('');
+            table.clear();
+            table.rows.add([rowData].concat(currentRows));
+            table.page('first').draw(false);
+        });
     })(window.jQuery || window.$);
 </script>
 @endsection

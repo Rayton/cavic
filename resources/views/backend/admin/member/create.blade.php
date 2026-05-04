@@ -27,13 +27,6 @@
 
 						<div class="col-md-6">
 							<div class="form-group">
-								<label class="control-label">{{ _lang('Member No') }}</label>
-								<input type="text" class="form-control" name="member_no" value="{{ old('member_no', $memberNo) }}" required {{ $memberNo != '' ? 'readonly' : '' }}>
-							</div>
-						</div>
-
-						<div class="col-md-6">
-							<div class="form-group">
 								<label class="control-label">{{ _lang('Business Name') }}</label>
 								<input type="text" class="form-control" name="business_name" value="{{ old('business_name') }}">
 							</div>
