@@ -187,7 +187,7 @@
         $isAdminWorkspace = $userType === 'admin';
         $adminBlueLogoPath = 'uploads/logos/cavic-logo-transparent-blue.png';
         $adminSidebarLogo = $isAdminWorkspace && file_exists(public_path($adminBlueLogoPath))
-            ? asset('public/' . $adminBlueLogoPath)
+            ? asset('public/' . $adminBlueLogoPath) . '?v=' . filemtime(public_path($adminBlueLogoPath))
             : get_logo();
         $canSwitchBranches = $authUser && ($authUser->user_type == 'admin' || $authUser->all_branch_access == 1);
         $layoutBranches = collect();
