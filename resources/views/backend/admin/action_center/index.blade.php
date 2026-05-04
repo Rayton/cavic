@@ -66,6 +66,207 @@
     .action-center-table-actions .dropdown-item:hover { background: var(--cavic-primary-soft, #e7f1f0); color: var(--cavic-primary-dark, #32555a); border-radius: 9px; }
     .action-center-table-actions .workspace-section-title,
     .action-center-table-actions h6 { color: var(--cavic-text, #2e3338); font-weight: 800; }
+    .action-exception-hero {
+        border: 1px solid #dfe9e8;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f8fbfa 0%, #eef7f6 100%);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .action-exception-hero-title {
+        color: #213039;
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: .25rem;
+    }
+    .action-exception-hero-copy {
+        color: #66717a;
+        font-size: .84rem;
+        margin: 0;
+    }
+    .action-exception-score {
+        align-items: center;
+        background: #fff;
+        border: 1px solid #dce8e7;
+        border-radius: 12px;
+        display: inline-flex;
+        gap: .75rem;
+        justify-content: flex-end;
+        min-width: 220px;
+        padding: .75rem .9rem;
+    }
+    .action-exception-score-value {
+        color: var(--cavic-primary-dark, #32555a);
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .action-exception-score-label {
+        color: #66717a;
+        font-size: .76rem;
+        font-weight: 700;
+        line-height: 1.25;
+        text-transform: uppercase;
+    }
+    .action-exception-signals {
+        display: grid;
+        gap: .85rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 1.1rem;
+    }
+    .action-signal-card {
+        border: 1px solid #e2eceb;
+        border-radius: 12px;
+        background: #fff;
+        min-height: 132px;
+        padding: .95rem;
+    }
+    .action-signal-card.critical { border-color: #f1c7cc; background: #fff8f8; }
+    .action-signal-card.warning { border-color: #f3ddb8; background: #fffaf1; }
+    .action-signal-card.recovery { border-color: #c9e6d3; background: #f7fcf8; }
+    .action-signal-card.info { border-color: #cce3e8; background: #f6fbfc; }
+    .action-signal-top {
+        align-items: flex-start;
+        display: flex;
+        gap: .7rem;
+        justify-content: space-between;
+    }
+    .action-signal-icon {
+        align-items: center;
+        border-radius: 11px;
+        display: inline-flex;
+        flex: 0 0 36px;
+        height: 36px;
+        justify-content: center;
+        width: 36px;
+        background: rgba(63, 104, 109, .1);
+        color: var(--cavic-primary-dark, #32555a);
+    }
+    .action-signal-card.critical .action-signal-icon { background: #f8d7da; color: #721c24; }
+    .action-signal-card.warning .action-signal-icon { background: #ffe8bd; color: #8a5300; }
+    .action-signal-card.recovery .action-signal-icon { background: #d9f1df; color: #155724; }
+    .action-signal-card.info .action-signal-icon { background: #d9eef2; color: #0c5460; }
+    .action-signal-value {
+        color: #213039;
+        font-size: 1.45rem;
+        font-weight: 800;
+        line-height: 1;
+        text-align: right;
+    }
+    .action-signal-label {
+        color: #25333b;
+        font-size: .86rem;
+        font-weight: 800;
+        margin-top: .75rem;
+    }
+    .action-signal-meta {
+        color: #6f787f;
+        font-size: .76rem;
+        line-height: 1.35;
+        margin-top: .25rem;
+    }
+    .action-aging-board {
+        border: 1px solid #e2eceb;
+        border-radius: 12px;
+        background: #fff;
+        padding: 1rem;
+        margin-bottom: 1.1rem;
+    }
+    .action-aging-grid {
+        display: grid;
+        gap: .75rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: .75rem;
+    }
+    .action-aging-item {
+        border-radius: 10px;
+        background: #f8faf9;
+        padding: .8rem;
+    }
+    .action-aging-top {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        gap: .5rem;
+        margin-bottom: .55rem;
+    }
+    .action-aging-label {
+        color: #46515a;
+        font-size: .78rem;
+        font-weight: 800;
+    }
+    .action-aging-count {
+        color: #213039;
+        font-weight: 800;
+    }
+    .action-aging-track {
+        background: #e8eeee;
+        border-radius: 999px;
+        height: 8px;
+        overflow: hidden;
+    }
+    .action-aging-fill {
+        background: var(--cavic-primary, #3f686d);
+        border-radius: inherit;
+        display: block;
+        height: 100%;
+        min-width: 8px;
+    }
+    .action-aging-item.warning .action-aging-fill { background: #d99032; }
+    .action-aging-item.danger .action-aging-fill { background: #b94a54; }
+    .action-aging-item.dark .action-aging-fill { background: #5e343a; }
+    .action-pressure-grid {
+        display: grid;
+        gap: .75rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 1rem;
+    }
+    .action-pressure-card {
+        align-items: center;
+        border: 1px solid #e2eceb;
+        border-radius: 12px;
+        background: #fff;
+        display: flex;
+        gap: .75rem;
+        min-height: 82px;
+        padding: .85rem;
+    }
+    .action-pressure-dot {
+        border-radius: 50%;
+        flex: 0 0 12px;
+        height: 12px;
+        width: 12px;
+        background: var(--cavic-primary, #3f686d);
+    }
+    .action-pressure-card.critical .action-pressure-dot { background: #b94a54; }
+    .action-pressure-card.warning .action-pressure-dot { background: #d99032; }
+    .action-pressure-card.info .action-pressure-dot { background: #388b9a; }
+    .action-pressure-card.success .action-pressure-dot { background: #3f8f5f; }
+    .action-pressure-title {
+        color: #25333b;
+        font-size: .8rem;
+        font-weight: 800;
+    }
+    .action-pressure-meta {
+        color: #6f787f;
+        font-size: .74rem;
+        margin-top: .15rem;
+    }
+    .action-pressure-value {
+        color: #213039;
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin-left: auto;
+    }
+    @media (max-width: 1199.98px) {
+        .action-exception-signals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 767.98px) {
+        .action-exception-score { justify-content: flex-start; margin-top: .75rem; width: 100%; }
+        .action-exception-signals,
+        .action-aging-grid,
+        .action-pressure-grid { grid-template-columns: 1fr; }
+    }
     .action-center-table-actions.dashboard-proof-datatable-card .admin-datatable-top { margin-bottom: .7rem; }
     .action-center-table-actions.dashboard-proof-datatable-card .admin-datatable-table-wrap { border: 0; border-radius: 0; }
     .action-center-table-actions.dashboard-proof-datatable-card .dashboard-proof-top-center { justify-content: center; }
@@ -532,51 +733,129 @@
             <a href="#due-upcoming" class="btn btn-outline-primary btn-sm mt-4 action-center-tab-link">{{ _lang('Stay In Repayment Queue') }}</a>
         </div>
         <div class="tab-pane fade" id="exceptions">
-            <div class="alert alert-light border mb-4">
-                {{ _lang('Current high-priority exception queue') }}: <strong>{{ $exceptionCount }}</strong>
-            </div>
-            <div class="alert alert-light small mb-4">
-                <strong>{{ _lang('Selected analytics range') }}:</strong> {{ $collectionDateRange['label'] ?? _lang('Today') }}
+            @php
+                $totalAgingBucketCount = max(1, collect($collectionBuckets)->sum('count'));
+                $financeExceptionTotal = $pendingFinanceRequestsCount + $pendingBankTransactionsCount + $pendingCashTransactionsCount;
+                $followUpActivityTotal = $followUpsLoggedToday + $resolvedInRangeCount + $recoveredInRangeCount;
+            @endphp
+            <div class="action-exception-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <div class="action-exception-hero-title">{{ _lang('Exception Control Board') }}</div>
+                        <p class="action-exception-hero-copy">{{ _lang('Focus first on overdue exposure, broken promises, blocked finance work, and recovery progress for the selected range.') }}</p>
+                    </div>
+                    <div class="action-exception-score">
+                        <div>
+                            <div class="action-exception-score-label">{{ _lang('Priority load') }}</div>
+                            <div class="small text-muted">{{ $collectionDateRange['label'] ?? _lang('Today') }}</div>
+                        </div>
+                        <div class="action-exception-score-value">{{ $exceptionCount }}</div>
+                    </div>
+                </div>
             </div>
             @unless($followUpsEnabled)
                 <div class="alert alert-info small">
                     <strong>{{ _lang('Follow-up tracking setup') }}:</strong> {{ _lang('Run the latest migration to unlock saved collection outcomes, broken-promise tracking, and branch completion analytics.') }}
                 </div>
             @endunless
-            <div class="row mb-4">
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Follow-ups Logged') }}</div><div class="bucket-value">{{ $followUpsLoggedToday }}</div><div class="bucket-meta">{{ _lang('Collection notes recorded in selected range') }}</div></div></div></div>
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Promises in Range') }}</div><div class="bucket-value">{{ $promiseDueTodayCount }}</div><div class="bucket-meta">{{ _lang('Promised-to-pay cases dated inside selected range') }}</div></div></div></div>
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Broken Promises') }}</div><div class="bucket-value">{{ $brokenPromisesCount }}</div><div class="bucket-meta">{{ _lang('Outstanding promised-to-pay cases already past due as of range end') }}</div></div></div></div>
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Recovered') }}</div><div class="bucket-value">{{ $recoveredInRangeCount }}</div><div class="bucket-meta">{{ _lang('Paid repayments that had follow-up activity in selected range') }}</div></div></div></div>
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Promise Kept') }}</div><div class="bucket-value">{{ $promiseKeptCount }}</div><div class="bucket-meta">{{ _lang('Promised-to-pay cases settled on or before committed date') }}</div></div></div></div>
-                <div class="col-md-4 col-xl-2 mb-3"><div class="card workspace-bucket-card mb-0 h-100"><div class="card-body"><div class="bucket-label">{{ _lang('Completion Rate') }}</div><div class="bucket-value">{{ $collectionCompletionRate }}%</div><div class="bucket-meta">{{ _lang('Open due and overdue cases touched in selected range') }}</div></div></div></div>
-            </div>
-            <div class="row mb-4">
-                @foreach($collectionBuckets as $bucket)
-                    <div class="col-md-4 mb-3">
-                        <div class="card workspace-bucket-card mb-0">
-                            <div class="card-body">
-                                <div class="bucket-label">{{ $bucket->label }}</div>
-                                <div class="bucket-value">{{ $bucket->count }}</div>
-                                <div class="bucket-meta">{{ _lang('Collections aging bucket') }}</div>
-                            </div>
-                        </div>
+            <div class="action-exception-signals">
+                <div class="action-signal-card critical">
+                    <div class="action-signal-top">
+                        <span class="action-signal-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                        <span class="action-signal-value">{{ $overdueRepaymentsCount }}</span>
                     </div>
-                @endforeach
+                    <div class="action-signal-label">{{ _lang('Overdue Exposure') }}</div>
+                    <div class="action-signal-meta">{{ _lang('Repayments already past due and needing collection action.') }}</div>
+                </div>
+                <div class="action-signal-card warning">
+                    <div class="action-signal-top">
+                        <span class="action-signal-icon"><i class="fas fa-calendar-times"></i></span>
+                        <span class="action-signal-value">{{ $brokenPromisesCount }}</span>
+                    </div>
+                    <div class="action-signal-label">{{ _lang('Broken Promises') }}</div>
+                    <div class="action-signal-meta">{{ _lang('Promises to pay that are past commitment date and still open.') }}</div>
+                </div>
+                <div class="action-signal-card info">
+                    <div class="action-signal-top">
+                        <span class="action-signal-icon"><i class="fas fa-random"></i></span>
+                        <span class="action-signal-value">{{ $financeExceptionTotal }}</span>
+                    </div>
+                    <div class="action-signal-label">{{ _lang('Finance Blockers') }}</div>
+                    <div class="action-signal-meta">{{ _lang('Pending finance, bank, and cash items waiting for operational clearing.') }}</div>
+                </div>
+                <div class="action-signal-card recovery">
+                    <div class="action-signal-top">
+                        <span class="action-signal-icon"><i class="fas fa-check-circle"></i></span>
+                        <span class="action-signal-value">{{ $collectionCompletionRate }}%</span>
+                    </div>
+                    <div class="action-signal-label">{{ _lang('Follow-up Coverage') }}</div>
+                    <div class="action-signal-meta">{{ _lang('Open due and overdue cases touched in the selected range.') }}</div>
+                </div>
+            </div>
+
+            <div class="action-aging-board">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <div class="workspace-section-title mb-1">{{ _lang('Collections Aging') }}</div>
+                        <div class="small text-muted">{{ _lang('Use this to spot whether pressure is fresh, maturing, or already critical.') }}</div>
+                    </div>
+                    <span class="workspace-status-chip {{ $criticalCollectionsCount > 0 ? 'critical' : 'active' }}">{{ $criticalCollectionsCount }} {{ _lang('critical') }}</span>
+                </div>
+                <div class="action-aging-grid">
+                    @foreach($collectionBuckets as $bucket)
+                        @php
+                            $bucketPercent = min(100, round(($bucket->count / $totalAgingBucketCount) * 100));
+                            $bucketClass = $bucket->theme === 'danger' ? 'danger' : ($bucket->theme === 'dark' ? 'dark' : 'warning');
+                        @endphp
+                        <div class="action-aging-item {{ $bucketClass }}">
+                            <div class="action-aging-top">
+                                <span class="action-aging-label">{{ $bucket->label }}</span>
+                                <span class="action-aging-count">{{ $bucket->count }}</span>
+                            </div>
+                            <div class="action-aging-track"><span class="action-aging-fill" style="width: {{ max(4, $bucketPercent) }}%;"></span></div>
+                            <div class="small text-muted mt-2">{{ decimalPlace($bucket->amount ?? 0) }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="action-pressure-grid">
+                <div class="action-pressure-card critical">
+                    <span class="action-pressure-dot"></span>
+                    <div>
+                        <div class="action-pressure-title">{{ _lang('Ready for Disbursement') }}</div>
+                        <div class="action-pressure-meta">{{ _lang('Approved loans waiting for release') }}</div>
+                    </div>
+                    <div class="action-pressure-value">{{ $readyForDisbursementCount }}</div>
+                </div>
+                <div class="action-pressure-card warning">
+                    <span class="action-pressure-dot"></span>
+                    <div>
+                        <div class="action-pressure-title">{{ _lang('Pending Finance Requests') }}</div>
+                        <div class="action-pressure-meta">{{ _lang('Deposit and withdrawal work still pending') }}</div>
+                    </div>
+                    <div class="action-pressure-value">{{ $pendingFinanceRequestsCount }}</div>
+                </div>
+                <div class="action-pressure-card info">
+                    <span class="action-pressure-dot"></span>
+                    <div>
+                        <div class="action-pressure-title">{{ _lang('Transaction Exceptions') }}</div>
+                        <div class="action-pressure-meta">{{ _lang('Bank and cash transactions needing attention') }}</div>
+                    </div>
+                    <div class="action-pressure-value">{{ $pendingBankTransactionsCount + $pendingCashTransactionsCount }}</div>
+                </div>
+                <div class="action-pressure-card success">
+                    <span class="action-pressure-dot"></span>
+                    <div>
+                        <div class="action-pressure-title">{{ _lang('Recovery Activity') }}</div>
+                        <div class="action-pressure-meta">{{ _lang('Follow-ups, recoveries, and resolutions in range') }}</div>
+                    </div>
+                    <div class="action-pressure-value">{{ $followUpActivityTotal }}</div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-lg-5 mb-4 mb-lg-0">
-                    <ul class="workspace-exception-list">
-                        <li><span>{{ _lang('Overdue repayments') }}</span><strong>{{ $overdueRepaymentsCount }}</strong></li>
-                        <li><span>{{ _lang('Ready for disbursement') }}</span><strong>{{ $readyForDisbursementCount }}</strong></li>
-                        <li><span>{{ _lang('Pending finance requests') }}</span><strong>{{ $pendingFinanceRequestsCount }}</strong></li>
-                        <li><span>{{ _lang('Pending bank transactions') }}</span><strong>{{ $pendingBankTransactionsCount }}</strong></li>
-                        <li><span>{{ _lang('Pending cash transactions') }}</span><strong>{{ $pendingCashTransactionsCount }}</strong></li>
-                        <li><span>{{ _lang('Broken promises') }}</span><strong>{{ $brokenPromisesCount }}</strong></li>
-                        <li><span>{{ _lang('Recovered in range') }}</span><strong>{{ $recoveredInRangeCount }}</strong></li>
-                        <li><span>{{ _lang('Promise kept') }}</span><strong>{{ $promiseKeptCount }}</strong></li>
-                    </ul>
-                    <div class="workspace-section-title mt-4">{{ _lang('Branch Collections Pressure') }}</div>
+                    <div class="workspace-section-title">{{ _lang('Branch Collections Pressure') }}</div>
                     <div class="table-responsive mb-4">
                         <table class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table action-center-data-table mb-0" data-export-filename="Action_Center_Branch_Collections_Pressure">
                             <thead>

@@ -137,6 +137,7 @@ class ActionCenterController extends Controller
                 'label' => $bucket['label'],
                 'theme' => $bucket['theme'],
                 'count' => $items->count(),
+                'amount' => (float) $items->sum('amount_to_pay'),
             ];
         })->values();
 
