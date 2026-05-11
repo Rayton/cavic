@@ -7,14 +7,16 @@ use App\Models\BankTransaction;
 use App\Models\Branch;
 use App\Models\Expense;
 use App\Models\Loan;
+use App\Models\LoanProduct;
 use App\Models\LoanRepayment;
 use App\Models\Member;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ReportCenterController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $todayCarbon = Carbon::today();
         $today = $todayCarbon->toDateString();
@@ -31,7 +33,7 @@ class ReportCenterController extends Controller
                 ],
             ],
             'portfolio' => [
-                'title' => _lang('Portfolio'),
+                'title' => _lang('Loan Portfolio'),
                 'items' => [
                     ['label' => _lang('Loan Report'), 'route' => route('reports.loan_report'), 'description' => _lang('Filter disbursed and pipeline loans by date, member, and product.')],
                 ],
@@ -99,6 +101,13 @@ class ReportCenterController extends Controller
         $monthlyTransactionsQuery = Transaction::whereDate('trans_date', '>=', $monthStart)->whereDate('trans_date', '<=', $monthEnd);
         $completedMonthlyTransactionsQuery = (clone $monthlyTransactionsQuery)->where('status', 2);
         $monthlyExpensesQuery = Expense::whereDate('expense_date', '>=', $monthStart)->whereDate('expense_date', '<=', $monthEnd);
+        $loanReportFilters = [
+            'date1' => $request->input('date1', $monthStart),
+            'date2' => $request->input('date2', $monthEnd),
+            'loan_type' => $request->input('loan_type', ''),
+            'status' => $request->input('status', ''),
+            'member_no' => $request->input('member_no', ''),
+        ];
 
         $monthlyCredits = (clone $completedMonthlyTransactionsQuery)->where('dr_cr', 'cr')->sum('amount');
         $monthlyDebits = (clone $completedMonthlyTransactionsQuery)->where('dr_cr', 'dr')->sum('amount');
@@ -106,6 +115,88 @@ class ReportCenterController extends Controller
         $pendingBankTransactions = BankTransaction::where('status', 0)->count();
         $overdueRepayments = (clone $overdueRepaymentsQuery)->count();
         $dueToday = (clone $dueTodayQuery)->count();
+        $overdueAmount = (clone $overdueRepaymentsQuery)->sum('amount_to_pay');
+        $dueTodayAmount = (clone $dueTodayQuery)->sum('amount_to_pay');
+        $portfolioPayable = Loan::where('status', 1)->sum('total_payable');
+        $portfolioPaid = Loan::where('status', 1)->sum('total_paid');
+        $portfolioPayable = $portfolioPayable > 0 ? $portfolioPayable : $activePortfolioAmount;
+        $portfolioRepaymentRate = $portfolioPayable > 0 ? round(($portfolioPaid / $portfolioPayable) * 100, 1) : 0;
+        $portfolioParRatio = $portfolioOutstanding > 0 ? round(($overdueAmount / $portfolioOutstanding) * 100, 1) : 0;
+
+        $loanStatusSummary = Loan::selectRaw('status, COUNT(*) as total, SUM(applied_amount) as applied_amount, SUM(COALESCE(total_payable, applied_amount) - COALESCE(total_paid, 0)) as outstanding')
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $loanProductPortfolio = Loan::where('status', 1)
+            ->selectRaw('loan_product_id, COUNT(*) as active_loans, SUM(applied_amount) as disbursed_amount, SUM(COALESCE(total_payable, applied_amount) - COALESCE(total_paid, 0)) as outstanding_amount')
+            ->with('loan_product')
+            ->groupBy('loan_product_id')
+            ->orderByDesc('outstanding_amount')
+            ->take(6)
+            ->get();
+
+        $portfolioAgingBuckets = [
+            'not_due' => [
+                'label' => _lang('Not Due'),
+                'count' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>', $today)->count(),
+                'amount' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>', $today)->sum('amount_to_pay'),
+            ],
+            'due_today' => [
+                'label' => _lang('Due Today'),
+                'count' => $dueToday,
+                'amount' => $dueTodayAmount,
+            ],
+            'one_to_thirty' => [
+                'label' => _lang('1-30 Days'),
+                'count' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(30)->toDateString())->whereDate('repayment_date', '<', $today)->count(),
+                'amount' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(30)->toDateString())->whereDate('repayment_date', '<', $today)->sum('amount_to_pay'),
+            ],
+            'thirty_one_to_sixty' => [
+                'label' => _lang('31-60 Days'),
+                'count' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(60)->toDateString())->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(30)->toDateString())->count(),
+                'amount' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(60)->toDateString())->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(30)->toDateString())->sum('amount_to_pay'),
+            ],
+            'sixty_one_to_ninety' => [
+                'label' => _lang('61-90 Days'),
+                'count' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(90)->toDateString())->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(60)->toDateString())->count(),
+                'amount' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '>=', $todayCarbon->copy()->subDays(90)->toDateString())->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(60)->toDateString())->sum('amount_to_pay'),
+            ],
+            'ninety_plus' => [
+                'label' => _lang('90+ Days'),
+                'count' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(90)->toDateString())->count(),
+                'amount' => LoanRepayment::where('status', 0)->whereDate('repayment_date', '<', $todayCarbon->copy()->subDays(90)->toDateString())->sum('amount_to_pay'),
+            ],
+        ];
+
+        $portfolioWatchlist = LoanRepayment::selectRaw('loan_id, MIN(repayment_date) as earliest_due_date, COUNT(*) as missed_installments, SUM(amount_to_pay) as overdue_amount')
+            ->with(['loan.borrower', 'loan.loan_product'])
+            ->whereDate('repayment_date', '<', $today)
+            ->where('status', 0)
+            ->groupBy('loan_id')
+            ->orderByDesc('overdue_amount')
+            ->take(6)
+            ->get();
+
+        $inlineLoanReport = Loan::select('loans.*')
+            ->with(['borrower', 'loan_product', 'currency'])
+            ->when($loanReportFilters['status'] !== '', function ($query) use ($loanReportFilters) {
+                return $query->where('status', $loanReportFilters['status']);
+            })
+            ->when($loanReportFilters['loan_type'] !== '', function ($query) use ($loanReportFilters) {
+                return $query->where('loan_product_id', $loanReportFilters['loan_type']);
+            })
+            ->when($loanReportFilters['member_no'] !== '', function ($query) use ($loanReportFilters) {
+                return $query->whereHas('borrower', function ($memberQuery) use ($loanReportFilters) {
+                    return $memberQuery->where('member_no', $loanReportFilters['member_no']);
+                });
+            })
+            ->whereDate('loans.created_at', '>=', $loanReportFilters['date1'])
+            ->whereDate('loans.created_at', '<=', $loanReportFilters['date2'])
+            ->orderByDesc('loans.id')
+            ->get();
+
+        $loanReportProducts = LoanProduct::where('status', 1)->orderBy('name')->get();
 
         $reportHighlights = [
             'period_label' => $monthLabel,
@@ -116,9 +207,9 @@ class ReportCenterController extends Controller
             'active_portfolio_amount' => $activePortfolioAmount,
             'portfolio_outstanding' => $portfolioOutstanding,
             'overdue_repayments' => $overdueRepayments,
-            'overdue_amount' => (clone $overdueRepaymentsQuery)->sum('amount_to_pay'),
+            'overdue_amount' => $overdueAmount,
             'due_today' => $dueToday,
-            'due_today_amount' => (clone $dueTodayQuery)->sum('amount_to_pay'),
+            'due_today_amount' => $dueTodayAmount,
             'transactions_this_month' => (clone $monthlyTransactionsQuery)->count(),
             'completed_transactions_this_month' => (clone $completedMonthlyTransactionsQuery)->count(),
             'pending_transactions_this_month' => (clone $monthlyTransactionsQuery)->where('status', 0)->count(),
@@ -214,6 +305,15 @@ class ReportCenterController extends Controller
             'reportHighlights' => $reportHighlights,
             'executiveCards' => $executiveCards,
             'branchReportSnapshot' => $branchReportSnapshot,
+            'loanStatusSummary' => $loanStatusSummary,
+            'loanProductPortfolio' => $loanProductPortfolio,
+            'portfolioAgingBuckets' => $portfolioAgingBuckets,
+            'portfolioWatchlist' => $portfolioWatchlist,
+            'portfolioRepaymentRate' => $portfolioRepaymentRate,
+            'portfolioParRatio' => $portfolioParRatio,
+            'inlineLoanReport' => $inlineLoanReport,
+            'loanReportFilters' => $loanReportFilters,
+            'loanReportProducts' => $loanReportProducts,
         ]);
     }
 }

@@ -1,19 +1,23 @@
 @extends('layouts.app')
 
+@php
+    $activeReportTab = request('tab', 'executive');
+@endphp
+
 @section('workspace_top_tabs')
 @include('backend.admin.partials.module-tabs', [
     'variant' => 'top-strip',
     'role' => 'navigation',
     'tabs' => [
-        ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => true],
-        ['label' => _lang('Portfolio'), 'target' => '#portfolio'],
-        ['label' => _lang('Collections'), 'target' => '#collections'],
-        ['label' => _lang('Accounts'), 'target' => '#accounts'],
-        ['label' => _lang('Transactions'), 'target' => '#transactions'],
-        ['label' => _lang('Expenses'), 'target' => '#expenses'],
-        ['label' => _lang('Banking'), 'target' => '#banking'],
-        ['label' => _lang('Branch Performance'), 'target' => '#branch-performance'],
-        ['label' => _lang('Revenue'), 'target' => '#revenue'],
+        ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => $activeReportTab === 'executive'],
+        ['label' => _lang('Loan Portfolio'), 'target' => '#portfolio', 'active' => $activeReportTab === 'portfolio'],
+        ['label' => _lang('Collections'), 'target' => '#collections', 'active' => $activeReportTab === 'collections'],
+        ['label' => _lang('Accounts'), 'target' => '#accounts', 'active' => $activeReportTab === 'accounts'],
+        ['label' => _lang('Transactions'), 'target' => '#transactions', 'active' => $activeReportTab === 'transactions'],
+        ['label' => _lang('Expenses'), 'target' => '#expenses', 'active' => $activeReportTab === 'expenses'],
+        ['label' => _lang('Banking'), 'target' => '#banking', 'active' => $activeReportTab === 'banking'],
+        ['label' => _lang('Branch Performance'), 'target' => '#branch-performance', 'active' => $activeReportTab === 'branch-performance'],
+        ['label' => _lang('Revenue'), 'target' => '#revenue', 'active' => $activeReportTab === 'revenue'],
     ],
 ])
 @endsection
@@ -169,6 +173,25 @@
     color: #3F686D;
     font-size: .9rem;
 }
+.report-portfolio-meter {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eef2f2;
+}
+.report-portfolio-meter span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #3F686D;
+}
+.report-portfolio-meter.danger span { background: #b4232f; }
+.report-inline-filter {
+    border: 1px solid #e7eeee;
+    border-radius: 8px;
+    background: #fbfdfd;
+    padding: 1rem 1rem .25rem;
+}
 @media (max-width: 767.98px) {
     .report-exec-title { font-size: 1.15rem; }
     .report-kpi-value { font-size: 1.25rem; }
@@ -178,7 +201,7 @@
 </style>
 
 <div class="tab-content reports-tab-content">
-        <div class="tab-pane fade show active" id="executive">
+        <div class="tab-pane fade {{ $activeReportTab === 'executive' ? 'show active' : '' }}" id="executive">
             @include('backend.admin.reports.partials.executive-dashboard')
 
             <div class="workspace-section-title mb-2">{{ _lang('Reports') }}</div>
@@ -199,17 +222,250 @@
                 </a>
             </div>
         </div>
-        <div class="tab-pane fade" id="portfolio">
-            <div class="report-action-grid">
-                @foreach(($reportGroups['portfolio']['items'] ?? []) as $item)
-                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
-                        <span>{{ $item['label'] }}</span>
-                        <i class="ti-arrow-right"></i>
-                    </a>
-                @endforeach
+        <div class="tab-pane fade {{ $activeReportTab === 'portfolio' ? 'show active' : '' }}" id="portfolio">
+            <div class="row mb-3">
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <div class="report-metric-card">
+                        <div class="report-metric-label">{{ _lang('Outstanding Portfolio') }}</div>
+                        <div class="report-metric-value">{{ money_format_2($reportHighlights['portfolio_outstanding'] ?? 0) }}</div>
+                        <div class="report-metric-split">
+                            <span>{{ _lang('Active Loans') }}: {{ number_format($reportHighlights['active_loans'] ?? 0) }}</span>
+                            <span>{{ _lang('Disbursed') }}: {{ money_format_2($reportHighlights['active_portfolio_amount'] ?? 0) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <div class="report-metric-card active">
+                        <div class="report-metric-label">{{ _lang('Repayment Rate') }}</div>
+                        <div class="report-metric-value">{{ number_format($portfolioRepaymentRate ?? 0, 1) }}%</div>
+                        <div class="report-portfolio-meter mt-3"><span style="width: {{ min(100, max(0, $portfolioRepaymentRate ?? 0)) }}%"></span></div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <div class="report-metric-card {{ ($portfolioParRatio ?? 0) > 0 ? 'critical' : 'active' }}">
+                        <div class="report-metric-label">{{ _lang('PAR Exposure') }}</div>
+                        <div class="report-metric-value">{{ number_format($portfolioParRatio ?? 0, 1) }}%</div>
+                        <div class="report-metric-split">
+                            <span>{{ _lang('Overdue') }}: {{ money_format_2($reportHighlights['overdue_amount'] ?? 0) }}</span>
+                            <span>{{ _lang('Items') }}: {{ number_format($reportHighlights['overdue_repayments'] ?? 0) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <div class="report-metric-card review">
+                        <div class="report-metric-label">{{ _lang('Pipeline') }}</div>
+                        <div class="report-metric-value">{{ number_format($reportHighlights['pending_loans'] ?? 0) }}</div>
+                        <div class="report-metric-split">
+                            <span>{{ _lang('Pending approval') }}</span>
+                            <span>{{ _lang('Due Today') }}: {{ number_format($reportHighlights['due_today'] ?? 0) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-lg-6 mb-3">
+                    <div class="card workspace-section-card h-100 mb-0">
+                        <div class="card-header">{{ _lang('Loan Status Mix') }}</div>
+                        <div class="card-body">
+                            <div class="report-chart-wrap">
+                                <canvas id="reportLoanStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card workspace-section-card h-100 mb-0">
+                        <div class="card-header">{{ _lang('Portfolio Aging') }}</div>
+                        <div class="card-body">
+                            <div class="report-chart-wrap">
+                                <canvas id="reportPortfolioAgingChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-lg-6 mb-3">
+                    <div class="card workspace-section-card h-100 mb-0">
+                        <div class="card-header">{{ _lang('Product Exposure') }}</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm report-mini-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ _lang('Product') }}</th>
+                                            <th>{{ _lang('Loans') }}</th>
+                                            <th>{{ _lang('Disbursed') }}</th>
+                                            <th>{{ _lang('Outstanding') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($loanProductPortfolio as $product)
+                                            <tr>
+                                                <td>{{ $product->loan_product->name ?? _lang('Unassigned') }}</td>
+                                                <td>{{ number_format($product->active_loans) }}</td>
+                                                <td>{{ money_format_2($product->disbursed_amount ?? 0) }}</td>
+                                                <td>{{ money_format_2($product->outstanding_amount ?? 0) }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="4" class="text-center text-muted">{{ _lang('No active loan portfolio found') }}</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card workspace-section-card h-100 mb-0">
+                        <div class="card-header">{{ _lang('Overdue Watchlist') }}</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm report-mini-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ _lang('Loan') }}</th>
+                                            <th>{{ _lang('Borrower') }}</th>
+                                            <th>{{ _lang('Missed') }}</th>
+                                            <th>{{ _lang('Overdue') }}</th>
+                                            <th>{{ _lang('Since') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($portfolioWatchlist as $item)
+                                            <tr>
+                                                <td>{{ $item->loan->loan_id ?? _lang('N/A') }}</td>
+                                                <td>{{ $item->loan->borrower->name ?? _lang('N/A') }}</td>
+                                                <td>{{ number_format($item->missed_installments) }}</td>
+                                                <td>{{ money_format_2($item->overdue_amount ?? 0) }}</td>
+                                                <td>{{ $item->earliest_due_date ? date(get_date_format(), strtotime($item->earliest_due_date)) : '-' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="5" class="text-center text-muted">{{ _lang('No overdue portfolio items found') }}</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card workspace-section-card mb-3">
+                <div class="card-header">{{ _lang('Loan Report') }}</div>
+                <div class="card-body">
+                    <form class="report-inline-filter validate mb-3" method="get" action="{{ route('reports.index') }}#portfolio" autocomplete="off">
+                        <input type="hidden" name="tab" value="portfolio">
+                        <div class="row">
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Start Date') }}</label>
+                                    <input type="text" class="form-control datepicker" name="date1" value="{{ $loanReportFilters['date1'] ?? '' }}" readonly required>
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('End Date') }}</label>
+                                    <input type="text" class="form-control datepicker" name="date2" value="{{ $loanReportFilters['date2'] ?? '' }}" readonly required>
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Loan Type') }}</label>
+                                    <select class="form-control auto-select" data-selected="{{ $loanReportFilters['loan_type'] ?? '' }}" name="loan_type">
+                                        <option value="">{{ _lang('All') }}</option>
+                                        @foreach($loanReportProducts as $loanProduct)
+                                            <option value="{{ $loanProduct->id }}">{{ $loanProduct->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Status') }}</label>
+                                    <select class="form-control auto-select" data-selected="{{ $loanReportFilters['status'] ?? '' }}" name="status">
+                                        <option value="">{{ _lang('All') }}</option>
+                                        <option value="0">{{ _lang('Pending') }}</option>
+                                        <option value="1">{{ _lang('Approved') }}</option>
+                                        <option value="2">{{ _lang('Completed') }}</option>
+                                        <option value="3">{{ _lang('Cancelled') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Member No') }}</label>
+                                    <input type="text" class="form-control" name="member_no" value="{{ $loanReportFilters['member_no'] ?? '' }}">
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    @php $date_format = get_date_format(); @endphp
+                    <div class="report-header">
+                       <img src="{{ get_logo() }}" class="logo"/>
+                       <h4>{{ _lang('Loan Report') }}</h4>
+                       <h5>{{ date($date_format, strtotime($loanReportFilters['date1'])) }} {{ _lang('to') }} {{ date($date_format, strtotime($loanReportFilters['date2'])) }}</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered report-table table-export">
+                            <thead>
+                                <tr>
+                                    <th data-total-label="{{ _lang('Total') }}">{{ _lang('Loan ID') }}</th>
+                                    <th>{{ _lang('Member No') }}</th>
+                                    <th>{{ _lang('Created') }}</th>
+                                    <th>{{ _lang('Loan Product') }}</th>
+                                    <th>{{ _lang('Borrower') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Applied Amount') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Due Amount') }}</th>
+                                    <th>{{ _lang('Status') }}</th>
+                                    <th class="text-center">{{ _lang('Details') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($inlineLoanReport as $loan)
+                                    @php
+                                        $loanCurrency = currency($loan->currency->name);
+                                        $dueAmount = ($loan->total_payable ?? $loan->applied_amount) - ($loan->total_paid ?? 0);
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $loan->loan_id }}</td>
+                                        <td>{{ $loan->borrower->member_no }}</td>
+                                        <td>{{ $loan->created_at }}</td>
+                                        <td>{{ $loan->loan_product->name }}</td>
+                                        <td>{{ $loan->borrower->name }}<br>{{ $loan->borrower->email }}</td>
+                                        <td class="text-right">{{ decimalPlace($loan->applied_amount, $loanCurrency) }}</td>
+                                        <td class="text-right">{{ decimalPlace($dueAmount, $loanCurrency) }}</td>
+                                        <td>
+                                            @if($loan->status == 0)
+                                                {!! xss_clean(show_status(_lang('Pending'), 'warning')) !!}
+                                            @elseif($loan->status == 1)
+                                                {!! xss_clean(show_status(_lang('Approved'), 'success')) !!}
+                                            @elseif($loan->status == 2)
+                                                {!! xss_clean(show_status(_lang('Completed'), 'info')) !!}
+                                            @elseif($loan->status == 3)
+                                                {!! xss_clean(show_status(_lang('Cancelled'), 'danger')) !!}
+                                            @endif
+                                        </td>
+                                        <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye', 'target' => '_blank']]])</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="9" class="text-center text-muted">{{ _lang('No loans found for these filters') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot><tr class="table-totals-row"><td></td><td></td><td></td><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td></td><td></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="collections">
+        <div class="tab-pane fade {{ $activeReportTab === 'collections' ? 'show active' : '' }}" id="collections">
             <div class="report-action-grid">
                 @foreach(($reportGroups['collections']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -219,7 +475,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="tab-pane fade" id="accounts">
+        <div class="tab-pane fade {{ $activeReportTab === 'accounts' ? 'show active' : '' }}" id="accounts">
             <div class="report-action-grid">
                 @foreach(($reportGroups['accounts']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -229,7 +485,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="tab-pane fade" id="transactions">
+        <div class="tab-pane fade {{ $activeReportTab === 'transactions' ? 'show active' : '' }}" id="transactions">
             <div class="report-action-grid">
                 @foreach(($reportGroups['transactions']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -239,7 +495,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="tab-pane fade" id="expenses">
+        <div class="tab-pane fade {{ $activeReportTab === 'expenses' ? 'show active' : '' }}" id="expenses">
             <div class="report-action-grid">
                 @foreach(($reportGroups['expenses']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -249,7 +505,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="tab-pane fade" id="banking">
+        <div class="tab-pane fade {{ $activeReportTab === 'banking' ? 'show active' : '' }}" id="banking">
             <div class="report-action-grid">
                 @foreach(($reportGroups['banking']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -259,7 +515,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="tab-pane fade" id="branch-performance">
+        <div class="tab-pane fade {{ $activeReportTab === 'branch-performance' ? 'show active' : '' }}" id="branch-performance">
             <div class="report-action-grid">
                 @foreach(($reportGroups['branch_performance']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -307,7 +563,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="revenue">
+        <div class="tab-pane fade {{ $activeReportTab === 'revenue' ? 'show active' : '' }}" id="revenue">
             <div class="report-action-grid">
                 @foreach(($reportGroups['revenue']['items'] ?? []) as $item)
                     <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
@@ -337,6 +593,15 @@
         (int) ($reportHighlights['overdue_repayments'] ?? 0),
         (int) ($reportHighlights['pending_bank_transactions'] ?? 0),
     ];
+    $loanStatusLabels = [_lang('Pending'), _lang('Active'), _lang('Closed'), _lang('Cancelled')];
+    $loanStatusValues = [
+        (int) data_get($loanStatusSummary->get(0), 'total', 0),
+        (int) data_get($loanStatusSummary->get(1), 'total', 0),
+        (int) data_get($loanStatusSummary->get(2), 'total', 0),
+        (int) data_get($loanStatusSummary->get(3), 'total', 0),
+    ];
+    $portfolioAgingLabels = collect($portfolioAgingBuckets ?? [])->pluck('label')->values();
+    $portfolioAgingValues = collect($portfolioAgingBuckets ?? [])->pluck('amount')->map(fn ($amount) => (float) $amount)->values();
 @endphp
 <script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
 <script>
@@ -488,6 +753,12 @@
             }
         });
     });
+
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"][href="#portfolio"]', function () {
+        if ($.fn.dataTable) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
+        }
+    });
 })(jQuery);
 
 (function () {
@@ -495,6 +766,8 @@
 
     var cashCanvas = document.getElementById('reportCashMovementChart');
     var pressureCanvas = document.getElementById('reportPortfolioPressureChart');
+    var loanStatusCanvas = document.getElementById('reportLoanStatusChart');
+    var portfolioAgingCanvas = document.getElementById('reportPortfolioAgingChart');
 
     var cashData = {
         labels: @json($cashChartLabels),
@@ -504,6 +777,16 @@
     var pressureData = {
         labels: @json($pressureChartLabels),
         values: @json($pressureChartValues),
+    };
+
+    var loanStatusData = {
+        labels: @json($loanStatusLabels),
+        values: @json($loanStatusValues),
+    };
+
+    var portfolioAgingData = {
+        labels: @json($portfolioAgingLabels),
+        values: @json($portfolioAgingValues),
     };
 
     if (cashCanvas) {
@@ -542,6 +825,46 @@
                 maintainAspectRatio: false,
                 cutout: '62%',
                 plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    if (loanStatusCanvas) {
+        new Chart(loanStatusCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: loanStatusData.labels,
+                datasets: [{
+                    data: loanStatusData.values,
+                    backgroundColor: ['#B7791F', '#1A8E8F', '#3F686D', '#C14953'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    if (portfolioAgingCanvas) {
+        new Chart(portfolioAgingCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: portfolioAgingData.labels,
+                datasets: [{
+                    data: portfolioAgingData.values,
+                    backgroundColor: ['#1A8E8F', '#E0B341', '#B7791F', '#C14953', '#9F1239', '#6B1024'],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
             }
         });
     }
