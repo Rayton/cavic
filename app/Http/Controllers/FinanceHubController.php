@@ -44,12 +44,6 @@ class FinanceHubController extends Controller
             ->limit(8)
             ->get();
 
-        $savingsProductSummary = SavingsProduct::withCount('accounts')
-            ->with('currency')
-            ->latest('id')
-            ->limit(6)
-            ->get();
-
         $pendingWithdraws = WithdrawRequest::with(['member', 'method', 'account.savings_type.currency'])
             ->where('status', 0)
             ->latest('id')
@@ -135,7 +129,6 @@ class FinanceHubController extends Controller
             'financeStats' => [
                 'deposit_requests' => DepositRequest::where('status', 0)->count(),
                 'withdraw_requests' => WithdrawRequest::where('status', 0)->count(),
-                'wallet_records' => SavingsAccount::count(),
                 'bank_accounts' => BankAccount::count(),
                 'today_transactions' => Transaction::whereDate('trans_date', $today)->count(),
                 'today_expenses' => Expense::whereDate('expense_date', $today)->count(),
@@ -144,7 +137,6 @@ class FinanceHubController extends Controller
             ],
             'latestTransactions' => $latestTransactions,
             'recentSavingsAccounts' => $recentSavingsAccounts,
-            'savingsProductSummary' => $savingsProductSummary,
             'pendingCashTransactions' => $pendingCashTransactions,
             'pendingDeposits' => $pendingDeposits,
             'pendingWithdraws' => $pendingWithdraws,

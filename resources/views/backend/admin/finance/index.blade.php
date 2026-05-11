@@ -5,8 +5,7 @@
     'variant' => 'top-strip',
     'role' => 'navigation',
     'tabs' => [
-        ['label' => _lang('Wallets'), 'target' => '#wallets', 'active' => true],
-        ['label' => _lang('Savings Accounts'), 'target' => '#accounts'],
+        ['label' => _lang('Savings Accounts'), 'target' => '#accounts', 'active' => true],
         ['label' => _lang('Cash Transactions'), 'target' => '#cash-ops'],
         ['label' => _lang('Requests'), 'target' => '#requests'],
         ['label' => _lang('Exceptions & Reconciliation'), 'target' => '#exceptions'],
@@ -21,7 +20,6 @@
 @php
     $depositRequests = $financeStats['deposit_requests'] ?? 0;
     $withdrawRequests = $financeStats['withdraw_requests'] ?? 0;
-    $walletCount = $financeStats['wallet_records'] ?? 0;
     $bankAccounts = $financeStats['bank_accounts'] ?? 0;
     $todayTransactions = $financeStats['today_transactions'] ?? 0;
     $todayExpenses = $financeStats['today_expenses'] ?? 0;
@@ -43,17 +41,15 @@
     ],
     'actions' => [
         ['label' => _lang('New Transaction'), 'url' => route('transactions.create'), 'class' => 'btn-primary btn-sm'],
-        ['label' => _lang('Open Wallets'), 'url' => route('wallets.index'), 'class' => 'btn-outline-primary btn-sm'],
     ],
 ])
 
-<div class="workspace-first-tab-stats" data-tab="#wallets">
+<div class="workspace-first-tab-stats" data-tab="#accounts">
 <div class="row mb-4">
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Deposit Requests') }}</div><div class="stat-value">{{ $depositRequests }}</div><a class="stat-link" href="{{ route('deposit_requests.index') }}">{{ _lang('Review deposits') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Withdraw Requests') }}</div><div class="stat-value">{{ $withdrawRequests }}</div><a class="stat-link" href="{{ route('withdraw_requests.index') }}">{{ _lang('Review withdrawals') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Cash Transactions') }}</div><div class="stat-value">{{ $pendingCashTransactionsCount }}</div><a class="stat-link" href="{{ route('transactions.index') }}">{{ _lang('Review cash postings') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Pending Bank Transactions') }}</div><div class="stat-value">{{ $pendingBankTransactionsCount }}</div><a class="stat-link" href="{{ route('bank_transactions.index') }}">{{ _lang('Open reconciliation queue') }}</a></div></div></div>
-    <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Wallet Records') }}</div><div class="stat-value">{{ number_format($walletCount) }}</div><a class="stat-link" href="{{ route('wallets.index') }}">{{ _lang('Open wallets') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Bank Accounts') }}</div><div class="stat-value">{{ $bankAccounts }}</div><a class="stat-link" href="{{ route('bank_accounts.index') }}">{{ _lang('Manage banking') }}</a></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Today\'s Transactions') }}</div><div class="stat-value">{{ $todayTransactions }}</div><span class="text-muted small">{{ _lang('Operational posting activity for today') }}</span></div></div></div>
     <div class="col-md-4 col-xl mb-3"><div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Today\'s Expenses') }}</div><div class="stat-value">{{ $todayExpenses }}</div><span class="text-muted small">{{ _lang('Expense entries posted today') }}</span></div></div></div>
@@ -62,26 +58,7 @@
 
 <div class="card workspace-section-card">
     <div class="card-body tab-content">
-        <div class="tab-pane fade show active" id="wallets">
-            <div class="row mb-4">
-                @foreach($savingsProductSummary as $product)
-                    <div class="col-md-6 col-xl-4 mb-3">
-                        <div class="card workspace-bucket-card mb-0 h-100">
-                            <div class="card-body">
-                                <div class="bucket-label">{{ $product->name }}</div>
-                                <div class="bucket-value">{{ $product->accounts_count }}</div>
-                                <div class="bucket-meta">{{ _lang('Active accounts') }}{{ optional($product->currency)->name ? ' · '.optional($product->currency)->name : '' }}</div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
-                <p class="text-muted mb-2 mb-md-0">{{ _lang('Wallet and contribution records remain available through the existing wallet tools.') }}</p>
-                <a href="{{ route('wallets.index') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Open Wallets') }}</a>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="accounts">
+        <div class="tab-pane fade show active" id="accounts">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered workspace-mini-table mb-3">
                     <thead>
