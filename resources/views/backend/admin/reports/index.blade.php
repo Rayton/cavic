@@ -16,19 +16,137 @@
 
 @section('content')
 @php
-    $reportCounts = [
-        'executive' => count($reportGroups['executive']['items'] ?? []),
-        'portfolio' => count($reportGroups['portfolio']['items'] ?? []),
-        'accounts' => count($reportGroups['accounts']['items'] ?? []),
-        'transactions' => count($reportGroups['transactions']['items'] ?? []),
-        'banking' => count($reportGroups['banking']['items'] ?? []),
-    ];
+    $attentionTotal = $reportHighlights['attention_total'] ?? 0;
+    $overdueCount = $reportHighlights['overdue_repayments'] ?? 0;
+    $dueTodayCount = $reportHighlights['due_today'] ?? 0;
+    $pendingBankItems = $reportHighlights['pending_bank_transactions'] ?? 0;
+    $periodLabel = $reportHighlights['period_label'] ?? date('F Y');
 @endphp
 @include('backend.admin.partials.workspace-styles')
+<style>
+.report-exec-hero {
+    border: 1px solid #dfe8e7;
+    border-radius: 8px;
+    background: #f8fbfb;
+}
+.report-exec-hero .card-body { padding: 1.35rem; }
+.report-exec-eyebrow {
+    color: #3F686D;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+.report-exec-title {
+    color: #243036;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: .35rem 0 .5rem;
+}
+.report-exec-copy { color: #66737b; max-width: 720px; }
+.report-exec-signal {
+    border: 1px solid #e6edec;
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+    height: 100%;
+}
+.report-exec-signal-label { color: #6f787f; font-size: .78rem; margin-bottom: .3rem; }
+.report-exec-signal-value { color: #243036; font-size: 1.55rem; font-weight: 700; line-height: 1.05; }
+.report-exec-signal-meta { color: #7b858c; font-size: .78rem; margin-top: .35rem; }
+.report-kpi-card {
+    display: block;
+    height: 100%;
+    border: 1px solid #e8eeee;
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+    background: #fff;
+    transition: border-color .15s ease, background .15s ease;
+}
+.report-kpi-card:hover { color: inherit; text-decoration: none; border-color: #cfdedb; background: #fbfdfd; }
+.report-kpi-card .card-body { padding: 1rem; }
+.report-kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .8rem; }
+.report-kpi-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef7f7;
+    color: #3F686D;
+}
+.report-kpi-card.critical .report-kpi-icon { background: #fdecee; color: #b4232f; }
+.report-kpi-card.review .report-kpi-icon { background: #fff2e3; color: #a04a00; }
+.report-kpi-card.today .report-kpi-icon { background: #fff7db; color: #7a4d00; }
+.report-kpi-label { color: #6f787f; font-size: .78rem; margin-bottom: .3rem; }
+.report-kpi-value { color: #243036; font-size: 1.45rem; font-weight: 700; line-height: 1.05; }
+.report-kpi-meta { color: #5f6b72; font-size: .8rem; margin-top: .35rem; }
+.report-kpi-detail { color: #7b858c; font-size: .78rem; margin-top: .7rem; min-height: 36px; }
+.report-shortcut-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eef1f5;
+    color: inherit;
+    text-decoration: none;
+}
+.report-shortcut-card:last-child { border-bottom: 0; }
+.report-shortcut-card:hover { color: inherit; text-decoration: none; }
+.report-shortcut-title { color: #243036; font-weight: 700; margin-bottom: .25rem; }
+.report-shortcut-copy { color: #6f787f; font-size: .82rem; margin: 0; }
+.report-mini-table th { background: #fafbf9; color: #5f6b72; font-size: .76rem; }
+.report-mini-table td { vertical-align: middle; }
+.report-exec-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.report-exec-toolbar .report-exec-title { margin: 0; }
+.report-exec-period { color: #6f787f; font-size: .82rem; }
+.report-exec-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.report-metric-card {
+    height: 100%;
+    border: 1px solid #e7eeee;
+    border-left: 4px solid #3F686D;
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+.report-metric-card.active { border-left-color: #16803c; }
+.report-metric-card.review { border-left-color: #b45309; }
+.report-metric-card.critical { border-left-color: #b4232f; }
+.report-metric-label { color: #65717a; font-size: .78rem; font-weight: 700; margin-bottom: .35rem; }
+.report-metric-value { color: #202b33; font-size: 1.55rem; font-weight: 800; line-height: 1.05; }
+.report-metric-split { display: grid; gap: .25rem; color: #6f787f; font-size: .78rem; margin-top: .7rem; }
+.report-info-table th,
+.report-info-table td { padding: .68rem .85rem; vertical-align: middle; }
+.report-info-table th { color: #65717a; font-weight: 600; width: 58%; }
+.report-info-table td { color: #202b33; font-weight: 800; text-align: right; }
+.report-chart-wrap {
+    height: 240px;
+    position: relative;
+}
+.report-chart-wrap canvas {
+    max-height: 240px;
+}
+@media (max-width: 767.98px) {
+    .report-exec-title { font-size: 1.15rem; }
+    .report-kpi-value { font-size: 1.25rem; }
+    .report-metric-value { font-size: 1.3rem; }
+    .report-chart-wrap { height: 220px; }
+}
+</style>
 
 @include('backend.admin.partials.page-header', [
     'title' => _lang('Reports Center'),
-    'subtitle' => _lang('Open all major CAVIC reports from one place, grouped by business question instead of scattered menu links.'),
+    'subtitle' => _lang('KPIs, graphs, branch pressure, and report links.'),
     'badge' => _lang('Centralized Reporting'),
     'breadcrumbs' => [
         ['label' => _lang('Dashboard'), 'url' => route('dashboard.index')],
@@ -36,94 +154,23 @@
     ],
 ])
 
-<div class="workspace-first-tab-stats" data-tab="#executive">
-<div class="row mb-4">
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Executive Reports') }}</div><div class="stat-value">{{ $reportCounts['executive'] }}</div><div class="text-muted small">{{ _lang('Cash and KPI summaries') }}</div></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Portfolio Reports') }}</div><div class="stat-value">{{ $reportCounts['portfolio'] }}</div><div class="text-muted small">{{ _lang('Loan, due, and repayment views') }}</div></div></div>
-    </div>
-    <div class="col-md-4 col-xl mb-3">
-        <div class="card workspace-stat-card mb-0"><div class="card-body"><div class="stat-label">{{ _lang('Operational Reports') }}</div><div class="stat-value">{{ $reportCounts['accounts'] + $reportCounts['transactions'] + $reportCounts['banking'] }}</div><div class="text-muted small">{{ _lang('Accounts, transactions, expenses, and banking') }}</div></div></div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Active Members') }}</div><div class="bucket-value">{{ number_format($reportHighlights['active_members'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Current member base for reporting') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Active Loans') }}</div><div class="bucket-value">{{ number_format($reportHighlights['active_loans'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Portfolio currently active') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Overdue Repayments') }}</div><div class="bucket-value">{{ number_format($reportHighlights['overdue_repayments'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Use due and collections reports for drill-down') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Due Today') }}</div><div class="bucket-value">{{ number_format($reportHighlights['due_today'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Immediate repayment schedule pressure') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Transactions This Month') }}</div><div class="bucket-value">{{ number_format($reportHighlights['transactions_this_month'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Movement volume for current reporting period') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Expenses This Month') }}</div><div class="bucket-value">{{ number_format($reportHighlights['expenses_this_month'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Operational expense entries this month') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Pending Bank Items') }}</div><div class="bucket-value">{{ number_format($reportHighlights['pending_bank_transactions'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Reconciliation items that still need review') }}</div></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card workspace-bucket-card mb-0"><div class="card-body"><div class="bucket-label">{{ _lang('Bank Accounts') }}</div><div class="bucket-value">{{ number_format($reportHighlights['bank_accounts'] ?? 0) }}</div><div class="bucket-meta">{{ _lang('Accounts available for bank reporting') }}</div></div></div></div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-lg-7 mb-3 mb-lg-0">
-        <div class="card workspace-section-card mb-0 h-100">
-            <div class="card-header"><span>{{ _lang('Branch Reporting Snapshot') }}</span></div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered workspace-mini-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>{{ _lang('Branch') }}</th>
-                                <th>{{ _lang('Active Members') }}</th>
-                                <th>{{ _lang('Pending Members') }}</th>
-                                <th>{{ _lang('Active Loans') }}</th>
-                                <th>{{ _lang('Overdue Repayments') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($branchReportSnapshot as $branch)
-                                <tr>
-                                    <td>{{ $branch->name }}</td>
-                                    <td>{{ $branch->active_members }}</td>
-                                    <td>{{ $branch->pending_members }}</td>
-                                    <td>{{ $branch->active_loans }}</td>
-                                    <td>{{ $branch->overdue_repayments }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="5" class="text-center text-muted">{{ _lang('No branch reporting data found') }}</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-5">
-        <div class="card workspace-section-card mb-0 h-100">
-            <div class="card-header"><span>{{ _lang('Recommended Reporting Workflow') }}</span></div>
-            <div class="card-body">
-                <ol class="text-muted small mb-0 pl-3">
-                    <li class="mb-2">{{ _lang('Start with Executive KPIs for liquidity and revenue checks.') }}</li>
-                    <li class="mb-2">{{ _lang('Move to Portfolio & Loans for due, overdue, and repayment analysis.') }}</li>
-                    <li class="mb-2">{{ _lang('Use Transactions & Expenses to validate operational posting and spending.') }}</li>
-                    <li>{{ _lang('Finish with Banking & Revenue to reconcile bank movement and fee outcomes.') }}</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
-</div>
-
-<div class="card workspace-section-card">
-    <div class="card-body tab-content">
+<div class="tab-content reports-tab-content">
         <div class="tab-pane fade show active" id="executive">
-            <p class="text-muted">{{ _lang('Use these reports for management-level visibility into cash and high-level financial performance.') }}</p>
-            <div class="list-group workspace-link-list">
+            @include('backend.admin.reports.partials.executive-dashboard')
+
+            <div class="workspace-section-title mb-2">{{ _lang('Reports') }}</div>
+            <div class="row mb-2">
                 @foreach(($reportGroups['executive']['items'] ?? []) as $item)
-                    <a class="list-group-item list-group-item-action" href="{{ $item['route'] }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ $item['label'] }}</span>
-                            <i class="ti-arrow-right"></i>
-                        </div>
-                        <div class="small text-muted mt-1">{{ $item['description'] ?? '' }}</div>
-                    </a>
+                    <div class="col-md-6 col-xl-3 mb-2">
+                        <a class="btn btn-outline-primary btn-block btn-sm" href="{{ $item['route'] }}">{{ $item['label'] }}</a>
+                    </div>
                 @endforeach
+                <div class="col-md-6 col-xl-3 mb-2">
+                    <a class="btn btn-outline-primary btn-block btn-sm" href="{{ route('reports.loan_due_report') }}">{{ _lang('Loan Due') }}</a>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-2">
+                    <a class="btn btn-outline-primary btn-block btn-sm" href="{{ route('reports.transactions_report') }}">{{ _lang('Transactions') }}</a>
+                </div>
             </div>
         </div>
         <div class="tab-pane fade" id="portfolio">
@@ -182,6 +229,84 @@
                 @endforeach
             </div>
         </div>
-    </div>
 </div>
+@endsection
+
+@section('js-script')
+@php
+    $cashChartLabels = [_lang('Credits'), _lang('Debits'), _lang('Expenses'), _lang('Net')];
+    $cashChartValues = [
+        (float) ($reportHighlights['monthly_credits'] ?? 0),
+        (float) ($reportHighlights['monthly_debits'] ?? 0),
+        (float) ($reportHighlights['expenses_this_month_amount'] ?? 0),
+        (float) ($reportHighlights['net_cash_movement'] ?? 0),
+    ];
+    $pressureChartLabels = [_lang('Active Loans'), _lang('Pending Loans'), _lang('Due Today'), _lang('Overdue'), _lang('Pending Bank')];
+    $pressureChartValues = [
+        (int) ($reportHighlights['active_loans'] ?? 0),
+        (int) ($reportHighlights['pending_loans'] ?? 0),
+        (int) ($reportHighlights['due_today'] ?? 0),
+        (int) ($reportHighlights['overdue_repayments'] ?? 0),
+        (int) ($reportHighlights['pending_bank_transactions'] ?? 0),
+    ];
+@endphp
+<script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
+<script>
+(function () {
+    if (typeof Chart === 'undefined') return;
+
+    var cashCanvas = document.getElementById('reportCashMovementChart');
+    var pressureCanvas = document.getElementById('reportPortfolioPressureChart');
+
+    var cashData = {
+        labels: @json($cashChartLabels),
+        values: @json($cashChartValues),
+    };
+
+    var pressureData = {
+        labels: @json($pressureChartLabels),
+        values: @json($pressureChartValues),
+    };
+
+    if (cashCanvas) {
+        new Chart(cashCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: cashData.labels,
+                datasets: [{
+                    data: cashData.values,
+                    backgroundColor: ['#1A8E8F', '#C14953', '#B7791F', '#3F686D'],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    if (pressureCanvas) {
+        new Chart(pressureCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: pressureData.labels,
+                datasets: [{
+                    data: pressureData.values,
+                    backgroundColor: ['#1A8E8F', '#B7791F', '#E0B341', '#C14953', '#3F686D'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+})();
+</script>
 @endsection
