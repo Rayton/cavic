@@ -31,9 +31,14 @@ class ReportCenterController extends Controller
                 ],
             ],
             'portfolio' => [
-                'title' => _lang('Portfolio & Loans'),
+                'title' => _lang('Portfolio'),
                 'items' => [
                     ['label' => _lang('Loan Report'), 'route' => route('reports.loan_report'), 'description' => _lang('Filter disbursed and pipeline loans by date, member, and product.')],
+                ],
+            ],
+            'collections' => [
+                'title' => _lang('Collections'),
+                'items' => [
                     ['label' => _lang('Loan Due Report'), 'route' => route('reports.loan_due_report'), 'description' => _lang('Review overdue loan positions and earliest missed installment dates.')],
                     ['label' => _lang('Loan Repayment Report'), 'route' => route('reports.loan_repayment_report'), 'description' => _lang('Inspect repayment behavior and payment history by loan.')],
                 ],
@@ -43,20 +48,38 @@ class ReportCenterController extends Controller
                 'items' => [
                     ['label' => _lang('Account Statement'), 'route' => route('reports.account_statement'), 'description' => _lang('Open detailed statement movements for an individual account number.')],
                     ['label' => _lang('Account Balance'), 'route' => route('reports.account_balances'), 'description' => _lang('Review balance positions by account type and member.')],
+                    ['label' => _lang('Cash In Hand'), 'route' => route('reports.cash_in_hand'), 'description' => _lang('Review current liquidity and movement between cash and bank positions.')],
                 ],
             ],
             'transactions' => [
-                'title' => _lang('Transactions & Expenses'),
+                'title' => _lang('Transactions'),
                 'items' => [
                     ['label' => _lang('Transaction Report'), 'route' => route('reports.transactions_report'), 'description' => _lang('Filter cash transactions by date, status, account, and type.')],
+                ],
+            ],
+            'expenses' => [
+                'title' => _lang('Expenses'),
+                'items' => [
                     ['label' => _lang('Expense Report'), 'route' => route('reports.expense_report'), 'description' => _lang('Monitor expense entries, categories, and branch spending patterns.')],
                 ],
             ],
             'banking' => [
-                'title' => _lang('Banking & Revenue'),
+                'title' => _lang('Banking'),
                 'items' => [
                     ['label' => _lang('Bank Transactions'), 'route' => route('reports.bank_transactions'), 'description' => _lang('Filter reconciliation movement by bank account, type, and status.')],
                     ['label' => _lang('Bank Account Balance'), 'route' => route('reports.bank_balances'), 'description' => _lang('Check current balances across configured bank accounts.')],
+                ],
+            ],
+            'branch_performance' => [
+                'title' => _lang('Branch Performance'),
+                'items' => [
+                    ['label' => _lang('Loan Due Report'), 'route' => route('reports.loan_due_report'), 'description' => _lang('Review overdue loan positions and earliest missed installment dates.')],
+                    ['label' => _lang('Expense Report'), 'route' => route('reports.expense_report'), 'description' => _lang('Monitor expense entries, categories, and branch spending patterns.')],
+                ],
+            ],
+            'revenue' => [
+                'title' => _lang('Revenue'),
+                'items' => [
                     ['label' => _lang('Revenue Report'), 'route' => route('reports.revenue_report'), 'description' => _lang('Cross-check revenue outcomes alongside banking and fee movement.')],
                 ],
             ],
@@ -186,6 +209,7 @@ class ReportCenterController extends Controller
 
         return view('backend.admin.reports.index', [
             'page_title' => _lang('Reports'),
+            'assets' => ['datatable'],
             'reportGroups' => $reportGroups,
             'reportHighlights' => $reportHighlights,
             'executiveCards' => $executiveCards,

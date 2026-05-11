@@ -6,10 +6,14 @@
     'role' => 'navigation',
     'tabs' => [
         ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => true],
-        ['label' => _lang('Portfolio & Loans'), 'target' => '#portfolio'],
+        ['label' => _lang('Portfolio'), 'target' => '#portfolio'],
+        ['label' => _lang('Collections'), 'target' => '#collections'],
         ['label' => _lang('Accounts'), 'target' => '#accounts'],
-        ['label' => _lang('Transactions & Expenses'), 'target' => '#transactions'],
-        ['label' => _lang('Banking & Revenue'), 'target' => '#banking'],
+        ['label' => _lang('Transactions'), 'target' => '#transactions'],
+        ['label' => _lang('Expenses'), 'target' => '#expenses'],
+        ['label' => _lang('Banking'), 'target' => '#banking'],
+        ['label' => _lang('Branch Performance'), 'target' => '#branch-performance'],
+        ['label' => _lang('Revenue'), 'target' => '#revenue'],
     ],
 ])
 @endsection
@@ -136,6 +140,35 @@
 .report-chart-wrap canvas {
     max-height: 240px;
 }
+.report-action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+.report-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    min-height: 48px;
+    border: 1px solid #dfe8e7;
+    border-radius: 8px;
+    background: #fff;
+    color: #243036;
+    font-weight: 700;
+    padding: .75rem .9rem;
+    text-decoration: none;
+}
+.report-action-btn:hover {
+    border-color: #3F686D;
+    color: #243036;
+    text-decoration: none;
+}
+.report-action-btn i {
+    color: #3F686D;
+    font-size: .9rem;
+}
 @media (max-width: 767.98px) {
     .report-exec-title { font-size: 1.15rem; }
     .report-kpi-value { font-size: 1.25rem; }
@@ -149,72 +182,137 @@
             @include('backend.admin.reports.partials.executive-dashboard')
 
             <div class="workspace-section-title mb-2">{{ _lang('Reports') }}</div>
-            <div class="row mb-2">
+            <div class="report-action-grid">
                 @foreach(($reportGroups['executive']['items'] ?? []) as $item)
-                    <div class="col-md-6 col-xl-3 mb-2">
-                        <a class="btn btn-outline-primary btn-block btn-sm" href="{{ $item['route'] }}">{{ $item['label'] }}</a>
-                    </div>
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
+                    </a>
                 @endforeach
-                <div class="col-md-6 col-xl-3 mb-2">
-                    <a class="btn btn-outline-primary btn-block btn-sm" href="{{ route('reports.loan_due_report') }}">{{ _lang('Loan Due') }}</a>
-                </div>
-                <div class="col-md-6 col-xl-3 mb-2">
-                    <a class="btn btn-outline-primary btn-block btn-sm" href="{{ route('reports.transactions_report') }}">{{ _lang('Transactions') }}</a>
-                </div>
+                <a class="report-action-btn ajax-modal" href="{{ route('reports.loan_due_report') }}" data-title="{{ _lang('Loan Due Report') }}" data-fullscreen="true">
+                    <span>{{ _lang('Loan Due') }}</span>
+                    <i class="ti-arrow-right"></i>
+                </a>
+                <a class="report-action-btn ajax-modal" href="{{ route('reports.transactions_report') }}" data-title="{{ _lang('Transactions Report') }}" data-fullscreen="true">
+                    <span>{{ _lang('Transactions') }}</span>
+                    <i class="ti-arrow-right"></i>
+                </a>
             </div>
         </div>
         <div class="tab-pane fade" id="portfolio">
-            <p class="text-muted">{{ _lang('Track portfolio health, repayments, and due positions.') }}</p>
-            <div class="list-group workspace-link-list">
+            <div class="report-action-grid">
                 @foreach(($reportGroups['portfolio']['items'] ?? []) as $item)
-                    <a class="list-group-item list-group-item-action" href="{{ $item['route'] }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ $item['label'] }}</span>
-                            <i class="ti-arrow-right"></i>
-                        </div>
-                        <div class="small text-muted mt-1">{{ $item['description'] ?? '' }}</div>
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        <div class="tab-pane fade" id="collections">
+            <div class="report-action-grid">
+                @foreach(($reportGroups['collections']['items'] ?? []) as $item)
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
                     </a>
                 @endforeach
             </div>
         </div>
         <div class="tab-pane fade" id="accounts">
-            <p class="text-muted">{{ _lang('Review member account activity, balances, and cash position.') }}</p>
-            <div class="list-group workspace-link-list">
+            <div class="report-action-grid">
                 @foreach(($reportGroups['accounts']['items'] ?? []) as $item)
-                    <a class="list-group-item list-group-item-action" href="{{ $item['route'] }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ $item['label'] }}</span>
-                            <i class="ti-arrow-right"></i>
-                        </div>
-                        <div class="small text-muted mt-1">{{ $item['description'] ?? '' }}</div>
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
                     </a>
                 @endforeach
             </div>
         </div>
         <div class="tab-pane fade" id="transactions">
-            <p class="text-muted">{{ _lang('Use operational reports to review transaction and expense movement.') }}</p>
-            <div class="list-group workspace-link-list">
+            <div class="report-action-grid">
                 @foreach(($reportGroups['transactions']['items'] ?? []) as $item)
-                    <a class="list-group-item list-group-item-action" href="{{ $item['route'] }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ $item['label'] }}</span>
-                            <i class="ti-arrow-right"></i>
-                        </div>
-                        <div class="small text-muted mt-1">{{ $item['description'] ?? '' }}</div>
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        <div class="tab-pane fade" id="expenses">
+            <div class="report-action-grid">
+                @foreach(($reportGroups['expenses']['items'] ?? []) as $item)
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
                     </a>
                 @endforeach
             </div>
         </div>
         <div class="tab-pane fade" id="banking">
-            <p class="text-muted">{{ _lang('Monitor bank movement, balances, and revenue outcomes from the same reporting center.') }}</p>
-            <div class="list-group workspace-link-list">
+            <div class="report-action-grid">
                 @foreach(($reportGroups['banking']['items'] ?? []) as $item)
-                    <a class="list-group-item list-group-item-action" href="{{ $item['route'] }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ $item['label'] }}</span>
-                            <i class="ti-arrow-right"></i>
-                        </div>
-                        <div class="small text-muted mt-1">{{ $item['description'] ?? '' }}</div>
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        <div class="tab-pane fade" id="branch-performance">
+            <div class="report-action-grid">
+                @foreach(($reportGroups['branch_performance']['items'] ?? []) as $item)
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="card workspace-section-card mb-3">
+                <div class="card-header">{{ _lang('Branch Performance Snapshot') }}</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered report-mini-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ _lang('Branch') }}</th>
+                                    <th>{{ _lang('Members') }}</th>
+                                    <th>{{ _lang('Pending Members') }}</th>
+                                    <th>{{ _lang('Active Loans') }}</th>
+                                    <th>{{ _lang('Portfolio') }}</th>
+                                    <th>{{ _lang('Overdue') }}</th>
+                                    <th>{{ _lang('Overdue Amount') }}</th>
+                                    <th>{{ _lang('Status') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($branchReportSnapshot as $branch)
+                                    <tr>
+                                        <td>{{ $branch->name }}</td>
+                                        <td>{{ number_format($branch->active_members) }}</td>
+                                        <td>{{ number_format($branch->pending_members) }}</td>
+                                        <td>{{ number_format($branch->active_loans) }}</td>
+                                        <td>{{ money_format_2($branch->portfolio_amount ?? 0) }}</td>
+                                        <td>{{ number_format($branch->overdue_repayments) }}</td>
+                                        <td>{{ money_format_2($branch->overdue_amount ?? 0) }}</td>
+                                        <td><span class="workspace-status-chip {{ $branch->pressure_score > 0 ? 'review' : 'active' }}">{{ $branch->pressure_score > 0 ? _lang('Review') : _lang('OK') }}</span></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="8" class="text-center text-muted">{{ _lang('No branch reporting data found') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="revenue">
+            <div class="report-action-grid">
+                @foreach(($reportGroups['revenue']['items'] ?? []) as $item)
+                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
+                        <span>{{ $item['label'] }}</span>
+                        <i class="ti-arrow-right"></i>
                     </a>
                 @endforeach
             </div>
@@ -242,6 +340,156 @@
 @endphp
 <script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
 <script>
+(function ($) {
+    function initReportModalTables($scope) {
+        if (!$.fn.DataTable) return;
+
+        $scope.find('.report-table').each(function () {
+            if ($.fn.DataTable.isDataTable(this)) return;
+
+            var headerText = $(this).prev('.report-header').html() || '';
+            $(this).DataTable({
+                responsive: true,
+                bAutoWidth: false,
+                ordering: false,
+                lengthChange: false,
+                dom:
+                    "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    emptyTable: $lang_no_data_found,
+                    info: $lang_showing + " _START_ " + $lang_to + " _END_ " + $lang_of + " _TOTAL_ " + $lang_entries,
+                    infoEmpty: $lang_showing_0_to_0_of_0_entries,
+                    infoFiltered: "(filtered from _MAX_ total entries)",
+                    lengthMenu: $lang_show + " _MENU_ " + $lang_entries,
+                    loadingRecords: $lang_loading,
+                    processing: $lang_processing,
+                    search: $lang_search,
+                    zeroRecords: $lang_no_matching_records_found,
+                    paginate: {
+                        first: $lang_first,
+                        last: $lang_last,
+                        previous: "<i class='fas fa-angle-left'></i>",
+                        next: "<i class='fas fa-angle-right'></i>"
+                    },
+                    buttons: {
+                        copy: $lang_copy,
+                        excel: $lang_excel,
+                        pdf: $lang_pdf,
+                        print: $lang_print
+                    }
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-bordered");
+                },
+                buttons: [
+                    'copy',
+                    'excel',
+                    'pdf',
+                    {
+                        extend: 'print',
+                        title: '',
+                        customize: function (win) {
+                            $(win.document.body)
+                                .css('font-size', '10pt')
+                                .prepend('<div class="text-center">' + headerText + '</div>');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+        });
+    }
+
+    function initReportModalContent($scope) {
+        if (!$scope.length) return;
+
+        if (typeof init_datepicker === 'function') {
+            init_datepicker($scope);
+        }
+
+        $scope.find('.auto-select').each(function () {
+            $(this).val($(this).data('selected')).trigger('change');
+        });
+
+        if ($.fn.select2) {
+            $scope.find('select.select2').select2({
+                dropdownParent: $scope.closest('.modal-content')
+            });
+        }
+
+        if ($.fn.parsley) {
+            $scope.find('form.validate').parsley();
+        }
+
+        initReportModalTables($scope);
+
+        if (window.TableExportTotals) {
+            window.TableExportTotals.refresh();
+        }
+    }
+
+    function hideRouteLoader() {
+        if (window.CavicRouteLoader) {
+            window.CavicRouteLoader.hide();
+        }
+    }
+
+    $(document).on('shown.bs.modal', '#main_modal', function () {
+        var $shell = $(this).find('.report-modal-shell');
+        if ($shell.length) {
+            setTimeout(function () {
+                initReportModalContent($shell);
+            }, 50);
+        }
+    });
+
+    $(document).on('submit', '#main_modal .report-modal-shell form', function (event) {
+        event.preventDefault();
+        hideRouteLoader();
+
+        var $form = $(this);
+        if ($form.data('submitting')) return;
+        if ($.fn.parsley && $form.hasClass('validate') && !$form.parsley().validate()) {
+            hideRouteLoader();
+            return;
+        }
+
+        $form.data('submitting', true);
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: ($form.attr('method') || 'GET').toUpperCase(),
+            data: $form.serialize(),
+            beforeSend: function () {
+                $("#preloader").css("display", "block");
+            },
+            success: function (html) {
+                var $modal = $('#main_modal');
+                $modal.find('.modal-body').html(html);
+                $modal.find('.alert-primary, .alert-danger').addClass('d-none');
+                initReportModalContent($modal.find('.report-modal-shell'));
+            },
+            error: function (request) {
+                var message = request.responseJSON && request.responseJSON.message
+                    ? request.responseJSON.message
+                    : @json(_lang('Unable to load report'));
+                $('#main_modal .alert-danger').html('<span>' + message + '</span>').removeClass('d-none');
+                $('#main_modal .alert-primary').addClass('d-none');
+            },
+            complete: function () {
+                $form.data('submitting', false);
+                $("#preloader").css("display", "none");
+                hideRouteLoader();
+            }
+        });
+    });
+})(jQuery);
+
 (function () {
     if (typeof Chart === 'undefined') return;
 

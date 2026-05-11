@@ -10,9 +10,9 @@
         <div class="report-exec-period">{{ $periodLabel }}</div>
     </div>
     <div class="report-exec-actions">
-        <a href="{{ route('reports.cash_in_hand') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Cash') }}</a>
-        <a href="{{ route('reports.loan_due_report') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Overdue') }}</a>
-        <a href="{{ route('reports.transactions_report') }}" class="btn btn-outline-primary btn-sm">{{ _lang('Transactions') }}</a>
+        <a href="{{ route('reports.cash_in_hand') }}" class="btn btn-outline-primary btn-sm ajax-modal" data-title="{{ _lang('Cash In Hand') }}" data-fullscreen="true">{{ _lang('Cash') }}</a>
+        <a href="{{ route('reports.loan_due_report') }}" class="btn btn-outline-primary btn-sm ajax-modal" data-title="{{ _lang('Loan Due Report') }}" data-fullscreen="true">{{ _lang('Overdue') }}</a>
+        <a href="{{ route('reports.transactions_report') }}" class="btn btn-outline-primary btn-sm ajax-modal" data-title="{{ _lang('Transactions Report') }}" data-fullscreen="true">{{ _lang('Transactions') }}</a>
     </div>
 </div>
 

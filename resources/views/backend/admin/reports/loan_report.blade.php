@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(request()->ajax() ? 'layouts.modal' : 'layouts.app')
 
 @section('content')
 <div class="row">
