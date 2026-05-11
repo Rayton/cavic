@@ -144,16 +144,6 @@
 }
 </style>
 
-@include('backend.admin.partials.page-header', [
-    'title' => _lang('Reports Center'),
-    'subtitle' => _lang('KPIs, graphs, branch pressure, and report links.'),
-    'badge' => _lang('Centralized Reporting'),
-    'breadcrumbs' => [
-        ['label' => _lang('Dashboard'), 'url' => route('dashboard.index')],
-        ['label' => _lang('Reports Center'), 'active' => true],
-    ],
-])
-
 <div class="tab-content reports-tab-content">
         <div class="tab-pane fade show active" id="executive">
             @include('backend.admin.reports.partials.executive-dashboard')
