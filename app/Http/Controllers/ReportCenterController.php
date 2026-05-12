@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Branch;
+use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\Loan;
+use App\Models\LoanPayment;
 use App\Models\LoanProduct;
 use App\Models\LoanRepayment;
 use App\Models\Member;
@@ -39,9 +41,8 @@ class ReportCenterController extends Controller
                 ],
             ],
             'collections' => [
-                'title' => _lang('Collections'),
+                'title' => _lang('Loan Repayments Report'),
                 'items' => [
-                    ['label' => _lang('Loan Due Report'), 'route' => route('reports.loan_due_report'), 'description' => _lang('Review overdue loan positions and earliest missed installment dates.')],
                     ['label' => _lang('Loan Repayment Report'), 'route' => route('reports.loan_repayment_report'), 'description' => _lang('Inspect repayment behavior and payment history by loan.')],
                 ],
             ],
@@ -107,6 +108,15 @@ class ReportCenterController extends Controller
             'loan_type' => $request->input('loan_type', ''),
             'status' => $request->input('status', ''),
             'member_no' => $request->input('member_no', ''),
+        ];
+        $repaymentReportLoanId = $request->input('repayment_loan_id', '');
+        $revenueYear = min((int) date('Y'), max(2020, (int) $request->input('revenue_year', date('Y'))));
+        $revenueMonth = min(12, max(1, (int) $request->input('revenue_month', date('m'))));
+        $activeCurrencyId = Currency::where('status', 1)->where('id', $request->input('revenue_currency_id', base_currency_id()))->value('id') ?? base_currency_id();
+        $revenueReportFilters = [
+            'year' => $revenueYear,
+            'month' => $revenueMonth,
+            'currency_id' => $activeCurrencyId,
         ];
 
         $monthlyCredits = (clone $completedMonthlyTransactionsQuery)->where('dr_cr', 'cr')->sum('amount');
@@ -197,6 +207,57 @@ class ReportCenterController extends Controller
             ->get();
 
         $loanReportProducts = LoanProduct::where('status', 1)->orderBy('name')->get();
+        $repaymentReportLoans = Loan::with(['currency', 'borrower'])->orderByDesc('id')->get();
+        $inlineLoanRepaymentReport = null;
+        $revenueCurrencies = Currency::where('status', 1)->orderBy('name')->get();
+
+        if ($repaymentReportLoanId !== '') {
+            $inlineLoanRepaymentReport = Loan::select('loans.*')
+                ->with(['borrower', 'loan_product', 'payments', 'currency'])
+                ->where('id', $repaymentReportLoanId)
+                ->first();
+        }
+
+        $transactionRevenue = Transaction::selectRaw("CONCAT('Revenue from ', type), sum(charge) as amount")
+            ->whereRaw("YEAR(trans_date) = ? AND MONTH(trans_date) = ?", [$revenueReportFilters['year'], $revenueReportFilters['month']])
+            ->where('charge', '>', 0)
+            ->where('status', 2)
+            ->whereHas('account.savings_type', function ($query) use ($revenueReportFilters) {
+                return $query->where('currency_id', $revenueReportFilters['currency_id']);
+            })
+            ->groupBy('type');
+
+        $maintenanceFee = Transaction::selectRaw("CONCAT('Revenue from ', type), sum(amount) as amount")
+            ->whereRaw("YEAR(trans_date) = ? AND MONTH(trans_date) = ?", [$revenueReportFilters['year'], $revenueReportFilters['month']])
+            ->where('type', 'Account_Maintenance_Fee')
+            ->where('status', 2)
+            ->whereHas('account.savings_type', function ($query) use ($revenueReportFilters) {
+                return $query->where('currency_id', $revenueReportFilters['currency_id']);
+            })
+            ->groupBy('type');
+
+        $otherFees = Transaction::join('transaction_categories', function ($join) {
+            $join->on('transaction_categories.name', '=', 'transactions.type')
+                ->where('transaction_categories.status', '=', 1);
+        })
+            ->selectRaw("CONCAT('Revenue from ', type), sum(amount) as amount")
+            ->whereRaw("YEAR(trans_date) = ? AND MONTH(trans_date) = ?", [$revenueReportFilters['year'], $revenueReportFilters['month']])
+            ->where('dr_cr', 'dr')
+            ->where('transactions.status', 2)
+            ->whereHas('account.savings_type', function ($query) use ($revenueReportFilters) {
+                return $query->where('currency_id', $revenueReportFilters['currency_id']);
+            })
+            ->groupBy('type');
+
+        $inlineRevenueReport = LoanPayment::selectRaw("'Revenue from Loan' as type, sum(interest + late_penalties) as amount")
+            ->whereRaw("YEAR(loan_payments.paid_at) = ? AND MONTH(loan_payments.paid_at) = ?", [$revenueReportFilters['year'], $revenueReportFilters['month']])
+            ->whereHas('loan', function ($query) use ($revenueReportFilters) {
+                return $query->where('currency_id', $revenueReportFilters['currency_id']);
+            })
+            ->union($transactionRevenue)
+            ->union($maintenanceFee)
+            ->union($otherFees)
+            ->get();
 
         $reportHighlights = [
             'period_label' => $monthLabel,
@@ -314,6 +375,12 @@ class ReportCenterController extends Controller
             'inlineLoanReport' => $inlineLoanReport,
             'loanReportFilters' => $loanReportFilters,
             'loanReportProducts' => $loanReportProducts,
+            'repaymentReportLoans' => $repaymentReportLoans,
+            'repaymentReportLoanId' => $repaymentReportLoanId,
+            'inlineLoanRepaymentReport' => $inlineLoanRepaymentReport,
+            'revenueCurrencies' => $revenueCurrencies,
+            'revenueReportFilters' => $revenueReportFilters,
+            'inlineRevenueReport' => $inlineRevenueReport,
         ]);
     }
 }

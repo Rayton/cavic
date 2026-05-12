@@ -11,7 +11,7 @@
     'tabs' => [
         ['label' => _lang('Executive KPIs'), 'target' => '#executive', 'active' => $activeReportTab === 'executive'],
         ['label' => _lang('Loan Portfolio'), 'target' => '#portfolio', 'active' => $activeReportTab === 'portfolio'],
-        ['label' => _lang('Collections'), 'target' => '#collections', 'active' => $activeReportTab === 'collections'],
+        ['label' => _lang('Loan Repayments Report'), 'target' => '#collections', 'active' => $activeReportTab === 'collections'],
         ['label' => _lang('Accounts'), 'target' => '#accounts', 'active' => $activeReportTab === 'accounts'],
         ['label' => _lang('Transactions'), 'target' => '#transactions', 'active' => $activeReportTab === 'transactions'],
         ['label' => _lang('Expenses'), 'target' => '#expenses', 'active' => $activeReportTab === 'expenses'],
@@ -192,6 +192,16 @@
     background: #fbfdfd;
     padding: 1rem 1rem .25rem;
 }
+.reports-inline-table-card .table-responsive {
+    border-radius: 8px;
+}
+.reports-inline-table-card .workspace-mini-table td,
+.reports-inline-table-card .workspace-mini-table th {
+    vertical-align: middle;
+}
+.reports-inline-table-card .report-header {
+    display: none;
+}
 @media (max-width: 767.98px) {
     .report-exec-title { font-size: 1.15rem; }
     .report-kpi-value { font-size: 1.25rem; }
@@ -353,7 +363,7 @@
                 </div>
             </div>
 
-            <div class="card workspace-section-card mb-3">
+            <div class="card workspace-section-card cavic-datatable-card reports-inline-table-card mb-3">
                 <div class="card-header">{{ _lang('Loan Report') }}</div>
                 <div class="card-body">
                     <form class="report-inline-filter validate mb-3" method="get" action="{{ route('reports.index') }}#portfolio" autocomplete="off">
@@ -414,7 +424,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered report-table table-export">
+                        <table id="reports_inline_loan_report_table" class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table reports-inline-data-table mb-0" data-export-filename="Reports_Loan_Report">
                             <thead>
                                 <tr>
                                     <th data-total-label="{{ _lang('Total') }}">{{ _lang('Loan ID') }}</th>
@@ -425,7 +435,7 @@
                                     <th class="text-right" data-sum="1">{{ _lang('Applied Amount') }}</th>
                                     <th class="text-right" data-sum="1">{{ _lang('Due Amount') }}</th>
                                     <th>{{ _lang('Status') }}</th>
-                                    <th class="text-center">{{ _lang('Details') }}</th>
+                                    <th class="text-center" data-no-export="1">{{ _lang('Details') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -444,13 +454,13 @@
                                         <td class="text-right">{{ decimalPlace($dueAmount, $loanCurrency) }}</td>
                                         <td>
                                             @if($loan->status == 0)
-                                                {!! xss_clean(show_status(_lang('Pending'), 'warning')) !!}
+                                                <span class="workspace-status-chip pending">{{ _lang('Pending') }}</span>
                                             @elseif($loan->status == 1)
-                                                {!! xss_clean(show_status(_lang('Approved'), 'success')) !!}
+                                                <span class="workspace-status-chip active">{{ _lang('Approved') }}</span>
                                             @elseif($loan->status == 2)
-                                                {!! xss_clean(show_status(_lang('Completed'), 'info')) !!}
+                                                <span class="workspace-status-chip active">{{ _lang('Completed') }}</span>
                                             @elseif($loan->status == 3)
-                                                {!! xss_clean(show_status(_lang('Cancelled'), 'danger')) !!}
+                                                <span class="workspace-status-chip critical">{{ _lang('Cancelled') }}</span>
                                             @endif
                                         </td>
                                         <td class="text-center">@include('backend.admin.partials.table-actions', ['items' => [['label' => _lang('View'), 'url' => route('loans.show', $loan->id), 'icon' => 'ti-eye', 'target' => '_blank']]])</td>
@@ -466,13 +476,83 @@
             </div>
         </div>
         <div class="tab-pane fade {{ $activeReportTab === 'collections' ? 'show active' : '' }}" id="collections">
-            <div class="report-action-grid">
-                @foreach(($reportGroups['collections']['items'] ?? []) as $item)
-                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
-                        <span>{{ $item['label'] }}</span>
-                        <i class="ti-arrow-right"></i>
-                    </a>
-                @endforeach
+            <div class="card workspace-section-card cavic-datatable-card reports-inline-table-card mb-3">
+                <div class="card-header">{{ _lang('Loan Repayments Report') }}</div>
+                <div class="card-body">
+                    <form class="report-inline-filter validate mb-3" method="get" action="{{ route('reports.index') }}#collections" autocomplete="off">
+                        <input type="hidden" name="tab" value="collections">
+                        <div class="row">
+                            <div class="col-xl-4 col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Loan ID') }}</label>
+                                    <select class="form-control auto-select select2" data-selected="{{ $repaymentReportLoanId ?? '' }}" name="repayment_loan_id" required>
+                                        <option value="">{{ _lang('Select One') }}</option>
+                                        @foreach($repaymentReportLoans as $loan)
+                                            @php
+                                                $loanCurrency = currency($loan->currency->name);
+                                                $dueAmount = ($loan->applied_amount ?? 0) - ($loan->total_paid ?? 0);
+                                            @endphp
+                                            <option value="{{ $loan->id }}">{{ $loan->loan_id }} ({{ $loan->borrower->name }}) ({{ _lang('Total Due') }} {{ decimalPlace($dueAmount, $loanCurrency) }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xl-2 col-lg-4">
+                                <button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    @php $date_format = get_date_format(); @endphp
+                    <div class="report-header">
+                       <img src="{{ get_logo() }}" class="logo"/>
+                       <h4>{{ _lang('Loan Repayments Report') }}</h4>
+
+                       @if($inlineLoanRepaymentReport)
+                           @php
+                               $selectedLoanCurrency = currency($inlineLoanRepaymentReport->currency->name);
+                               $selectedLoanDueAmount = ($inlineLoanRepaymentReport->applied_amount ?? 0) - ($inlineLoanRepaymentReport->total_paid ?? 0);
+                           @endphp
+                           <p>{{ _lang('Loan ID') }}: {{ $inlineLoanRepaymentReport->loan_id }}</p>
+                           <p>{{ _lang('Member No') }}: {{ $inlineLoanRepaymentReport->borrower->member_no }}, {{ _lang('Borrower') }}: {{ $inlineLoanRepaymentReport->borrower->name }}</p>
+                           <p>{{ _lang('Applied Amount') }}: {{ decimalPlace($inlineLoanRepaymentReport->applied_amount, $selectedLoanCurrency) }}, {{ _lang('Due Amount') }}: {{ decimalPlace($selectedLoanDueAmount, $selectedLoanCurrency) }}</p>
+                       @endif
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="reports_inline_loan_repayments_table" class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table reports-inline-data-table mb-0" data-export-filename="Reports_Loan_Repayments_Report">
+                            <thead>
+                                <tr>
+                                    <th data-total-label="{{ _lang('Total') }}">{{ _lang('Payment Date') }}</th>
+                                    <th>{{ _lang('Loan') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Principal Amount') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Interest') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Late Penalties') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Total Amount') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($inlineLoanRepaymentReport)
+                                    @forelse($inlineLoanRepaymentReport->payments as $loanPayment)
+                                        <tr>
+                                            <td>{{ $loanPayment->paid_at }}</td>
+                                            <td>{{ $inlineLoanRepaymentReport->loan_id }}</td>
+                                            <td class="text-right">{{ decimalPlace($loanPayment->repayment_amount - $loanPayment->interest, $selectedLoanCurrency) }}</td>
+                                            <td class="text-right">{{ decimalPlace($loanPayment->interest, $selectedLoanCurrency) }}</td>
+                                            <td class="text-right">{{ decimalPlace($loanPayment->late_penalties, $selectedLoanCurrency) }}</td>
+                                            <td class="text-right">{{ decimalPlace($loanPayment->total_amount, $selectedLoanCurrency) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="6" class="text-center text-muted">{{ _lang('No repayments found for this loan') }}</td></tr>
+                                    @endforelse
+                                @else
+                                    <tr><td colspan="6" class="text-center text-muted">{{ _lang('Select a loan to view repayments') }}</td></tr>
+                                @endif
+                            </tbody>
+                            <tfoot><tr class="table-totals-row"><td></td><td></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td><td class="text-right"></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="tab-pane fade {{ $activeReportTab === 'accounts' ? 'show active' : '' }}" id="accounts">
@@ -564,16 +644,87 @@
             </div>
         </div>
         <div class="tab-pane fade {{ $activeReportTab === 'revenue' ? 'show active' : '' }}" id="revenue">
-            <div class="report-action-grid">
-                @foreach(($reportGroups['revenue']['items'] ?? []) as $item)
-                    <a class="report-action-btn ajax-modal" href="{{ $item['route'] }}" data-title="{{ $item['label'] }}" data-fullscreen="true">
-                        <span>{{ $item['label'] }}</span>
-                        <i class="ti-arrow-right"></i>
-                    </a>
-                @endforeach
+            <div class="card workspace-section-card cavic-datatable-card reports-inline-table-card mb-3">
+                <div class="card-header">{{ _lang('Revenue Report') }}</div>
+                <div class="card-body">
+                    <form class="report-inline-filter validate mb-3" method="get" action="{{ route('reports.index') }}#revenue" autocomplete="off">
+                        <input type="hidden" name="tab" value="revenue">
+                        <div class="row">
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Year') }}</label>
+                                    <select class="form-control auto-select" name="revenue_year" data-selected="{{ $revenueReportFilters['year'] ?? date('Y') }}" required>
+                                        @for($y = 2020; $y <= date('Y'); $y++)
+                                            <option value="{{ $y }}">{{ $y }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-2 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Month') }}</label>
+                                    <select class="form-control auto-select" name="revenue_month" data-selected="{{ $revenueReportFilters['month'] ?? date('m') }}" required>
+                                        @for($i = 1; $i <= 12; $i++)
+                                            <option value="{{ $i }}">{{ date('F', mktime(0, 0, 0, $i, 10)) }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-4">
+                                <div class="form-group">
+                                    <label class="control-label">{{ _lang('Currency') }}</label>
+                                    <select class="form-control auto-select" data-selected="{{ $revenueReportFilters['currency_id'] ?? base_currency_id() }}" name="revenue_currency_id" required>
+                                        @foreach($revenueCurrencies as $currency)
+                                            <option value="{{ $currency->id }}">{{ $currency->full_name }} ({{ $currency->name }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-2 col-lg-4">
+                                <button type="submit" class="btn btn-outline-primary btn-xs btn-block mt-26"><i class="ti-filter"></i>&nbsp;{{ _lang('Filter') }}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="report-header">
+                        <h4>{{ _lang('Revenue Report') }} {{ _lang('of') }} {{ date('F', mktime(0, 0, 0, $revenueReportFilters['month'] ?? date('m'), 10)) }} {{ $revenueReportFilters['year'] ?? date('Y') }}</h4>
+                    </div>
+
+                    @php
+                        $revenueCurrency = currency(get_currency($revenueReportFilters['currency_id'] ?? base_currency_id())->name);
+                        $revenueTotal = 0;
+                    @endphp
+                    <div class="table-responsive">
+                        <table id="reports_inline_revenue_table" class="table table-bordered table-striped table-export dashboard-table-compact workspace-mini-table cavic-data-table reports-inline-data-table mb-0" data-export-filename="Reports_Revenue_Report">
+                            <thead>
+                                <tr>
+                                    <th data-total-label="{{ _lang('Total') }}">{{ _lang('Revenue Type') }}</th>
+                                    <th class="text-right" data-sum="1">{{ _lang('Amount') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($inlineRevenueReport as $revenue)
+                                    @php $revenueTotal += $revenue->amount; @endphp
+                                    <tr>
+                                        <td>{{ str_replace('_', ' ', $revenue->type) }}</td>
+                                        <td class="text-right">{{ decimalPlace($revenue->amount, $revenueCurrency) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" class="text-center text-muted">{{ _lang('No revenue found for these filters') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot><tr class="table-totals-row"><td>{{ _lang('Total') }}</td><td class="text-right">{{ decimalPlace($revenueTotal, $revenueCurrency) }}</td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 </div>
+
+@include('backend.admin.partials.cavic-datatable-standard')
 @endsection
 
 @section('js-script')
@@ -606,6 +757,10 @@
 <script src="{{ asset('public/backend/plugins/chartJs/chart.min.js') }}"></script>
 <script>
 (function ($) {
+    if (typeof window.cavicInitStaticDataTables === 'function') {
+        window.cavicInitStaticDataTables('.reports-inline-data-table', 'Reports');
+    }
+
     function initReportModalTables($scope) {
         if (!$.fn.DataTable) return;
 
@@ -754,7 +909,7 @@
         });
     });
 
-    $(document).on('shown.bs.tab', 'a[data-toggle="tab"][href="#portfolio"]', function () {
+    $(document).on('shown.bs.tab', 'a[data-toggle="tab"][href="#portfolio"], a[data-toggle="tab"][href="#collections"], a[data-toggle="tab"][href="#revenue"]', function () {
         if ($.fn.dataTable) {
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
         }
